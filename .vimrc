@@ -76,19 +76,15 @@ set viminfo+=h                 " Disable 'hlsearch' on saved files
 "}}}
 " Part II: Customization {{{
 " --- Appearance {{{
-if has("gui_running" ) " GVim options:
-    set guioptions-=m  " --- remove menu bar
-    set guioptions-=T  " --- remove toolbar
-    set guioptions-=r  " --- remove right-hand scroll
-    set guioptions-=L  " --- remove left-hand scroll
-    set guifont=Inconsolata\ for\ Powerline,Inconsolata
-end
 
 "set t_Co=256           " 256 color terminal -- can Vim detect this automagically?
 set background=dark    " Dark background (duh)
 colorscheme pencil     " inspired by iA Writer
+set colorcolumn=80     " highlight column 80
+set cursorline         " highlight the line the cursor's on
 
 set laststatus=2       " use status line, always.
+set noshowmode         " Airline already shows mode, not necessary
 set wildmenu           " tab completion with a menu
 set ruler              " show ruler
 set showcmd            " Show partial commands as-you-type
@@ -96,6 +92,8 @@ set showcmd            " Show partial commands as-you-type
 match ErrorMsg '\s\+$' " Show trailing whitespace as error
 
 set scrolloff=8        " keep lines at bottom and top when scrolling
+set sidescrolloff=4    " keep lines at the left and write when scrolling
+set sidescroll=1       " scroll sideways by characters, not screens
 set wrap               " set wrapping
 set linebreak          " wrap at words. (:help breakat)
 " --- }}}
@@ -113,6 +111,7 @@ set shiftround        " indent to nearest tabstop
 set incsearch         " find the next match as we type
 set hlsearch          " highlight search matches
 set ignorecase        " ignore case as we search
+set smartcase         " ... unless a capital appears (it's probs meant)
 
 set foldenable        " Enable folding
 set foldmethod=marker " {{{ }}} mark folds
@@ -167,7 +166,23 @@ nnoremap <leader><Space> :nohlsearch<return><Esc>
 nnoremap <leader>r<Space> :%s/\s\+$//e<CR>
 " --- }}}
 " }}}
-" Part III: Plugins! {{{
+" Part III: Custom functions {{{
+function! WordCount()
+    let s:old_status = v:statusmsg
+    let position = getpos(".")
+    exe ":silent normal g\<c-g>"
+    let stat = v:statusmsg
+    let s:word_count = 0
+    if stat != '--No lines in buffer--'
+        let s:word_count = str2nr(split(v:statusmsg)[11])
+        let v:statusmsg = s:old_status
+    endif
+    call setpos('.', position)
+    return s:word_count
+endfunction
+noremap <leader>wc :echo 'words: '.WordCount()<CR>
+" }}}
+" Part IV: Plugins! {{{
 
 " Toggle file browser
 nnoremap \ :NERDTreeToggle<CR>
@@ -185,6 +200,7 @@ let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
 " AIRLINE OPTIONS
 " --- The right section is busy.
 let g:airline_section_z = '%3p%%|%3l:%2c'
+"let g:airline_section_y = "%{WordCount()}"
 " --- include character count
 "let g:airline_section_z = '%3p%%|%4l:%2c|%{strwidth(join(getline(1,"$")))}c'
 let g:airline_powerline_fonts = 1
@@ -196,11 +212,32 @@ let g:markdown_fold_style = 'nested'
 nnoremap <F5> :GundoToggle<CR>
 let g:gundo_preview_bottom = 1 " Preview takes up full width
 " }}}
-" Part IV: Windows-only options {{{
+" Part V: Can I has() options? {{{
+" GVIM {{{
+if has('gui_running')
+    " --- Common GUI options
+    set guioptions-=m  " remove menu bar
+    set guioptions-=T  " remove toolbar
+    set guioptions-=r  " remove right-hand scroll
+    set guioptions-=L  " remove left-hand scroll
+    "set lines=25       " window is 25 lines high
+    "set columns=80     " window is 80 columns long
+    " --- Set fonts for different systems
+    if has("gui_gtk2")
+        set guifont=Inconsolata\ for\ Powerline,Inconsolata
+    elseif has("x11") " also works with GTK 1
+        "set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
+    elseif has("gui_win32")
+        "set guifont=Inconsolata_for_Powerline:h15
+        set guifont=Consolas:h12:cANSI
+        " Consolas don't have powerline arrows
+        let g:airline_powerline_fonts = 0
+    endif
+endif
+" }}}
+" WINDOWS {{{
 if has('win32')
     let &runtimepath.=',$HOME/.vim' " for portability
-
-    set guifont=Inconsolata_for_Powerline:h15
 
     " define keymap for font size change
     nnoremap <C-Up> :silent! let &guifont = substitute(
@@ -239,4 +276,5 @@ if has('win32')
 
     set viminfo+=rA:,rB: " Don't store marks for A: or B:
 endif
+" }}}
 " }}}
