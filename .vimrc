@@ -1,50 +1,55 @@
 " _______________ VIMRC -- CASE DUCKWORTH _________________
 " vim:foldlevel=0:textwidth=0:nowrap:nolinebreak
-set nocompatible " duh.
+set nocompatible
 " Part 0: Vundle {{{
 filetype off
-
-" set the runime path to include Vundle
 set runtimepath+=$HOME/.vim/bundle/Vundle.vim
 call vundle#begin()
-
 Plugin 'gmarik/Vundle.vim'             " let Vundle manage Vundle, req'd
-" Plugin list {{{
-" --- Vim operation
+" Plugins
+" --- Using ViM {{{
 Plugin 'Rykka/clickable.vim'           " Folding, links, files clickable
 Plugin 'Lokaltog/vim-easymotion'       " No more counting objects
-"Plugin 'justinmk/vim-sneak'            " Similar to easymotion
 Plugin 'chrisbra/NrrwRgn'              " Open region in new window, edit, reinsert
 Plugin 'vim-scripts/gundo'             " Visualize Vim's undo tree (not on Windows?)
-" --- Browsing files
+" --- --- VIM eyecandy
+Plugin 'bling/vim-airline'             " a better statusline
+Plugin 'junegunn/goyo.vim'             " distraction-free writing like Writeroom
+" --- --- Colorschemes
+"Plugin 'flazz/vim-colorschemes'        " huge collection of colorschemes
+Plugin 'reedes/vim-colors-pencil'      " pencil colorscheme
+Plugin 'Pychimp/vim-luna'              " luna colorscheme
+Plugin 'Pychimp/vim-sol'               " lighter version of luna
+" --- --- Vim Wiki
+Plugin 'vimwiki/vimwiki'
+" --- }}}
+" --- Editing Files {{{
+" --- --- Navigating and saving
 Plugin 'scrooloose/nerdtree'           " NERDTree - an easy-to-use file manager
 Plugin 'kien/ctrlp.vim'                " a fuzzy finder
 "Plugin 'mhinz/vim-startify'            " start page with recent files, etc.
-" --- Working within files
+Plugin 'dockyard/vim-easydir'          " Create new dirs on-the-fly when saving
+" --- --- Working within files
 Plugin 'scrooloose/nerdcommenter'      " toggle comments easily
 Plugin 'tpope/vim-surround'            " Surround text objects with things
 Plugin 'godlygeek/tabular'             " easy formatting of text tables
-" --- Working with Filetypes
+Plugin 'ervandew/supertab'             " perform all complet. with Tab (I)
 Plugin 'AndrewRadev/splitjoin.vim'     " Split and join code easily
-"     --- HTML
+" --- --- Filetypes
+" --- --- --- HTML
 Plugin 'mattn/emmet-vim'               " Zencoding for HTML
 Plugin 'gregsexton/MatchTag'           " Match HTML tags like parentheses
-"     --- CSS
+" --- --- --- CSS
 "Plugin 'hail2u/vim-css3-syntax'        " syntax file for CSS3
-"     --- Markdown
+" --- --- --- Markdown
 Plugin 'tpope/vim-markdown'
 Plugin 'nelstrom/vim-markdown-folding' " fold Markdown on headings
-"     --- Pandoc
+" --- --- --- Pandoc
 Plugin 'vim-pandoc/vim-pandoc'
 Plugin 'vim-pandoc/vim-pandoc-syntax'
-"     --- Polyglot: over fifty languages' syntax files
+" --- --- --- Polyglot: over fifty languages' syntax files
 Plugin 'sheerun/vim-polyglot'
-" --- VIM eyecandy
-"Plugin 'flazz/vim-colorschemes'        " huge collection of colorschemes
-Plugin 'reedes/vim-colors-pencil'      " pencil colorscheme
-Plugin 'bling/vim-airline'             " a better statusline
-Plugin 'junegunn/goyo.vim'                 " distraction-free writing like Writeroom
-" }}}
+" --- }}}
 call vundle#end()                      "req'd
 filetype plugin indent on              "req'd
 "}}}
@@ -77,13 +82,25 @@ set viminfo+=h                 " Disable 'hlsearch' on saved files
 " Part II: Customization {{{
 " --- Appearance {{{
 
-"set t_Co=256           " 256 color terminal -- can Vim detect this automagically?
+"set t_Co=256           " 256 color terminal--can Vim detect this automagically?
 set background=dark    " Dark background (duh)
 colorscheme pencil     " inspired by iA Writer
 set colorcolumn=80     " highlight column 80
 set cursorline         " highlight the line the cursor's on
 
 set laststatus=2       " use status line, always.
+
+" Statusline
+set statusline=%t " basename of file
+set statusline+=%H " help buffer flag ,HLP
+set statusline+=%R " read-only flag ,RO
+set statusline+=\ %m " modified flag [+]
+set statusline+=%= " begin right-align
+set statusline+=%y\  " file type
+set statusline+=%3p%% " scroll percentage
+set statusline+=\ -%l/%L " current line / total lines
+set statusline+=\|%2c " current column
+
 set noshowmode         " Airline already shows mode, not necessary
 set wildmenu           " tab completion with a menu
 set ruler              " show ruler
@@ -96,10 +113,17 @@ set sidescrolloff=4    " keep lines at the left and write when scrolling
 set sidescroll=1       " scroll sideways by characters, not screens
 set wrap               " set wrapping
 set linebreak          " wrap at words. (:help breakat)
+
+" Spelling
+autocmd FileType vimwiki,markdown,text setlocal spell
+hi SpellBad gui=undercurl
 " --- }}}
 " --- Acting {{{
 set writebackup       " save a backup before writing
 set nobackup          " but don't keep the backup file
+
+set noerrorbells      " don't beep on errors
+set visualbell        " flash instead of beeping
 
 set expandtab         " use spaces instead of tabs
 set autoindent        " indent based on filetype and previous line
@@ -141,6 +165,9 @@ nnoremap Y y$
 " ESC is so far away...
 inoremap jj <Esc>
 
+" Turns out, K is useful -- remap (using h for help)
+nnoremap <leader>h K
+
 " Make windows easier to navigate
 map <C-j> <C-w>j<C-w>_
 map <C-k> <C-w>k<C-w>_
@@ -180,9 +207,10 @@ function! WordCount()
     call setpos('.', position)
     return s:word_count
 endfunction
+" TODO: a function that switches between basename and full path in stl
 noremap <leader>wc :echo 'words: '.WordCount()<CR>
 " }}}
-" Part IV: Plugins! {{{
+" Part IV: Plugin Config {{{
 
 " Toggle file browser
 nnoremap \ :NERDTreeToggle<CR>
@@ -208,18 +236,24 @@ let g:airline_powerline_fonts = 1
 " Markdown-folding options
 let g:markdown_fold_style = 'nested'
 
+" Goyo on <F11> like fullscreen
+nnoremap <F11> <Esc>:Goyo<CR>
+let g:goyo_width = 70
+let g:goyo_margin_top = 4
+let g:goyo_margin_bottom = 4
+
 " Toggle UNDO tree view
 nnoremap <F5> :GundoToggle<CR>
 let g:gundo_preview_bottom = 1 " Preview takes up full width
 " }}}
 " Part V: Can I has() options? {{{
-" GVIM {{{
-if has('gui_running')
+if has('gui_running') " --- GVIM {{{
     " --- Common GUI options
     set guioptions-=m  " remove menu bar
     set guioptions-=T  " remove toolbar
     set guioptions-=r  " remove right-hand scroll
     set guioptions-=L  " remove left-hand scroll
+    set guioptions-=e  " remove GUI tabline; use consoley one instead
     "set lines=25       " window is 25 lines high
     "set columns=80     " window is 80 columns long
     " --- Set fonts for different systems
@@ -229,14 +263,13 @@ if has('gui_running')
         "set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has("gui_win32")
         "set guifont=Inconsolata_for_Powerline:h15
-        set guifont=Consolas:h12:cANSI
+        set guifont=Consolas:h11:cANSI
         " Consolas don't have powerline arrows
         let g:airline_powerline_fonts = 0
     endif
 endif
-" }}}
-" WINDOWS {{{
-if has('win32')
+" --- }}}
+if has('win32') " --- WINDOWS {{{
     let &runtimepath.=',$HOME/.vim' " for portability
 
     " define keymap for font size change
@@ -260,6 +293,12 @@ if has('win32')
     " No python support :(
     let g:gundo_disable = 1
     let g:pandoc#modules#disabled = ["bibliographies"]
+    " Goyo maximizes window
+    augroup win_Goyo_events         " Call these functions
+        autocmd!
+        autocmd User GoyoEnter simalt ~x | sleep 10m | Goyo 80
+        autocmd User GoyoLeave simalt ~r
+    augroup END
 
     " --- Windows like clipboard / saving
     " yank to and paste from the clipboard without prepending "*
@@ -276,5 +315,5 @@ if has('win32')
 
     set viminfo+=rA:,rB: " Don't store marks for A: or B:
 endif
-" }}}
+" --- }}}
 " }}}
