@@ -8,8 +8,6 @@ github_setup() {
     echo -n "Last name:  "; read lastname
     echo -n "Email: "; read email
     echo "---------------------------------"
-    echo -n "Github user:"; read githubuser
-    echo -n "Password: "; read password
 
     $(which git) || return 1
 
@@ -25,7 +23,7 @@ if [[ "$1" == "-g" ]]; then # github setup requested
     github_setup || echo "Install git!";
 fi
 
-ln -s dots/vimrc ~/.vimrc # soft links = best practice
-mkdir -p $HOME/.vim/bundle
-git clone https://github.com/gmarik/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
-vim +PluginInstall +qall
+#mkdir -p $HOME/.vim/bundle
+#git clone https://github.com/gmarik/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
+#vim +PluginInstall +qall
+#ln -s dots/vimrc ~/.vimrc # soft links = best practice

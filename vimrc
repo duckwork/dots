@@ -52,7 +52,7 @@ if exists(":Plugin")
     Plugin 'sheerun/vim-polyglot'
     " --- }}}
 endif
-    call vundle#end()                  "req'd
+call vundle#end()                      "req'd
 filetype plugin indent on              "req'd
 "}}}
 " Part I: Usability Configuration {{{
@@ -85,9 +85,15 @@ set viminfo+=h                 " Disable 'hlsearch' on saved files
 " --- Appearance {{{
 
 set background=dark    " Dark background (duh)
-colorscheme pencil     " inspired by iA Writer
-set colorcolumn=80     " highlight column 80
-set cursorline         " highlight the line the cursor's on
+if has("gui_running") || &t_Co>=88
+    colorscheme pencil     " inspired by iA Writer
+    set colorcolumn=80     " highlight column 80
+    set cursorline         " highlight the line the cursor's on
+else                       " 8-color terms can't handle colors
+    colorscheme desert
+    set colorcolumn=
+    set nocursorline
+endif
 
 set laststatus=2       " use status line, always.
 
