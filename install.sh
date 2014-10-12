@@ -20,10 +20,23 @@ github_setup() {
 
 if [[ "$1" == "-g" ]]; then # github setup requested
     echo "Will set up git."
+    echo "---------------------------------"
     github_setup || echo "Install git!";
 fi
 
-#mkdir -p $HOME/.vim/bundle
-#git clone https://github.com/gmarik/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
-#vim +PluginInstall +qall
-#ln -s dots/vimrc ~/.vimrc # soft links = best practice
+echo "Installing Vundle..."
+mkdir -p $HOME/.vim/bundle
+git clone https://github.com/gmarik/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
+vim +PluginInstall +qall
+ln -s ./vimrc $HOME/.vimrc # soft links = best practice
+
+echo "Installing Oh-My-Zsh..."
+curl -L http://install.ohmyz.sh | sh
+echo "Moving stock zshrc to $HOME/.config/old-configs/"
+mkdir -p .config/old-configs/
+mv $HOME/.zshrc $HOME/.config/old-configs/
+ln -s ./zshrc $HOME/.zshrc
+
+echo "Installing color stuff..."
+bash <(curl aur.sh) -si stderred-git
+git clone git://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.oh-my-zsh/custom/plugins/

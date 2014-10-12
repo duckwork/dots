@@ -5,7 +5,7 @@ set nocompatible
 filetype off
 set runtimepath+=$HOME/.vim/bundle/Vundle.vim
 call vundle#begin()
-"if exists(":Plugin")
+if exists(":Plugin")
     Plugin 'gmarik/Vundle.vim'         " let Vundle manage Vundle, req'd
     " Plugins
     " --- Using ViM {{{
@@ -21,8 +21,8 @@ call vundle#begin()
     " --- --- Colorschemes
     "Plugin 'flazz/vim-colorschemes'    " huge collection of colorschemes
     Plugin 'reedes/vim-colors-pencil'  " pencil colorscheme
-    Plugin 'Pychimp/vim-luna'          " luna colorscheme
-    Plugin 'Pychimp/vim-sol'           " lighter version of luna
+    "Plugin 'Pychimp/vim-luna'          " luna colorscheme
+    "Plugin 'Pychimp/vim-sol'           " lighter version of luna
     " --- --- Vim Wiki
     Plugin 'vimwiki/vimwiki'
     " --- }}}
@@ -53,7 +53,7 @@ call vundle#begin()
     " --- --- --- Polyglot: over fifty languages' syntax files
     Plugin 'sheerun/vim-polyglot'
     " --- }}}
-"endif
+endif
 call vundle#end()                      "req'd
 filetype plugin indent on              "req'd
 "}}}
@@ -238,6 +238,9 @@ nnoremap \ :NERDTreeToggle<CR>
 let g:user_emmet_leader_key = '<c-e>'
 
 " Ctrl-P settings
+if executable('ag') " use The Silver Searcher if it exists
+    let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+endif
 let g:ctrlp_max_depth = 100         " max depth of search
 let g:ctrlp_max_files = 0           " no limit to how many files
 let g:ctrlp_use_caching = 1         " enable caching
@@ -254,6 +257,7 @@ let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
     let g:airline_powerline_fonts = 1
     "AirlineRefresh
     set noshowmode         " Airline already shows mode, not necessary
+    let g:airline_powerline_fonts = 0
 "endif
 
 " Markdown-folding options
@@ -282,6 +286,7 @@ if has('gui_running') " --- GVIM {{{
     " --- Set fonts for different systems
     if has("gui_gtk2")
         set guifont=Inconsolata\ for\ Powerline,Inconsolata
+        let g:airline_powerline_fonts = 1
     elseif has("x11") " also works with GTK 1
         "set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has("gui_win32")
