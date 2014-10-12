@@ -5,11 +5,13 @@ set nocompatible
 filetype off
 set runtimepath+=$HOME/.vim/bundle/Vundle.vim
 call vundle#begin()
-if exists(":Plugin")
+"if exists(":Plugin")
     Plugin 'gmarik/Vundle.vim'         " let Vundle manage Vundle, req'd
     " Plugins
     " --- Using ViM {{{
-    Plugin 'Rykka/clickable.vim'       " Folding, links, files clickable
+    if has("gui_running")
+        Plugin 'Rykka/clickable.vim'   " Folding, links, files clickable
+    endif
     Plugin 'Lokaltog/vim-easymotion'   " No more counting objects
     Plugin 'chrisbra/NrrwRgn'          " Open region in new window, edit, reinsert
     Plugin 'vim-scripts/gundo'         " Visualize Vim's undo tree (not on Windows?)
@@ -51,7 +53,7 @@ if exists(":Plugin")
     " --- --- --- Polyglot: over fifty languages' syntax files
     Plugin 'sheerun/vim-polyglot'
     " --- }}}
-endif
+"endif
 call vundle#end()                      "req'd
 filetype plugin indent on              "req'd
 "}}}
@@ -243,16 +245,16 @@ let g:ctrlp_clear_cache_on_exit = 0 " enable cross-session caching
 let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
 
 " AIRLINE OPTIONS
-if exists(":AirlineRefresh") " Is Airline installed?
+"if exists(":AirlineRefresh") " Is Airline installed?
     " --- The right section is busy.
     let g:airline_section_z = '%3p%%|%3l:%2c'
     let g:airline_section_y = "%{WordCount()}"
     " --- include character count
     "let g:airline_section_z = '%3p%%|%4l:%2c|%{strwidth(join(getline(1,"$")))}c'
     let g:airline_powerline_fonts = 1
-    AirlineRefresh
+    "AirlineRefresh
     set noshowmode         " Airline already shows mode, not necessary
-endif
+"endif
 
 " Markdown-folding options
 let g:markdown_fold_style = 'nested'
