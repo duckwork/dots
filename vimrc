@@ -9,9 +9,6 @@ if exists(":Plugin")
     Plugin 'gmarik/Vundle.vim'         " let Vundle manage Vundle, req'd
     " Plugins
     " --- Using ViM {{{
-    if has("gui_running")
-        Plugin 'Rykka/clickable.vim'   " Folding, links, files clickable
-    endif
     Plugin 'Lokaltog/vim-easymotion'   " No more counting objects
     Plugin 'chrisbra/NrrwRgn'          " Open region in new window, edit, reinsert
     Plugin 'vim-scripts/gundo'         " Visualize Vim's undo tree (not on Windows?)
@@ -21,8 +18,6 @@ if exists(":Plugin")
     " --- --- Colorschemes
     "Plugin 'flazz/vim-colorschemes'    " huge collection of colorschemes
     Plugin 'reedes/vim-colors-pencil'  " pencil colorscheme
-    "Plugin 'Pychimp/vim-luna'          " luna colorscheme
-    "Plugin 'Pychimp/vim-sol'           " lighter version of luna
     " --- --- Vim Wiki
     Plugin 'vimwiki/vimwiki'
     " --- }}}
@@ -44,9 +39,6 @@ if exists(":Plugin")
     Plugin 'gregsexton/MatchTag'       " Match HTML tags like parentheses
     " --- --- --- CSS
     "Plugin 'hail2u/vim-css3-syntax'    " syntax file for CSS3
-    " --- --- --- Markdown " These should be handled by Pandoc, below
-    "Plugin 'tpope/vim-markdown'
-    "Plugin 'nelstrom/vim-markdown-folding' " fold Markdown on headings
     " --- --- --- Pandoc
     Plugin 'vim-pandoc/vim-pandoc'
     Plugin 'vim-pandoc/vim-pandoc-syntax'
