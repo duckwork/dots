@@ -206,9 +206,10 @@ function! WordCount() " TODO: Generalize to count words, characters, etc.
         let v:statusmsg = s:old_status
     endif
     call setpos('.', position)
-    return s:word_count . "w"
+    return s:word_count
 endfunction
 nnoremap <leader>wc :echo 'words: '.WordCount()<CR>
+set statusline+=<%{WordCount()}w
 
 function! ToggleBackground()
     if &background=="dark"
@@ -240,17 +241,17 @@ let g:ctrlp_clear_cache_on_exit = 0 " enable cross-session caching
 let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
 
 " AIRLINE OPTIONS
-"if exists(":AirlineRefresh") " Is Airline installed?
+if exists(":AirlineRefresh") " Is Airline installed?
     " --- The right section is busy.
-    let g:airline_section_z = '%3p%%|%3l:%2c'
-    let g:airline_section_y = "%{WordCount()}"
+    let g:airline_section_z = '-%3l/%3L(%2p%%)|%2c'
+    let g:airline_section_y = '%{WordCount()}'
     " --- include character count
     "let g:airline_section_z = '%3p%%|%4l:%2c|%{strwidth(join(getline(1,"$")))}c'
     let g:airline_powerline_fonts = 1
     "AirlineRefresh
     set noshowmode         " Airline already shows mode, not necessary
     let g:airline_powerline_fonts = 0
-"endif
+endif
 
 " Markdown-folding options
 let g:markdown_fold_style = 'nested'
