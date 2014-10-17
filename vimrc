@@ -10,33 +10,44 @@ if exists(":Plugin")
     " Plugins
     " --- Using ViM {{{
     Plugin 'Lokaltog/vim-easymotion'   " No more counting objects
-    Plugin 'chrisbra/NrrwRgn'          " Open region in new window, edit, reinsert
-    Plugin 'vim-scripts/gundo'         " Visualize Vim's undo tree (not on Windows?)
+    Plugin 'chrisbra/NrrwRgn'          " Open region in new win to edit
+    Plugin 'vim-scripts/gundo'         " Visualize Vim's undo tree
     " --- --- VIM eyecandy
     Plugin 'bling/vim-airline'         " a better statusline
-    Plugin 'junegunn/goyo.vim'         " distraction-free writing like Writeroom
+    Plugin 'junegunn/goyo.vim'         " distraction-free writing
+    Plugin 'junegunn/limelight.vim'    " highlight only active paragraph
     " --- --- Colorschemes
-    "Plugin 'flazz/vim-colorschemes'    " huge collection of colorschemes
     Plugin 'reedes/vim-colors-pencil'  " pencil colorscheme
+    Plugin 'chriskempson/base16-vim'   " base 16 colors
     " --- --- Vim Wiki
     Plugin 'vimwiki/vimwiki'
+    " --- --- Git integration
+    Plugin 'airblade/vim-gitgutter'        " Git stuff in signs column
+    Plugin 'tpope/vim-fugitive'            " Git integration
+    " --- --- Shell integration/misc.
+    Plugin 'xolox/vim-misc'
+    Plugin 'xolox/vim-shell'
     " --- }}}
     " --- Editing Files {{{
     " --- --- Navigating and saving
-    Plugin 'scrooloose/nerdtree'       " NERDTree - an easy-to-use file manager
+    Plugin 'scrooloose/nerdtree'       " an easy-to-use file manager
     Plugin 'kien/ctrlp.vim'            " a fuzzy finder
-    "Plugin 'mhinz/vim-startify'        " start page with recent files, etc.
-    Plugin 'dockyard/vim-easydir'      " Create new dirs on-the-fly when saving
+    "Plugin 'mhinz/vim-startify'        " start page with recent files
+    Plugin 'dockyard/vim-easydir'      " Create new dirs on-the-fly
     " --- --- Working within files
     Plugin 'scrooloose/nerdcommenter'  " toggle comments easily
-    Plugin 'tpope/vim-surround'        " Surround text objects with things
+    Plugin 'tpope/vim-surround'        " format surroundings easily
     Plugin 'godlygeek/tabular'         " easy formatting of text tables
-    Plugin 'ervandew/supertab'         " perform all complet. with Tab (I)
+    Plugin 'ervandew/supertab'         " tab completion in (I)
     Plugin 'AndrewRadev/splitjoin.vim' " Split and join code easily
+    Plugin 'tpope/vim-abolish'         " Enhanced search and replace
+    Plugin 'q335r49/microviche'        " infinite pannable vim
     " --- --- Filetypes
+    " --- --- Plain text
+    Plugin 'reedes/vim-textobj-sentence' " Improved sentence textobj
     " --- --- --- HTML
     Plugin 'mattn/emmet-vim'           " Zencoding for HTML
-    Plugin 'gregsexton/MatchTag'       " Match HTML tags like parentheses
+    Plugin 'gregsexton/MatchTag'       " Match HTML tags with %
     " --- --- --- CSS
     "Plugin 'hail2u/vim-css3-syntax'    " syntax file for CSS3
     " --- --- --- Pandoc
@@ -49,20 +60,104 @@ endif
 call vundle#end()                      "req'd
 filetype plugin indent on              "req'd
 "}}}
-" Part I: Usability Configuration {{{
+" Part I: Plugin Config {{{
+
+let g:shell_mappings_enabled = 0 " Disable vim-shell mappings
+let g:shell_fullsreen_message = 0 " I know what I'm doing
+
+" Goyo maximizes window
+augroup Goyo_events         " Call these functions
+    autocmd!
+    autocmd User GoyoEnter Fullscreen | Limelight | sleep 50m | Goyo g:goyo_width
+    autocmd User GoyoLeave Fullscreen | Limelight!
+augroup END
+
+" map emmet (ZenCoding) to <C-E>
+let g:user_emmet_leader_key = '<c-e>'
+
+" Ctrl-P settings
+if executable('ag') " use The Silver Searcher if it exists
+    let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+endif
+let g:ctrlp_max_depth = 100         " max depth of search
+let g:ctrlp_max_files = 0           " no limit to how many files
+let g:ctrlp_use_caching = 1         " enable caching
+let g:ctrlp_clear_cache_on_exit = 0 " enable cross-session caching
+let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
+
+" AIRLINE OPTIONS
+let g:airline_section_z = '%2p%%)_%2l|%2c{%{WordCount()}w'
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+if exists('*airline#add_statusline_func')
+    AirlineRefresh
+    set noshowmode         " Airline already shows mode, not necessary
+endif
+
+let g:markdown_fold_style = 'nested' " Fold Markdown on 
+
+let g:goyo_width = 72           " Goyo width of 72 characters
+let g:goyo_margin_top = 4       " Margins above and below Goyo window
+let g:goyo_margin_bottom = 4
+
+let g:gundo_preview_bottom = 1 " Preview takes up full width
+" }}}
+" Part II: Custom functions {{{
+function! WordCount() " {{{
+    " TODO: Generalize to count words, characters, etc.
+    "character counting:
+    "strwidth(join(getline(1,"$")))
+    let s:old_status = v:statusmsg
+    let position = getpos(".")
+    exe ":silent normal g\<c-g>"
+    let stat = v:statusmsg
+    let s:word_count = 0
+    if stat != '--No lines in buffer--'
+        let s:word_count = str2nr(split(v:statusmsg)[11])
+        let v:statusmsg = s:old_status
+    endif
+    call setpos('.', position)
+    return s:word_count
+endfunction "}}}
+function! ToggleBackground() " {{{
+    if &background=="dark"
+        set background=light
+    else
+        set background=dark
+    endif
+endfunction " }}}
+function! NextTabOrBuffer(dir) " {{{
+    " if there's only one tab, switch bufs; else switch tabs
+    if tabpagenr('$') == 1 "there's only one 'tab' so switch bufs
+        if a:dir < 0 " negative numbers go previous
+            bprevious
+        else
+            bnext
+        endif
+    else " real tabs exist
+        if a:dir < 0
+            tabprevious
+        else
+            tabnext
+        endif
+    endif
+endfunction " }}}
+" TODO: a function that switches between basename and full path in stl
+" }}}
+" Part III: Better ViM defaults {{{
 " because vanilla vim, though great, is still lacking.
+" and because we don't need sensible.vim! YEAH
 " --- Display
 syntax on                      " syntax highlighting is great
 set number                     " and line numbers, too
 set autoread                   " reload on a change, automagically
-set lazyredraw                 " don't redraw everything (faster macros, etc.)
+set lazyredraw                 " don't redraw macros til done
 set hidden                     " Don't close unused buffers
 " --- Using Vim
-set formatoptions-=r           " disable autocomments when hitting ENTER (I)
-set formatoptions-=o           " disable autocomments when hitting O or o (I)
+set formatoptions-=ro          " disable autocomments in (I)
 set history=1000               " set history of commands to 1000 long.
 runtime macros/matchit.vim     " enable matchit plugin (better %)
-set backspace=indent,eol,start " backspace across autoindents, lines, insertstart
+set backspace=indent,eol,start " backspace across these things
 " --- File encoding and format
 set encoding=utf-8             " encoding = utf-8.
 set fileencoding=utf-8         " because year = 2014.
@@ -75,13 +170,13 @@ set viminfo+=<50               " Save 50 lines of registers
 set viminfo+=s10               " Save only first 10 Kb of each register
 set viminfo+=h                 " Disable 'hlsearch' on saved files
 "}}}
-" Part II: Customization {{{
+" Part IV: Customization {{{
 " --- Appearance {{{
 
 set background=dark    " Dark background (duh)
 if has("gui_running") || &t_Co>=88
-    colorscheme pencil     " inspired by iA Writer
-    set colorcolumn=80     " highlight column 80
+    colorscheme base16-default     " fun bright colors
+    set colorcolumn=72     " highlight column 80
     set cursorline         " highlight the line the cursor's on
 else                       " 8-color terms can't handle colors
     colorscheme desert
@@ -92,15 +187,16 @@ endif
 set laststatus=2       " use status line, always.
 
 " Statusline
-set statusline=%t          " basename of file
-set statusline+=%H         " help buffer flag ,HLP
-set statusline+=%R         " read-only flag ,RO
-set statusline+=\ %m       " modified flag [+]
-set statusline+=%=         " begin right-align
-set statusline+=%y\        " file type
-set statusline+=%3p%%      " scroll percentage
-set statusline+=\ -%3l/%3L " current line / total lines
-set statusline+=\|%2c      " current column
+set statusline=%t                " basename of file
+set statusline+=%H               " help buffer flag ,HLP
+set statusline+=%R               " read-only flag ,RO
+set statusline+=\ %m             " modified flag [+]
+set statusline+=%=               " begin right-align
+set statusline+=%y\              " file type
+set statusline+=%3p%%)           " scroll percentage
+set statusline+=_%03l             " current line / total lines
+set statusline+=\|%02c            " current column
+set statusline+={%{WordCount()}w " word count function
 
 set wildmenu           " tab completion with a menu
 set ruler              " show ruler
@@ -109,7 +205,7 @@ set showcmd            " Show partial commands as-you-type
 match ErrorMsg '\s\+$' " Show trailing whitespace as error
 
 set scrolloff=8        " keep lines at bottom and top when scrolling
-set sidescrolloff=4    " keep lines at the left and write when scrolling
+set sidescrolloff=4    " keep lines at left and right when scrolling
 set sidescroll=1       " scroll sideways by characters, not screens
 set wrap               " set wrapping
 set linebreak          " wrap at words. (:help breakat)
@@ -136,7 +232,7 @@ set shiftround        " indent to nearest tabstop
 set incsearch         " find the next match as we type
 set hlsearch          " highlight search matches
 set ignorecase        " ignore case as we search
-set smartcase         " ... unless a capital appears (it's probs meant)
+set smartcase         " ... unless a capital appears
 
 set foldenable        " Enable folding
 set foldmethod=marker " {{{ }}} mark folds
@@ -167,7 +263,7 @@ nnoremap Y y$
 inoremap jj <Esc>
 
 " Turns out, K is useful -- remap (using h for help)
-nnoremap <leader>h K
+nnoremap <F1> K
 
 " Make windows easier to navigate
 map <C-j> <C-w>j<C-w>_
@@ -184,87 +280,21 @@ augroup reload_vimrc
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
 augroup END
 
-" I (should) also edit life.txt a lot. SO:
-"let g:lifefile = 'D:\Dropbox\life.txt'  change this as necessary
-"nnoremap <leader>el :edit `=g:lifefile`<CR>
-
 " use <Space> to remove search highlight
 nnoremap <leader><Space> :nohlsearch<return><Esc>
 " Remove whitespace from the ends of lines
 nnoremap <leader>r<Space> :%s/\s\+$//e<CR>
-" --- }}}
-" }}}
-" Part III: Custom functions {{{
-function! WordCount() " TODO: Generalize to count words, characters, etc.
-    let s:old_status = v:statusmsg
-    let position = getpos(".")
-    exe ":silent normal g\<c-g>"
-    let stat = v:statusmsg
-    let s:word_count = 0
-    if stat != '--No lines in buffer--'
-        let s:word_count = str2nr(split(v:statusmsg)[11])
-        let v:statusmsg = s:old_status
-    endif
-    call setpos('.', position)
-    return s:word_count
-endfunction
+
+" --- --- Function keybinds
 nnoremap <leader>wc :echo 'words: '.WordCount()<CR>
-set statusline+=<%{WordCount()}w
-
-function! ToggleBackground()
-    if &background=="dark"
-        set background=light
-    else
-        set background=dark
-    endif
-endfunction
 nnoremap <F6> :call ToggleBackground()<CR>
-
-" TODO: a function that switches between basename and full path in stl
-" }}}
-" Part IV: Plugin Config {{{
-
-" Toggle file browser
+nnoremap gt :call NextTabOrBuffer(1)<CR>
+nnoremap gT :call NextTabOrBuffer(-1)<CR>
+" --- --- Plugin keybinds
 nnoremap \ :NERDTreeToggle<CR>
-
-" map emmet (ZenCoding) to <C-E>
-let g:user_emmet_leader_key = '<c-e>'
-
-" Ctrl-P settings
-if executable('ag') " use The Silver Searcher if it exists
-    let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-endif
-let g:ctrlp_max_depth = 100         " max depth of search
-let g:ctrlp_max_files = 0           " no limit to how many files
-let g:ctrlp_use_caching = 1         " enable caching
-let g:ctrlp_clear_cache_on_exit = 0 " enable cross-session caching
-let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
-
-" AIRLINE OPTIONS
-if exists(":AirlineRefresh") " Is Airline installed?
-    " --- The right section is busy.
-    let g:airline_section_z = '-%3l/%3L(%2p%%)|%2c'
-    let g:airline_section_y = '%{WordCount()}'
-    " --- include character count
-    "let g:airline_section_z = '%3p%%|%4l:%2c|%{strwidth(join(getline(1,"$")))}c'
-    let g:airline_powerline_fonts = 1
-    "AirlineRefresh
-    set noshowmode         " Airline already shows mode, not necessary
-    let g:airline_powerline_fonts = 0
-endif
-
-" Markdown-folding options
-let g:markdown_fold_style = 'nested'
-
-" Goyo on <F11> like fullscreen
-nnoremap <F11> <Esc>:Goyo<CR>
-let g:goyo_width = 70
-let g:goyo_margin_top = 4
-let g:goyo_margin_bottom = 4
-
-" Toggle UNDO tree view
+nnoremap <F11> :Goyo<CR>
 nnoremap <F5> :GundoToggle<CR>
-let g:gundo_preview_bottom = 1 " Preview takes up full width
+" --- }}}
 " }}}
 " Part V: Can I has() options? {{{
 if has('gui_running') " --- GVIM {{{
@@ -312,14 +342,7 @@ if has('win32') " --- WINDOWS {{{
     " Don't use NERDTree. Don't work in Windows right.
     nnoremap \ :CtrlP D:\Dropbox\<CR>
     " No python support :(
-    let g:gundo_disable = 1
     let g:pandoc#modules#disabled = ["bibliographies"]
-    " Goyo maximizes window
-    augroup win_Goyo_events         " Call these functions
-        autocmd!
-        autocmd User GoyoEnter simalt ~x | sleep 10m | Goyo 70
-        autocmd User GoyoLeave simalt ~r
-    augroup END
 
     " --- Windows like clipboard / saving
     " yank to and paste from the clipboard without prepending "*
