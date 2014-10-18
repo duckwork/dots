@@ -68,8 +68,13 @@ let g:shell_fullsreen_message = 0 " I know what I'm doing
 " Goyo maximizes window
 augroup Goyo_events         " Call these functions
     autocmd!
-    autocmd User GoyoEnter Fullscreen | Limelight | sleep 50m | Goyo g:goyo_width
-    autocmd User GoyoLeave Fullscreen | Limelight!
+    if has('gui_running')
+        autocmd User GoyoEnter Fullscreen | Limelight | sleep 50m | Goyo g:goyo_width
+        autocmd User GoyoLeave Fullscreen | Limelight!
+    else
+        autocmd User GoyoEnter Limelight
+        autocmd User GoyoLeave Limelight!
+    endif
 augroup END
 
 " map emmet (ZenCoding) to <C-E>
@@ -93,8 +98,6 @@ if exists('*airline#add_statusline_func')
     AirlineRefresh
     set noshowmode         " Airline already shows mode, not necessary
 endif
-
-let g:markdown_fold_style = 'nested' " Fold Markdown on 
 
 let g:goyo_width = 72           " Goyo width of 72 characters
 let g:goyo_margin_top = 4       " Margins above and below Goyo window
