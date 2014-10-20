@@ -30,7 +30,7 @@ if exists(":Plugin")
     " --- }}}
     " --- Editing Files {{{
     " --- --- Navigating and saving
-    Plugin 'scrooloose/nerdtree'       " an easy-to-use file manager
+    "Plugin 'scrooloose/nerdtree'       " an easy-to-use file manager
     Plugin 'kien/ctrlp.vim'            " a fuzzy finder
     "Plugin 'mhinz/vim-startify'        " start page with recent files
     Plugin 'dockyard/vim-easydir'      " Create new dirs on-the-fly
@@ -62,50 +62,45 @@ filetype plugin indent on              "req'd
 "}}}
 " Part I: Plugin Config {{{
 
-let g:shell_mappings_enabled = 0 " Disable vim-shell mappings
+let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
 let g:shell_fullsreen_message = 0 " I know what I'm doing
 
-" Goyo maximizes window
-augroup Goyo_events         " Call these functions
-    autocmd!
-    if has('gui_running')
-        autocmd User GoyoEnter Fullscreen | Limelight | sleep 50m | Goyo g:goyo_width
-        autocmd User GoyoLeave Fullscreen | Limelight!
-    else
-        autocmd User GoyoEnter Limelight
-        autocmd User GoyoLeave Limelight!
-    endif
-augroup END
-
-" map emmet (ZenCoding) to <C-E>
-let g:user_emmet_leader_key = '<c-e>'
-
-" Ctrl-P settings
-if executable('ag') " use The Silver Searcher if it exists
-    let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+if &textwidth
+    let g:goyo_width = &textwidth
+else
+    let g:goyo_width = 72           " Goyo width of 72 characters
 endif
-let g:ctrlp_max_depth = 100         " max depth of search
-let g:ctrlp_max_files = 0           " no limit to how many files
-let g:ctrlp_use_caching = 1         " enable caching
-let g:ctrlp_clear_cache_on_exit = 0 " enable cross-session caching
-let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
-
-" AIRLINE OPTIONS
-let g:airline_section_z = '%2p%%)_%2l|%2c{%{WordCount()}w'
-let g:airline_powerline_fonts = 1
-let g:airline#extensions#tabline#enabled = 1
-if exists('*airline#add_statusline_func')
-    AirlineRefresh
-    set noshowmode         " Airline already shows mode, not necessary
-endif
-
-let g:goyo_width = 72           " Goyo width of 72 characters
-let g:goyo_margin_top = 4       " Margins above and below Goyo window
-let g:goyo_margin_bottom = 4
+let g:goyo_margin_top = 2
+let g:goyo_margin_bottom = 2
 
 let g:gundo_preview_bottom = 1 " Preview takes up full width
+
+" --- Ctrl-P options {{{
+let g:ctrlp_max_depth           = 100 " max depth of search
+let g:ctrlp_max_files           = 0   " no limit to how many files
+let g:ctrlp_use_caching         = 1   " enable caching
+let g:ctrlp_clear_cache_on_exit = 0   " enable cross-session caching
+let g:ctrlp_cache_dir           = $HOME.'/.cache/ctrlp'
+let g:ctrlp_lazy_update         = 1   " Update only after done typing
+if executable('ag')
+    " use The Silver Searcher if it exists
+    let g:ctrlp_user_command    = 'ag %s -l --nocolor -g "" '
+endif
+" --- }}}
+" --- Airline options {{{
+let g:airline_section_b  = 'b%n'              " buffer n
+
+let g:airline_section_z  = '%2p%%)'           " xx%)
+let g:airline_section_z .= '_%02l'            " _ll
+let g:airline_section_z .= '|%02c'            " |cc
+let g:airline_section_z .= '{%{WordCount()}w' " {www
+
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+" --- }}}
 " }}}
 " Part II: Custom functions {{{
+" TODO: a function that switches between basename and full path in stl
 function! WordCount() " {{{
     " TODO: Generalize to count words, characters, etc.
     "character counting:
@@ -145,7 +140,13 @@ function! NextTabOrBuffer(dir) " {{{
         endif
     endif
 endfunction " }}}
-" TODO: a function that switches between basename and full path in stl
+function! CloseBufferOrWindow() " {{{
+    if len(filter(range(1, bufnr("$")), "buflisted(v:val)")) > 1
+        bdelete
+    else
+        quit
+    endif
+endfunction " }}}
 " }}}
 " Part III: Better ViM defaults {{{
 " because vanilla vim, though great, is still lacking.
@@ -190,15 +191,15 @@ endif
 set laststatus=2       " use status line, always.
 
 " Statusline
-set statusline=%t                " basename of file
-set statusline+=%H               " help buffer flag ,HLP
-set statusline+=%R               " read-only flag ,RO
-set statusline+=\ %m             " modified flag [+]
+set statusline=\>\ b%n              " buffernumber
+set statusline+=\>\ %f               " basename of file
+set statusline+=%m               " modified flag [+] or [-] if ro
+set statusline+=%h               " help buffer flag [help]
 set statusline+=%=               " begin right-align
-set statusline+=%y\              " file type
-set statusline+=%3p%%)           " scroll percentage
-set statusline+=_%03l             " current line / total lines
-set statusline+=\|%02c            " current column
+set statusline+=\<%y\              " file type
+set statusline+=\<%3p%%)           " scroll percentage
+set statusline+=_%02l            " current line / total lines
+set statusline+=\|%02c           " current column
 set statusline+={%{WordCount()}w " word count function
 
 set wildmenu           " tab completion with a menu
@@ -214,8 +215,6 @@ set wrap               " set wrapping
 set linebreak          " wrap at words. (:help breakat)
 
 " Spelling
-autocmd FileType vimwiki,markdown,text setlocal spell
-autocmd FileType help setlocal nospell
 hi SpellBad gui=undercurl
 " --- }}}
 " --- Acting {{{
@@ -246,60 +245,95 @@ if has('mouse')
 end
 " --- }}}
 " --- Keybinds {{{
-let mapleader = "," " \ is a dumb mapleader.
-
-" allow Tab and Shift+Tab to change selection indent in visual mode
-vmap <Tab> >gv
-vmap <S-Tab> <gv
-
-" ; = : and : = ;
+" --- --- Keybinds for usability {{{
+" \ is a dumb mapleader.
+let mapleader = ","
+" <Shift> AND ; is SO MUCH WORK
 noremap ; :
-"noremap : ;
 " j and k should work on visual lines, not code lines
 nnoremap j gj
 nnoremap k gk
-" make K the opposite of J (split lines at cursor)
-nnoremap K i<CR><Esc>
-" Y should do similar things to C or D
+" Y should do similar things as C or D
 nnoremap Y y$
 " ESC is so far away...
 inoremap jj <Esc>
-
-" Turns out, K is useful -- remap (using h for help)
+" make K the opposite of J (split lines at cursor)
+nnoremap K i<CR><Esc>
+" More useful <F1> bind -- looks up :h <cursor>
 nnoremap <F1> K
-
-" Make windows easier to navigate
+" Map Q (usu. for Ex mode LAME) to closing the buffer (or window)
+nnoremap Q :call CloseBufferOrWindow()<CR>
+" allow Tab and Shift+Tab to change selection indent in visual mode
+vnoremap > >gv
+vnoremap < <gv
+" \ does netrw window
+nnoremap \ :Explore D:\Dropbox<CR>
+" --- --- }}}
+" --- --- Keybinds for window management {{{
+" --- --- --- Switching windows
 map <C-j> <C-w>j<C-w>_
 map <C-k> <C-w>k<C-w>_
 map <C-h> <C-w>h<C-w>_
 map <C-l> <C-w>l<C-w>_
-" TODO: more window binds, eh?
-
+" --- --- --- Moving windows
+map <C-S-j> <C-w>J<C-w>_
+map <C-S-k> <C-w>K<C-w>_
+map <C-S-h> <C-w>H<C-w>_
+map <C-S-l> <C-w>L<C-w>_
+" --- --- }}}
+" --- --- Leader binds {{{
 " Easily edit $MYVIMRC
 nnoremap <leader>ev :edit $MYVIMRC<CR>
-" Source $MYVIMRC on save
-augroup reload_vimrc
-    autocmd!
-    autocmd BufWritePost $MYVIMRC source $MYVIMRC
-augroup END
-
 " use <Space> to remove search highlight
 nnoremap <leader><Space> :nohlsearch<return><Esc>
 " Remove whitespace from the ends of lines
 nnoremap <leader>r<Space> :%s/\s\+$//e<CR>
-
-" --- --- Function keybinds
+" --- --- }}}
+" --- --- Function keybinds {{{
 nnoremap <leader>wc :echo 'words: '.WordCount()<CR>
 nnoremap <F6> :call ToggleBackground()<CR>
 nnoremap gt :call NextTabOrBuffer(1)<CR>
 nnoremap gT :call NextTabOrBuffer(-1)<CR>
-" --- --- Plugin keybinds
-nnoremap \ :NERDTreeToggle<CR>
+" --- --- }}}
+" --- --- Plugin keybinds {{{
 nnoremap <F11> :Goyo<CR>
 nnoremap <F5> :GundoToggle<CR>
+vnoremap <Tab> :Tabularize /
+let g:user_emmet_leader_key = '<c-e>'
+" --- --- }}}
 " --- }}}
 " }}}
-" Part V: Can I has() options? {{{
+" Part V: Autocommands {{{
+" Goyo maximizes window
+augroup Goyo_events         " Call these functions
+    autocmd!
+    if has('gui_running')
+        autocmd User GoyoEnter Fullscreen | Limelight | sleep 50m | Goyo g:goyo_width
+        autocmd User GoyoLeave Fullscreen | Limelight!
+    else
+        autocmd User GoyoEnter Limelight
+        autocmd User GoyoLeave Limelight!
+    endif
+augroup END
+" Check spelling in text-like filetypes
+augroup Spelling
+    autocmd!
+    autocmd FileType vimwiki,markdown,text setlocal spell
+    autocmd FileType help setlocal nospell
+augroup END
+" Source $MYVIMRC on save
+augroup reload_vimrc
+    autocmd!
+    autocmd BufWritePost $MYVIMRC source $MYVIMRC | AirlineRefresh
+augroup END
+" Toggle showmode for enter/exit airline
+augroup AirlineShowmode
+    autocmd!
+    autocmd User AirlineToggledOn set noshowmode
+    autocmd User AirlineToggledOff set showmode
+augroup END
+" }}}
+" Part VI: Can I has() options? {{{
 if has('gui_running') " --- GVIM {{{
     " --- Common GUI options
     set guioptions-=m  " remove menu bar
@@ -307,8 +341,6 @@ if has('gui_running') " --- GVIM {{{
     set guioptions-=r  " remove right-hand scroll
     set guioptions-=L  " remove left-hand scroll
     set guioptions-=e  " remove GUI tabline; use consoley one instead
-    "set lines=25       " window is 25 lines high
-    "set columns=80     " window is 80 columns long
     " --- Set fonts for different systems
     if has("gui_gtk2")
         set guifont=Inconsolata\ for\ Powerline,Inconsolata
@@ -340,10 +372,8 @@ if has('win32') " --- WINDOWS {{{
 
     " --- Plugins
     " Ctrl-P starts in D:\Dropbox
-    let g:ctrlp_cmd = 'CtrlP D:\Dropbox\'
+    let g:ctrlp_cmd       = 'CtrlP D:\Dropbox\'
     let g:ctrlp_cache_dir = 'D:\Dropbox\apps\ctrlp'
-    " Don't use NERDTree. Don't work in Windows right.
-    nnoremap \ :CtrlP D:\Dropbox\<CR>
     " No python support :(
     let g:pandoc#modules#disabled = ["bibliographies"]
 
