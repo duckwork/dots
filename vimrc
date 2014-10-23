@@ -30,8 +30,10 @@ if exists(":Plugin")
     " --- }}}
     " --- Editing Files {{{
     " --- --- Navigating and saving
-    "Plugin 'scrooloose/nerdtree'       " an easy-to-use file manager
     Plugin 'kien/ctrlp.vim'            " a fuzzy finder
+    if executable('ag')
+        Plugin 'rking/ag.vim'              " Ag implementation
+    endif
     "Plugin 'mhinz/vim-startify'        " start page with recent files
     Plugin 'dockyard/vim-easydir'      " Create new dirs on-the-fly
     " --- --- Working within files
@@ -43,7 +45,7 @@ if exists(":Plugin")
     Plugin 'tpope/vim-abolish'         " Enhanced search and replace
     Plugin 'q335r49/microviche'        " infinite pannable vim
     " --- --- Filetypes
-    " --- --- Plain text
+    " --- --- --- Plain text
     Plugin 'reedes/vim-textobj-sentence' " Improved sentence textobj
     " --- --- --- HTML
     Plugin 'mattn/emmet-vim'           " Zencoding for HTML
@@ -82,6 +84,8 @@ let g:ctrlp_use_caching         = 1   " enable caching
 let g:ctrlp_clear_cache_on_exit = 0   " enable cross-session caching
 let g:ctrlp_cache_dir           = $HOME.'/.cache/ctrlp'
 let g:ctrlp_lazy_update         = 1   " Update only after done typing
+" Ctrl-P window on top and a normal order for results
+let g:ctrlp_match_window        = 'top,order:ttb'
 if executable('ag')
     " use The Silver Searcher if it exists
     let g:ctrlp_user_command    = 'ag %s -l --nocolor -g "" '
@@ -95,8 +99,9 @@ let g:airline_section_z .= '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
 let g:airline_section_z .= '{%{WordCount()}w' " {www
 
-let g:airline_powerline_fonts = 1
-let g:airline#extensions#tabline#enabled = 1
+let g:airline_powerline_fonts             = 1
+let g:airline#extensions#tabline#enabled  = 1
+let g:airline#extensions#tabline#fnamemod = ':t'
 " --- }}}
 " }}}
 " Part II: Custom functions {{{
@@ -240,6 +245,8 @@ set foldenable        " Enable folding
 set foldmethod=marker " {{{ }}} mark folds
 set foldlevel=2       " Start open to second level
 
+set magic             " use better regexp
+
 if has('mouse')
     set mouse=a       " Enable the mouse if present
 end
@@ -267,7 +274,7 @@ nnoremap Q :call CloseBufferOrWindow()<CR>
 vnoremap > >gv
 vnoremap < <gv
 " \ does netrw window
-nnoremap \ :Explore D:\Dropbox<CR>
+nnoremap \ :Explore<CR>
 " --- --- }}}
 " --- --- Keybinds for window management {{{
 " --- --- --- Switching windows
@@ -275,11 +282,6 @@ map <C-j> <C-w>j<C-w>_
 map <C-k> <C-w>k<C-w>_
 map <C-h> <C-w>h<C-w>_
 map <C-l> <C-w>l<C-w>_
-" --- --- --- Moving windows
-map <C-S-j> <C-w>J<C-w>_
-map <C-S-k> <C-w>K<C-w>_
-map <C-S-h> <C-w>H<C-w>_
-map <C-S-l> <C-w>L<C-w>_
 " --- --- }}}
 " --- --- Leader binds {{{
 " Easily edit $MYVIMRC
@@ -288,6 +290,8 @@ nnoremap <leader>ev :edit $MYVIMRC<CR>
 nnoremap <leader><Space> :nohlsearch<return><Esc>
 " Remove whitespace from the ends of lines
 nnoremap <leader>r<Space> :%s/\s\+$//e<CR>
+" Change working directory to that of current buffer
+nnoremap <leader>cd :cd %:p:h<CR>
 " --- --- }}}
 " --- --- Function keybinds {{{
 nnoremap <leader>wc :echo 'words: '.WordCount()<CR>
@@ -304,6 +308,8 @@ let g:user_emmet_leader_key = '<c-e>'
 " --- }}}
 " }}}
 " Part V: Autocommands {{{
+" Change local current directory to buffer's directory
+autocmd BufEnter * silent! lcd %:p:h
 " Goyo maximizes window
 augroup Goyo_events         " Call these functions
     autocmd!
@@ -373,8 +379,9 @@ if has('win32') " --- WINDOWS {{{
     " --- Plugins
     " Ctrl-P starts in D:\Dropbox
     let g:ctrlp_cmd       = 'CtrlP D:\Dropbox\'
-    let g:ctrlp_cache_dir = 'D:\Dropbox\apps\ctrlp'
-    " No python support :(
+    "let g:ctrlp_cache_dir = 'D:\Dropbox\apps\ctrlp'
+    nnoremap \ :CtrlP C:\Users\Case<CR>
+    " No python support :(?)
     let g:pandoc#modules#disabled = ["bibliographies"]
 
     " --- Windows like clipboard / saving
