@@ -81,6 +81,7 @@ export ARCHFLAGS="-arch x86_64"
 #
 # Example aliases
 alias zshconfig="vim ~/.zshrc"
+alias xyzzy="echo \"Nothing happens.\""
 alias ohmyzsh="vim ~/.oh-my-zsh"
 
 # Stderred library (stderr is red)
