@@ -11,7 +11,9 @@ if exists(":Plugin")
     " --- Using ViM {{{
     Plugin 'Lokaltog/vim-easymotion'   " No more counting objects
     Plugin 'chrisbra/NrrwRgn'          " Open region in new win to edit
-    Plugin 'vim-scripts/gundo'         " Visualize Vim's undo tree
+    if has('python')
+        Plugin 'vim-scripts/gundo'         " Visualize Vim's undo tree
+    endif
     " --- --- VIM eyecandy
     Plugin 'bling/vim-airline'         " a better statusline
     Plugin 'junegunn/goyo.vim'         " distraction-free writing
@@ -19,11 +21,14 @@ if exists(":Plugin")
     " --- --- Colorschemes
     Plugin 'reedes/vim-colors-pencil'  " pencil colorscheme
     Plugin 'chriskempson/base16-vim'   " base 16 colors
+    Plugin 'nice/sweater'              " light scheme
     " --- --- Vim Wiki
     Plugin 'vimwiki/vimwiki'
     " --- --- Git integration
-    Plugin 'airblade/vim-gitgutter'        " Git stuff in signs column
-    Plugin 'tpope/vim-fugitive'            " Git integration
+    if executable('git')
+        Plugin 'airblade/vim-gitgutter'        " Git stuff in signs column
+        Plugin 'tpope/vim-fugitive'            " Git integration
+    endif
     " --- --- Shell integration/misc.
     Plugin 'xolox/vim-misc'
     Plugin 'xolox/vim-shell'
@@ -94,14 +99,19 @@ endif
 " --- Airline options {{{
 let g:airline_section_b  = 'b%n'              " buffer n
 
-let g:airline_section_z  = '%2p%%)'           " xx%)
+let g:airline_section_y  = '%{WordCount()}w' " {www
+
+let g:airline_section_z  = '%2p%%)'           " pp%)
 let g:airline_section_z .= '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
-let g:airline_section_z .= '{%{WordCount()}w' " {www
 
-let g:airline_powerline_fonts             = 1
-let g:airline#extensions#tabline#enabled  = 1
-let g:airline#extensions#tabline#fnamemod = ':t'
+let g:airline_powerline_fonts                           = 1
+
+let g:airline#extensions#tabline#enabled                = 1
+let g:airline#extensions#tabline#fnamemod               = ':t'
+
+let g:airline#extensions#whitespace#trailing_format     = 't[%s]'
+let g:airline#extensions#whitespace#mixed_indent_format = 'mi[%s]'
 " --- }}}
 " }}}
 " Part II: Custom functions {{{
@@ -125,8 +135,16 @@ endfunction "}}}
 function! ToggleBackground() " {{{
     if &background=="dark"
         set background=light
+        set colorcolumn=0
+        set nocursorline
     else
         set background=dark
+        if &textwidth
+            let &colorcolumn = &textwidth
+        else
+            set colorcolumn=72
+        endif
+        set cursorline
     endif
 endfunction " }}}
 function! NextTabOrBuffer(dir) " {{{
@@ -347,6 +365,8 @@ if has('gui_running') " --- GVIM {{{
     set guioptions-=r  " remove right-hand scroll
     set guioptions-=L  " remove left-hand scroll
     set guioptions-=e  " remove GUI tabline; use consoley one instead
+    set columns    =100
+    set lines      =30
     " --- Set fonts for different systems
     if has("gui_gtk2")
         set guifont=Inconsolata\ for\ Powerline,Inconsolata
