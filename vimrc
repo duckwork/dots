@@ -99,10 +99,9 @@ endif
 " --- Airline options {{{
 let g:airline_section_b  = 'b%n'              " buffer n
 
-let g:airline_section_y  = '%{WordCount()}w' " {www
+let g:airline_section_y  = '%2p%%'           " pp%)
 
-let g:airline_section_z  = '%2p%%)'           " pp%)
-let g:airline_section_z .= '_%02l'            " _ll
+let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
 
 let g:airline_powerline_fonts                           = 1
@@ -119,7 +118,6 @@ let g:airline#extensions#whitespace#mixed_indent_format = 'mi[%s]'
 function! WordCount() " {{{
     " TODO: Generalize to count words, characters, etc.
     "character counting:
-    "strwidth(join(getline(1,"$")))
     let s:old_status = v:statusmsg
     let position = getpos(".")
     exe ":silent normal g\<c-g>"
@@ -330,8 +328,7 @@ let g:user_emmet_leader_key = '<c-e>'
 " Part V: Autocommands {{{
 " Change local current directory to buffer's directory
 autocmd BufEnter * silent! lcd %:p:h
-" Goyo maximizes window
-augroup Goyo_events         " Call these functions
+augroup GoyoEvents " Goyo fullscreens
     autocmd!
     if has('gui_running')
         autocmd User GoyoEnter Fullscreen | Limelight | sleep 50m | Goyo g:goyo_width
@@ -341,20 +338,19 @@ augroup Goyo_events         " Call these functions
         autocmd User GoyoLeave Limelight!
     endif
 augroup END
-" Check spelling in text-like filetypes
-augroup Spelling
+augroup TextEditing " For texty filetypes
     autocmd!
     autocmd BufNewFile,BufRead *.md set ft=markdown spell
-    autocmd FileType vimwiki,markdown,text setlocal spell
+    autocmd FileType vimwiki,markdown,text setlocal spell |
+                \ let g:airline_section_y  = '%{WordCount()}w (%2p%%)'
+    " TODO: switch back when not a texty filetype
     autocmd FileType help setlocal nospell
 augroup END
-" Source $MYVIMRC on save
-augroup reload_vimrc
+augroup ReloadVimrc " Source $MYVIMRC on save
     autocmd!
     autocmd BufWritePost $MYVIMRC source $MYVIMRC | AirlineRefresh
 augroup END
-" Toggle showmode for enter/exit airline
-augroup AirlineShowmode
+augroup AirlineShowmode " Toggle showmode for enter/exit airline
     autocmd!
     autocmd User AirlineToggledOn set noshowmode
     autocmd User AirlineToggledOff set showmode
