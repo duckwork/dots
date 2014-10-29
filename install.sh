@@ -41,7 +41,8 @@ if [[ -f $HOME/.vimrc ]]; then
 elif [[ -L $HOME/.vimrc ]]; then
     rm $HOME/.vimrc
 fi
-ln -s $PWD/vimrc $HOME/.vimrc # soft links = best practice
+ln -s $PWD/vimrc $HOME/.vimrc             # soft links = best practice
+mkdir -p $HOME/.vim/{bundle,swap,backup}/ # make all .vim/ dirs
 
 echo "Configuring ViM..."
 if [[ ! -d $HOME/.vim/bundle ]]; then
