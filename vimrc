@@ -115,7 +115,7 @@ let g:airline#extensions#whitespace#mixed_indent_format = 'mi[%s]'
 " }}}
 " Part II: Custom functions {{{
 " TODO: a function that switches between basename and full path in stl
-function! Count(thing) " {{{
+function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     "character counting:
     let s:old_status = v:statusmsg
     let position = getpos(".")
@@ -310,6 +310,7 @@ map <C-j> <C-w>j<C-w>_
 map <C-k> <C-w>k<C-w>_
 map <C-h> <C-w>h<C-w>_
 map <C-l> <C-w>l<C-w>_
+" TODO: think about using <UP>, <DOWN>, <LEFT>, <RIGHT>
 " --- --- }}}
 " --- --- Leader binds {{{
 " Easily edit $MYVIMRC
@@ -322,7 +323,23 @@ nnoremap <leader>r<Space> :%s/\s\+$//e<CR>
 nnoremap <leader>cd :cd %:p:h<CR>
 " --- --- }}}
 " --- --- Function keybinds {{{
-nnoremap <leader>wc :echo 'words: '.Count('words')<CR>
+" --- --- --- Count() {{{
+nnoremap <leader>wc :let g:airline_section_y =
+                   \'%{Count("words")}w (%2p%%)'<CR>
+                   \:AirlineRefresh<CR>
+nnoremap <leader>bc :let g:airline_section_y =
+                   \'%{Count("bytes")}b (%2p%%)'<CR>
+                   \:AirlineRefresh<CR>
+nnoremap <leader>WC :let g:airline_section_y =
+                   \'%{Count("thisw")}/%{Count("words")}w (%2p%%)'<CR>
+                   \:AirlineRefresh<CR>
+nnoremap <leader>BC :let g:airline_section_y =
+                   \'%{Count("thisb")}/%{Count("bytes")}b (%2p%%)'<CR>
+                   \:AirlineRefresh<CR>
+nnoremap <leader>% :let g:airline_section_y =
+                   \'%2p%%'<CR>
+                   \:AirlineRefresh<CR>
+" --- --- --- }}}
 nnoremap <F6> :call ToggleBackground()<CR>
 nnoremap gt :call NextTabOrBuffer(1)<CR>
 nnoremap gT :call NextTabOrBuffer(-1)<CR>
