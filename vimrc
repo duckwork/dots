@@ -208,29 +208,29 @@ set viminfo+=h                 " Disable 'hlsearch' on saved files
 " Part IV: Customization {{{
 " --- Appearance {{{
 
-set background=dark    " Dark background (duh)
-if has("gui_running") || &t_Co>=88
-    colorscheme base16-default     " fun bright colors
-    set colorcolumn=72     " highlight column 80
-    set cursorline         " highlight the line the cursor's on
-else                       " 8-color terms can't handle colors
+set background=dark            " Dark background (duh)
+if has('gui_running') || &t_Co>=88
+    colorscheme base16-default " fun bright colors
+    set colorcolumn=72         " highlight column 80
+    set cursorline             " highlight the line the cursor's on
+else                           " 8-color terms can't handle colors
     colorscheme desert
-    set colorcolumn=
+    set colorcolumn=0
     set nocursorline
 endif
 
-set laststatus=2       " use status line, always.
+set laststatus=2               " use status line, always.
 
 " Statusline
 set statusline=\>\ b%n              " buffernumber
-set statusline+=\>\ %f               " basename of file
-set statusline+=%m               " modified flag [+] or [-] if ro
-set statusline+=%h               " help buffer flag [help]
-set statusline+=%=               " begin right-align
-set statusline+=\<%y\              " file type
-set statusline+=\<%3p%%)           " scroll percentage
-set statusline+=_%02l            " current line / total lines
-set statusline+=\|%02c           " current column
+set statusline+=\>\ %f              " basename of file
+set statusline+=%m                  " modified flag [+] or [-] if ro
+set statusline+=%h                  " help buffer flag [help]
+set statusline+=%=                  " begin right-align
+set statusline+=\<%y\               " file type
+set statusline+=\<%3p%%)            " scroll percentage
+set statusline+=_%02l               " current line / total lines
+set statusline+=\|%02c              " current column
 set statusline+={%{Count('words')}w " word count function
 
 set wildmenu           " tab completion with a menu
