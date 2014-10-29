@@ -241,8 +241,10 @@ set linebreak          " wrap at words. (:help breakat)
 hi SpellBad gui=undercurl
 " --- }}}
 " --- Acting {{{
-set writebackup       " save a backup before writing
-set nobackup          " but don't keep the backup file
+set directory=$HOME/.vim/swap//    " directory for swap files
+set backupdir=$HOME/.vim/backup//  " directory for backups
+set backupcopy=yes  " copy the original and overwrite
+set backup          " Keep backup files, just in case
 
 set noerrorbells      " don't beep on errors
 set visualbell        " flash instead of beeping
@@ -267,7 +269,7 @@ set magic             " use better regexp
 
 if has('mouse')
     set mouse=a       " Enable the mouse if present
-end
+endif
 " --- }}}
 " --- Keybinds {{{
 " --- --- Keybinds for usability {{{
@@ -276,8 +278,8 @@ let mapleader = ","
 " <Shift> AND ; is SO MUCH WORK
 noremap ; :
 " j and k should work on visual lines, not code lines
-nnoremap j gj
-nnoremap k gk
+nnoremap <expr> j v:count ? 'j' : 'gj'
+nnoremap <expr> k v:count ? 'k' : 'gk'
 " Y should do similar things as C or D
 nnoremap Y y$
 " ESC is so far away...
@@ -342,6 +344,7 @@ augroup END
 " Check spelling in text-like filetypes
 augroup Spelling
     autocmd!
+    autocmd BufNewFile,BufRead *.md set ft=markdown spell
     autocmd FileType vimwiki,markdown,text setlocal spell
     autocmd FileType help setlocal nospell
 augroup END
