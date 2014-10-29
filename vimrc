@@ -12,7 +12,7 @@ if exists(":Plugin")
     Plugin 'Lokaltog/vim-easymotion'   " No more counting objects
     Plugin 'chrisbra/NrrwRgn'          " Open region in new win to edit
     if has('python')
-        Plugin 'vim-scripts/gundo'         " Visualize Vim's undo tree
+        Plugin 'vim-scripts/gundo'     " Visualize Vim's undo tree
     endif
     " --- --- VIM eyecandy
     Plugin 'bling/vim-airline'         " a better statusline
@@ -45,10 +45,10 @@ if exists(":Plugin")
     Plugin 'scrooloose/nerdcommenter'  " toggle comments easily
     Plugin 'tpope/vim-surround'        " format surroundings easily
     Plugin 'godlygeek/tabular'         " easy formatting of text tables
-    Plugin 'ervandew/supertab'         " tab completion in (I)
-    Plugin 'AndrewRadev/splitjoin.vim' " Split and join code easily
+    "Plugin 'ervandew/supertab'         " tab completion in (I)
+    "Plugin 'AndrewRadev/splitjoin.vim' " Split and join code easily
     Plugin 'tpope/vim-abolish'         " Enhanced search and replace
-    Plugin 'q335r49/microviche'        " infinite pannable vim
+    "Plugin 'q335r49/microviche'        " infinite pannable vim
     " --- --- Filetypes
     " --- --- --- Plain text
     Plugin 'reedes/vim-textobj-sentence' " Improved sentence textobj
@@ -87,7 +87,7 @@ let g:ctrlp_max_depth           = 100 " max depth of search
 let g:ctrlp_max_files           = 0   " no limit to how many files
 let g:ctrlp_use_caching         = 1   " enable caching
 let g:ctrlp_clear_cache_on_exit = 0   " enable cross-session caching
-let g:ctrlp_cache_dir           = $HOME.'/.cache/ctrlp'
+let g:ctrlp_cache_dir           = $HOME . '/.cache/ctrlp'
 let g:ctrlp_lazy_update         = 1   " Update only after done typing
 " Ctrl-P window on top and a normal order for results
 let g:ctrlp_match_window        = 'top,order:ttb'
@@ -99,7 +99,7 @@ endif
 " --- Airline options {{{
 let g:airline_section_b  = 'b%n'              " buffer n
 
-let g:airline_section_y  = '%2p%%'           " pp%)
+let g:airline_section_y  = '%2p%%'            " pp%
 
 let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
@@ -109,14 +109,13 @@ let g:airline_powerline_fonts                           = 1
 let g:airline#extensions#tabline#enabled                = 1
 let g:airline#extensions#tabline#fnamemod               = ':t'
 
-let g:airline#extensions#whitespace#trailing_format     = 't[%s]'
+let g:airline#extensions#whitespace#trailing_format     = 'tw[%s]'
 let g:airline#extensions#whitespace#mixed_indent_format = 'mi[%s]'
 " --- }}}
 " }}}
 " Part II: Custom functions {{{
 " TODO: a function that switches between basename and full path in stl
-function! WordCount() " {{{
-    " TODO: Generalize to count words, characters, etc.
+function! Count(thing) " {{{
     "character counting:
     let s:old_status = v:statusmsg
     let position = getpos(".")
@@ -125,10 +124,21 @@ function! WordCount() " {{{
     let s:word_count = 0
     if stat != '--No lines in buffer--'
         let s:word_count = str2nr(split(v:statusmsg)[11])
+        let s:word_curnt = str2nr(split(v:statusmsg)[9])
+        let s:byte_count = str2nr(split(v:statusmsg)[15])
+        let s:byte_curnt = str2nr(split(v:statusmsg)[13])
         let v:statusmsg = s:old_status
     endif
     call setpos('.', position)
-    return s:word_count
+    if a:thing == 'words'
+        return s:word_count
+    elseif a:thing == 'bytes'
+        return s:byte_count
+    elseif a:thing == 'thisw'
+        return s:word_curnt
+    elseif a:thing == 'thisb'
+        return s:byte_curnt
+    endif
 endfunction "}}}
 function! ToggleBackground() " {{{
     if &background=="dark"
@@ -221,7 +231,7 @@ set statusline+=\<%y\              " file type
 set statusline+=\<%3p%%)           " scroll percentage
 set statusline+=_%02l            " current line / total lines
 set statusline+=\|%02c           " current column
-set statusline+={%{WordCount()}w " word count function
+set statusline+={%{Count('words')}w " word count function
 
 set wildmenu           " tab completion with a menu
 set ruler              " show ruler
@@ -312,7 +322,7 @@ nnoremap <leader>r<Space> :%s/\s\+$//e<CR>
 nnoremap <leader>cd :cd %:p:h<CR>
 " --- --- }}}
 " --- --- Function keybinds {{{
-nnoremap <leader>wc :echo 'words: '.WordCount()<CR>
+nnoremap <leader>wc :echo 'words: '.Count('words')<CR>
 nnoremap <F6> :call ToggleBackground()<CR>
 nnoremap gt :call NextTabOrBuffer(1)<CR>
 nnoremap gT :call NextTabOrBuffer(-1)<CR>
@@ -342,7 +352,7 @@ augroup TextEditing " For texty filetypes
     autocmd!
     autocmd BufNewFile,BufRead *.md set ft=markdown spell
     autocmd FileType vimwiki,markdown,text setlocal spell |
-                \ let g:airline_section_y  = '%{WordCount()}w (%2p%%)'
+                \ let g:airline_section_y  = '%{Count("words")}w (%2p%%)'
     " TODO: switch back when not a texty filetype
     autocmd FileType help setlocal nospell
 augroup END
