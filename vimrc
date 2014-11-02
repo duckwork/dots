@@ -1,75 +1,63 @@
-" _______________ VIMRC -- CASE DUCKWORTH _________________
+" ______________________ VIMRC -- CASE DUCKWORTH _________________________
 " vim:foldlevel=0:textwidth=0:nowrap:nolinebreak
 set nocompatible
 " Part 0: Vundle {{{
 filetype off
 set runtimepath+=$HOME/.vim/bundle/Vundle.vim
 call vundle#begin()
-if exists(":Plugin")
-    Plugin 'gmarik/Vundle.vim'         " let Vundle manage Vundle, req'd
-    " Plugins
-    " --- Using ViM {{{
-    Plugin 'Lokaltog/vim-easymotion'   " No more counting objects
-    Plugin 'chrisbra/NrrwRgn'          " Open region in new win to edit
-    if has('python')
-        Plugin 'vim-scripts/gundo'     " Visualize Vim's undo tree
-    endif
-    " --- --- VIM eyecandy
-    Plugin 'bling/vim-airline'         " a better statusline
-    Plugin 'junegunn/goyo.vim'         " distraction-free writing
-    Plugin 'junegunn/limelight.vim'    " highlight only active paragraph
-    " --- --- Colorschemes
-    Plugin 'reedes/vim-colors-pencil'  " pencil colorscheme
-    "Plugin 'chriskempson/base16-vim'   " base 16 colors
-    Plugin 'nice/sweater'              " light scheme
-    " --- --- Vim Wiki
-    Plugin 'vimwiki/vimwiki'
-    " --- --- Git integration
-    if executable('git')
-        Plugin 'airblade/vim-gitgutter' " Git stuff in signs column
-        Plugin 'tpope/vim-fugitive'     " Git integration
-    endif
-    " --- --- Shell integration/misc.
-    Plugin 'xolox/vim-misc'
-    Plugin 'xolox/vim-shell'
-    " --- }}}
-    " --- Editing Files {{{
-    " --- --- Navigating and saving
-    Plugin 'kien/ctrlp.vim'            " a fuzzy finder
-    if executable('ag')
-        Plugin 'rking/ag.vim'              " Ag implementation
-        " use The Silver Searcher if it exists
-        " here for fewer checks for ag
-        let g:ctrlp_user_command    = 'ag %s -l --nocolor -g "" '
-    endif
-    "Plugin 'mhinz/vim-startify'        " start page with recent files
-    Plugin 'dockyard/vim-easydir'      " Create new dirs on-the-fly
-    " --- --- Working within files
-    "Plugin 'scrooloose/nerdcommenter'  " toggle comments easily
-    Plugin 'tpope/vim-commentary'      " commenting
-    Plugin 'tpope/vim-surround'        " format surroundings easily
-    Plugin 'godlygeek/tabular'         " easy formatting of text tables
-    "Plugin 'ervandew/supertab'         " tab completion in (I)
-    "Plugin 'AndrewRadev/splitjoin.vim' " Split and join code easily
-    Plugin 'tpope/vim-abolish'         " Enhanced search and replace
-    "Plugin 'q335r49/microviche'        " infinite pannable vim
-    Plugin 'tpope/vim-repeat'          " repeat plugin commands with .
-    Plugin 'tpope/vim-speeddating'     " C-a C-x on dates and times
-    " --- --- Filetypes
-    " --- --- --- Plain text
-    Plugin 'reedes/vim-textobj-sentence' " Improved sentence textobj
-    " --- --- --- HTML
-    Plugin 'mattn/emmet-vim'           " Zencoding for HTML
-    Plugin 'gregsexton/MatchTag'       " Match HTML tags with %
-    " --- --- --- CSS
-    "Plugin 'hail2u/vim-css3-syntax'    " syntax file for CSS3
-    " --- --- --- Pandoc
-    Plugin 'vim-pandoc/vim-pandoc'
-    Plugin 'vim-pandoc/vim-pandoc-syntax'
-    " --- --- --- Polyglot: over fifty languages' syntax files
-    Plugin 'sheerun/vim-polyglot'
-    " --- }}}
+
+Plugin 'gmarik/Vundle.vim'            " let Vundle manage Vundle
+
+Plugin 'bling/vim-airline'            " a better statusline
+Plugin 'junegunn/goyo.vim'            " distraction-free writing
+Plugin 'junegunn/limelight.vim'       " highlight only active para
+Plugin 'reedes/vim-colors-pencil'     " pencil colorscheme
+Plugin 'nice/sweater'                 " light scheme
+
+Plugin 'tpope/vim-repeat'             " repeat plugin commands with
+Plugin 'tpope/vim-surround'           " format surroundings easily
+Plugin 'tpope/vim-abolish'            " Enhanced search and replace
+Plugin 'tpope/vim-speeddating'        " C-a C-x on dates and times
+Plugin 'tpope/vim-commentary'         " commenting
+
+Plugin 'Lokaltog/vim-easymotion'      " No more counting objects
+Plugin 'reedes/vim-textobj-sentence'  " Improved sentence textobj
+
+Plugin 'dockyard/vim-easydir'         " Create new dirs on-the-fly
+Plugin 'chrisbra/NrrwRgn'             " Open region in new win to ed
+Plugin 'kien/ctrlp.vim'               " a fuzzy finder
+Plugin 'godlygeek/tabular'            " easy formatting of text tabs
+
+Plugin 'mattn/emmet-vim'              " Zencoding for HTML
+Plugin 'gregsexton/MatchTag'          " Match HTML tags with %
+Plugin 'vim-pandoc/vim-pandoc'        " Pandoc helpers
+Plugin 'vimwiki/vimwiki'              " Personal wiki with ViM
+
+Plugin 'sheerun/vim-polyglot'         " Many syntax defs
+Plugin 'hail2u/vim-css3-syntax'       " syntax file for CSS3
+Plugin 'vim-pandoc/vim-pandoc-syntax' " Pandoc syntax
+
+Plugin 'xolox/vim-misc'
+Plugin 'xolox/vim-shell'
+
+if executable('git')
+    Plugin 'airblade/vim-gitgutter' " Git stuff in signs column
+    Plugin 'tpope/vim-fugitive'     " Git integration
 endif
+if executable('ag')
+    Plugin 'rking/ag.vim'              " Ag implementation
+    let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
+endif
+if has('python')
+    Plugin 'vim-scripts/gundo'     " Visualize Vim's undo tree
+endif
+
+"Plugin 'chriskempson/base16-vim'   " base 16 colors
+"Plugin 'q335r49/microviche'        " infinite pannable vim
+"Plugin 'scrooloose/nerdcommenter'  " toggle comments easily
+"Plugin 'AndrewRadev/splitjoin.vim' " Split and join code easily
+"Plugin 'ervandew/supertab'         " tab completion in (I)
+
 call vundle#end()                      "req'd
 filetype plugin indent on              "req'd
 "}}}
@@ -78,10 +66,10 @@ filetype plugin indent on              "req'd
 let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
 let g:shell_fullsreen_message = 0 " I know what I'm doing
 
-if &textwidth " Use textwidth if defined; else use 72
+if &textwidth " Use textwidth if defined; else use 78
     let g:goyo_width = &textwidth
 else
-    let g:goyo_width = 72
+    let g:goyo_width = 78
 endif
 let g:goyo_margin_top = 2
 let g:goyo_margin_bottom = 2
@@ -89,6 +77,8 @@ let g:goyo_margin_bottom = 2
 let g:gundo_preview_bottom = 1 " Preview takes up full width
 
 let g:EasyMotion_do_mapping = 0 " Disable Easymotion default mappings
+let g:EasyMotion_prompt = '{n}/>> '
+let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
 " --- Ctrl-P options {{{
 let g:ctrlp_max_depth           = 100 " max depth of search
 let g:ctrlp_max_files           = 0   " no limit to how many files
@@ -96,28 +86,48 @@ let g:ctrlp_use_caching         = 1   " enable caching
 let g:ctrlp_clear_cache_on_exit = 0   " enable cross-session caching
 let g:ctrlp_cache_dir           = $HOME . '/.cache/ctrlp'
 let g:ctrlp_lazy_update         = 1   " Update only after done typing
-" Ctrl-P window on top and a normal order for results
 let g:ctrlp_match_window        = 'top,order:ttb'
 " --- }}}
 " --- Airline options {{{
-let g:airline_section_b  = 'b%n'              " buffer n
-
 let g:airline_section_y  = '%2p%%'            " pp%
 
 let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
 
-let g:airline_powerline_fonts                           = 1
+let g:airline#extensions#default#section_truncate_width = {
+    \ 'b': 79,
+    \ 'x': 60,
+    \ 'y': 68,
+    \ 'z': 45,
+    \ }
 
-let g:airline#extensions#tabline#enabled                = 1
-let g:airline#extensions#tabline#fnamemod               = ':t'
+let g:airline_powerline_fonts = 0
+let g:airline_left_sep        = ''
+let g:airline_right_sep       = ''
+
+let g:airline_mode_map = {
+    \ '__' : '--',
+    \ 'n'  : 'Nr',
+    \ 'i'  : 'In',
+    \ 'R'  : 'Re',
+    \ 'c'  : 'Cm',
+    \ 'v'  : 'Vi',
+    \ 'V'  : 'V_',
+    \ '' : 'V[',
+    \ 's'  : 'Se',
+    \ 'S'  : 'S_',
+    \ '' : 'S[',
+    \ }
+
+let g:airline#extensions#tabline#enabled         = 1
+let g:airline#extensions#tabline#fnamemod        = ':t'
+let g:airline#extensions#tabline#buffer_idx_mode = 1
 
 let g:airline#extensions#whitespace#trailing_format     = 'tw[%s]'
 let g:airline#extensions#whitespace#mixed_indent_format = 'mi[%s]'
 " --- }}}
 " }}}
 " Part II: Custom functions {{{
-" TODO: a function that switches between basename and full path in stl
 function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     "character counting:
     let s:old_status = v:statusmsg
@@ -153,12 +163,13 @@ function! ToggleBackground() " {{{
         if &textwidth
             let &colorcolumn = &textwidth
         else
-            set colorcolumn=72
+            set colorcolumn=78
         endif
         set cursorline
     endif
 endfunction " }}}
 function! NextTabOrBuffer(dir) " {{{
+    " TODO: add count
     " if there's only one tab, switch bufs; else switch tabs
     if tabpagenr('$') == 1 "there's only one 'tab' so switch bufs
         if a:dir < 0 " negative numbers go previous
@@ -184,23 +195,22 @@ endfunction " }}}
 " }}}
 " Part III: Better ViM defaults {{{
 " because vanilla vim, though great, is still lacking.
-" --- Display
+
 syntax on                      " syntax highlighting is great
 set number                     " and line numbers, too
 set autoread                   " reload on a change, automagically
 set lazyredraw                 " don't redraw macros til done
 set hidden                     " Don't close unused buffers
-" --- Using Vim
+
 set formatoptions-=ro          " disable autocomments in (I)
 set history=1000               " set history of commands to 1000 long.
-runtime macros/matchit.vim     " enable matchit plugin (better %)
 set backspace=indent,eol,start " backspace across these things
-" --- File encoding and format
+
 set encoding=utf-8             " encoding = utf-8.
 set fileencoding=utf-8         " because year = 2014.
 set fileformat=unix            " Unix file ending default
 set fileformats=unix,dos       " but recognize DOS line endings
-" --- Viminfo file
+
 set viminfo='100               " Save marks for 100 files max
 set viminfo^=!                 " Save global all-caps variables
 set viminfo+=<50               " Save 50 lines of registers
@@ -212,7 +222,7 @@ set viminfo+=h                 " Disable 'hlsearch' on saved files
 set background=dark            " Dark background (duh)
 if has('gui_running') || &t_Co>=88
     colorscheme pencil
-    set colorcolumn=72         " highlight column 80
+    set colorcolumn=78         " highlight column 78
     set cursorline             " highlight the line the cursor's on
 else                           " 8-color terms can't handle colors
     colorscheme desert
@@ -279,7 +289,7 @@ set magic             " use better regexp
 " --- Keybinds {{{
 " --- --- Keybinds for usability {{{
 " \ is a dumb mapleader.
-let mapleader = "\<space>"
+let mapleader = ","
 " <Shift> AND ; is SO MUCH WORK
 noremap ; :
 " j and k should work on visual lines, not code lines
@@ -300,6 +310,8 @@ vnoremap <leader>> >gv
 vnoremap <leader>< <gv
 " \ does netrw window
 nnoremap \ :Explore<CR>
+" Map dD to remove line but leave blank
+nnoremap dD ddO<Esc>
 " --- --- }}}
 " --- --- Keybinds for window management {{{
 " --- --- --- Switching windows
@@ -328,10 +340,8 @@ nnoremap <leader>/ :nohlsearch<return><Esc>
 
 " Remove whitespace from the ends of lines
 nnoremap <leader>rs :%s/\s\+$//e<CR>
-" UnLaTeXify a document TODO: fix
-nnoremap <leader>rl :%s/\m\s\?\\\S\+//g<CR>
 " Remove blank lines
-nnoremap <leader>rb :g/^$/d<CR>
+noremap <leader>rb :g/^$/d<CR>
 " --- --- }}}
 " --- --- Function keybinds {{{
 " --- --- --- Count() {{{
@@ -367,6 +377,7 @@ nmap f <Plug>(easymotion-bd-f)
 nmap t <Plug>(easymotion-bd-t)
 omap f <Plug>(easymotion-bd-f)
 omap t <Plug>(easymotion-bd-t)
+nmap <Leader>, <Plug>(easymotion-repeat)
 " --- --- }}}
 " --- }}}
 " }}}
@@ -399,7 +410,6 @@ augroup END
 if has('mouse')
     set mouse=a       " Enable the mouse if present
 endif
-
 if has('gui_running') " --- GVIM {{{
     " --- Common GUI options
     set guioptions-=m  " remove menu bar
@@ -407,8 +417,8 @@ if has('gui_running') " --- GVIM {{{
     set guioptions-=r  " remove right-hand scroll
     set guioptions-=L  " remove left-hand scroll
     set guioptions-=e  " remove GUI tabline; use consoley one instead
-    set columns    =100
-    set lines      =30
+    set columns    =78
+    set lines      =36
     " --- Set fonts for different systems
     if has("gui_gtk2")
         set guifont=Inconsolata\ for\ Powerline,Inconsolata
