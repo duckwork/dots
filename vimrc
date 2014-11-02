@@ -20,14 +20,14 @@ if exists(":Plugin")
     Plugin 'junegunn/limelight.vim'    " highlight only active paragraph
     " --- --- Colorschemes
     Plugin 'reedes/vim-colors-pencil'  " pencil colorscheme
-    Plugin 'chriskempson/base16-vim'   " base 16 colors
+    "Plugin 'chriskempson/base16-vim'   " base 16 colors
     Plugin 'nice/sweater'              " light scheme
     " --- --- Vim Wiki
     Plugin 'vimwiki/vimwiki'
     " --- --- Git integration
     if executable('git')
-        Plugin 'airblade/vim-gitgutter'        " Git stuff in signs column
-        Plugin 'tpope/vim-fugitive'            " Git integration
+        Plugin 'airblade/vim-gitgutter' " Git stuff in signs column
+        Plugin 'tpope/vim-fugitive'     " Git integration
     endif
     " --- --- Shell integration/misc.
     Plugin 'xolox/vim-misc'
@@ -38,17 +38,23 @@ if exists(":Plugin")
     Plugin 'kien/ctrlp.vim'            " a fuzzy finder
     if executable('ag')
         Plugin 'rking/ag.vim'              " Ag implementation
+        " use The Silver Searcher if it exists
+        " here for fewer checks for ag
+        let g:ctrlp_user_command    = 'ag %s -l --nocolor -g "" '
     endif
     "Plugin 'mhinz/vim-startify'        " start page with recent files
     Plugin 'dockyard/vim-easydir'      " Create new dirs on-the-fly
     " --- --- Working within files
-    Plugin 'scrooloose/nerdcommenter'  " toggle comments easily
+    "Plugin 'scrooloose/nerdcommenter'  " toggle comments easily
+    Plugin 'tpope/vim-commentary'      " commenting
     Plugin 'tpope/vim-surround'        " format surroundings easily
     Plugin 'godlygeek/tabular'         " easy formatting of text tables
     "Plugin 'ervandew/supertab'         " tab completion in (I)
     "Plugin 'AndrewRadev/splitjoin.vim' " Split and join code easily
     Plugin 'tpope/vim-abolish'         " Enhanced search and replace
     "Plugin 'q335r49/microviche'        " infinite pannable vim
+    Plugin 'tpope/vim-repeat'          " repeat plugin commands with .
+    Plugin 'tpope/vim-speeddating'     " C-a C-x on dates and times
     " --- --- Filetypes
     " --- --- --- Plain text
     Plugin 'reedes/vim-textobj-sentence' " Improved sentence textobj
@@ -72,16 +78,17 @@ filetype plugin indent on              "req'd
 let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
 let g:shell_fullsreen_message = 0 " I know what I'm doing
 
-if &textwidth
+if &textwidth " Use textwidth if defined; else use 72
     let g:goyo_width = &textwidth
 else
-    let g:goyo_width = 72           " Goyo width of 72 characters
+    let g:goyo_width = 72
 endif
 let g:goyo_margin_top = 2
 let g:goyo_margin_bottom = 2
 
 let g:gundo_preview_bottom = 1 " Preview takes up full width
 
+let g:EasyMotion_do_mapping = 0 " Disable Easymotion default mappings
 " --- Ctrl-P options {{{
 let g:ctrlp_max_depth           = 100 " max depth of search
 let g:ctrlp_max_files           = 0   " no limit to how many files
@@ -91,10 +98,6 @@ let g:ctrlp_cache_dir           = $HOME . '/.cache/ctrlp'
 let g:ctrlp_lazy_update         = 1   " Update only after done typing
 " Ctrl-P window on top and a normal order for results
 let g:ctrlp_match_window        = 'top,order:ttb'
-if executable('ag')
-    " use The Silver Searcher if it exists
-    let g:ctrlp_user_command    = 'ag %s -l --nocolor -g "" '
-endif
 " --- }}}
 " --- Airline options {{{
 let g:airline_section_b  = 'b%n'              " buffer n
@@ -123,10 +126,10 @@ function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     let stat = v:statusmsg
     let s:word_count = 0
     if stat != '--No lines in buffer--'
-        let s:word_count = str2nr(split(v:statusmsg)[11])
-        let s:word_curnt = str2nr(split(v:statusmsg)[9])
-        let s:byte_count = str2nr(split(v:statusmsg)[15])
-        let s:byte_curnt = str2nr(split(v:statusmsg)[13])
+        let s:word_count = str2nr(split(stat)[11])
+        let s:word_curnt = str2nr(split(stat)[9])
+        let s:byte_count = str2nr(split(stat)[15])
+        let s:byte_curnt = str2nr(split(stat)[13])
         let v:statusmsg = s:old_status
     endif
     call setpos('.', position)
@@ -181,7 +184,6 @@ endfunction " }}}
 " }}}
 " Part III: Better ViM defaults {{{
 " because vanilla vim, though great, is still lacking.
-" and because we don't need sensible.vim! YEAH
 " --- Display
 syntax on                      " syntax highlighting is great
 set number                     " and line numbers, too
@@ -207,10 +209,9 @@ set viminfo+=h                 " Disable 'hlsearch' on saved files
 "}}}
 " Part IV: Customization {{{
 " --- Appearance {{{
-
 set background=dark            " Dark background (duh)
 if has('gui_running') || &t_Co>=88
-    colorscheme base16-default " fun bright colors
+    colorscheme pencil
     set colorcolumn=72         " highlight column 80
     set cursorline             " highlight the line the cursor's on
 else                           " 8-color terms can't handle colors
@@ -231,7 +232,7 @@ set statusline+=\<%y\               " file type
 set statusline+=\<%3p%%)            " scroll percentage
 set statusline+=_%02l               " current line / total lines
 set statusline+=\|%02c              " current column
-set statusline+={%{Count('words')}w " word count function
+"set statusline+={%{Count('words')}w " word count function
 
 set wildmenu           " tab completion with a menu
 set ruler              " show ruler
@@ -274,15 +275,11 @@ set foldmethod=marker " {{{ }}} mark folds
 set foldlevel=2       " Start open to second level
 
 set magic             " use better regexp
-
-if has('mouse')
-    set mouse=a       " Enable the mouse if present
-endif
 " --- }}}
 " --- Keybinds {{{
 " --- --- Keybinds for usability {{{
 " \ is a dumb mapleader.
-let mapleader = ","
+let mapleader = "\<space>"
 " <Shift> AND ; is SO MUCH WORK
 noremap ; :
 " j and k should work on visual lines, not code lines
@@ -299,44 +296,59 @@ nnoremap <F1> K
 " Map Q (usu. for Ex mode LAME) to closing the buffer (or window)
 nnoremap Q :call CloseBufferOrWindow()<CR>
 " allow Tab and Shift+Tab to change selection indent in visual mode
-vnoremap > >gv
-vnoremap < <gv
+vnoremap <leader>> >gv
+vnoremap <leader>< <gv
 " \ does netrw window
 nnoremap \ :Explore<CR>
 " --- --- }}}
 " --- --- Keybinds for window management {{{
 " --- --- --- Switching windows
-map <C-j> <C-w>j<C-w>_
-map <C-k> <C-w>k<C-w>_
-map <C-h> <C-w>h<C-w>_
-map <C-l> <C-w>l<C-w>_
-" TODO: think about using <UP>, <DOWN>, <LEFT>, <RIGHT>
+nnoremap <C-k> <C-w>k
+nnoremap <C-j> <C-w>j
+nnoremap <C-h> <C-w>h
+nnoremap <C-l> <C-w>l
+nnoremap <S-UP>    <C-w>K
+nnoremap <S-DOWN>  <C-w>J
+nnoremap <S-LEFT>  <C-w>H
+nnoremap <S-RIGHT> <C-w>L
+"nnoremap <C-UP>    <C-w>k
+"nnoremap <C-DOWN>  <C-w>j
+"nnoremap <C-LEFT>  <C-w>h
+"nnoremap <C-RIGHT> <C-w>l
 " --- --- }}}
 " --- --- Leader binds {{{
 " Easily edit $MYVIMRC
 nnoremap <leader>ev :edit $MYVIMRC<CR>
-" use <Space> to remove search highlight
-nnoremap <leader><Space> :nohlsearch<return><Esc>
-" Remove whitespace from the ends of lines
-nnoremap <leader>r<Space> :%s/\s\+$//e<CR>
+nnoremap <leader>sv :source $MYVIMRC<CR>
 " Change working directory to that of current buffer
 nnoremap <leader>cd :cd %:p:h<CR>
+
+" remove search highlight
+nnoremap <leader>/ :nohlsearch<return><Esc>
+
+" Remove whitespace from the ends of lines
+nnoremap <leader>rs :%s/\s\+$//e<CR>
+" UnLaTeXify a document TODO: fix
+nnoremap <leader>rl :%s/\m\s\?\\\S\+//g<CR>
+" Remove blank lines
+nnoremap <leader>rb :g/^$/d<CR>
 " --- --- }}}
 " --- --- Function keybinds {{{
 " --- --- --- Count() {{{
-nnoremap <leader>wc :let g:airline_section_y =
+nnoremap <leader>wc :echo 'words: ' . Count("words")<CR>
+nnoremap <leader>swc :let g:airline_section_y =
                    \'%{Count("words")}w (%2p%%)'<CR>
                    \:AirlineRefresh<CR>
-nnoremap <leader>bc :let g:airline_section_y =
+nnoremap <leader>sbc :let g:airline_section_y =
                    \'%{Count("bytes")}b (%2p%%)'<CR>
                    \:AirlineRefresh<CR>
-nnoremap <leader>WC :let g:airline_section_y =
+nnoremap <leader>stw :let g:airline_section_y =
                    \'%{Count("thisw")}/%{Count("words")}w (%2p%%)'<CR>
                    \:AirlineRefresh<CR>
-nnoremap <leader>BC :let g:airline_section_y =
+nnoremap <leader>stb :let g:airline_section_y =
                    \'%{Count("thisb")}/%{Count("bytes")}b (%2p%%)'<CR>
                    \:AirlineRefresh<CR>
-nnoremap <leader>% :let g:airline_section_y =
+nnoremap <leader>s% :let g:airline_section_y =
                    \'%2p%%'<CR>
                    \:AirlineRefresh<CR>
 " --- --- --- }}}
@@ -345,10 +357,16 @@ nnoremap gt :call NextTabOrBuffer(1)<CR>
 nnoremap gT :call NextTabOrBuffer(-1)<CR>
 " --- --- }}}
 " --- --- Plugin keybinds {{{
-nnoremap <F11> :Goyo<CR>
-nnoremap <F5> :GundoToggle<CR>
-vnoremap <Tab> :Tabularize /
+nnoremap <F11>   :Goyo<CR>
+nnoremap <S-F11> :Fullscreen<CR>
+nnoremap <F5>    :GundoToggle<CR>
+vnoremap \|      :Tabularize /
 let g:user_emmet_leader_key = '<c-e>'
+
+nmap f <Plug>(easymotion-bd-f)
+nmap t <Plug>(easymotion-bd-t)
+omap f <Plug>(easymotion-bd-f)
+omap t <Plug>(easymotion-bd-t)
 " --- --- }}}
 " --- }}}
 " }}}
@@ -357,19 +375,13 @@ let g:user_emmet_leader_key = '<c-e>'
 autocmd BufEnter * silent! lcd %:p:h
 augroup GoyoEvents " Goyo fullscreens
     autocmd!
-    if has('gui_running')
-        autocmd User GoyoEnter Fullscreen | Limelight | sleep 50m | Goyo g:goyo_width
-        autocmd User GoyoLeave Fullscreen | Limelight!
-    else
-        autocmd User GoyoEnter Limelight
-        autocmd User GoyoLeave Limelight!
-    endif
+    autocmd User GoyoEnter Limelight
+    autocmd User GoyoLeave Limelight!
 augroup END
 augroup TextEditing " For texty filetypes
     autocmd!
     autocmd BufNewFile,BufRead *.md set ft=markdown spell
-    autocmd FileType vimwiki,markdown,text setlocal spell |
-                \ let g:airline_section_y  = '%{Count("words")}w (%2p%%)'
+    autocmd FileType vimwiki,markdown,text setlocal spell
     " TODO: switch back when not a texty filetype
     autocmd FileType help setlocal nospell
 augroup END
@@ -384,6 +396,10 @@ augroup AirlineShowmode " Toggle showmode for enter/exit airline
 augroup END
 " }}}
 " Part VI: Can I has() options? {{{
+if has('mouse')
+    set mouse=a       " Enable the mouse if present
+endif
+
 if has('gui_running') " --- GVIM {{{
     " --- Common GUI options
     set guioptions-=m  " remove menu bar
