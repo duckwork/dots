@@ -421,15 +421,13 @@ if has('gui_running') " --- GVIM {{{
     set lines      =36
     " --- Set fonts for different systems
     if has("gui_gtk2")
-        set guifont=Inconsolata\ for\ Powerline,Inconsolata
+        set guifont=Inconsolata
         let g:airline_powerline_fonts = 1
     elseif has("x11") " also works with GTK 1
         "set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has("gui_win32")
-        "set guifont=Inconsolata_for_Powerline:h15
         set guifont=Consolas:h11:cANSI
         " Consolas don't have powerline arrows
-        let g:airline_powerline_fonts = 0
     endif
 endif
 " --- }}}
