@@ -145,22 +145,16 @@ function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     let stat = v:statusmsg
     let s:word_count = 0
     if stat != '--No lines in buffer--'
-        let s:word_count = str2nr(split(stat)[11])
-        let s:word_curnt = str2nr(split(stat)[9])
-        let s:byte_count = str2nr(split(stat)[15])
-        let s:byte_curnt = str2nr(split(stat)[13])
+        let s:things = {
+                    \ "words": str2nr(split(stat)[11]),
+                    \ "thisw": str2nr(split(stat)[9]),
+                    \ "bytes": str2nr(split(stat)[15]),
+                    \ "thisb": str2nr(split(stat)[13]),
+                    \ }
         let v:statusmsg = s:old_status
     endif
     call setpos('.', position)
-    if a:thing == 'words'
-        return s:word_count
-    elseif a:thing == 'bytes'
-        return s:byte_count
-    elseif a:thing == 'thisw'
-        return s:word_curnt
-    elseif a:thing == 'thisb'
-        return s:byte_curnt
-    endif
+    return s:things[a:thing]
 endfunction "}}}
 function! ToggleBackground() " {{{
     if &background=="dark"
@@ -363,21 +357,6 @@ noremap <leader>rb :g/^$/d<CR>
 " --- --- Function keybinds {{{
 " --- --- --- Count() {{{
 nnoremap <leader>wc :echo 'words: ' . Count("words")<CR>
-nnoremap <leader>swc :let g:airline_section_y =
-                   \'%{Count("words")}w (%2p%%)'<CR>
-                   \:AirlineRefresh<CR>
-nnoremap <leader>sbc :let g:airline_section_y =
-                   \'%{Count("bytes")}b (%2p%%)'<CR>
-                   \:AirlineRefresh<CR>
-nnoremap <leader>stw :let g:airline_section_y =
-                   \'%{Count("thisw")}/%{Count("words")}w (%2p%%)'<CR>
-                   \:AirlineRefresh<CR>
-nnoremap <leader>stb :let g:airline_section_y =
-                   \'%{Count("thisb")}/%{Count("bytes")}b (%2p%%)'<CR>
-                   \:AirlineRefresh<CR>
-nnoremap <leader>s% :let g:airline_section_y =
-                   \'%2p%%'<CR>
-                   \:AirlineRefresh<CR>
 " --- --- --- }}}
 nnoremap <F6> :call ToggleBackground()<CR>
 nnoremap gt :call NextTabOrBuffer(1)<CR>
