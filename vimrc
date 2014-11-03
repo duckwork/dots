@@ -13,6 +13,7 @@ Plugin 'junegunn/goyo.vim'            " distraction-free writing
 Plugin 'junegunn/limelight.vim'       " highlight only active para
 Plugin 'reedes/vim-colors-pencil'     " pencil colorscheme
 Plugin 'nice/sweater'                 " light scheme
+Plugin 'altercation/vim-colors-solarized'
 
 Plugin 'tpope/vim-repeat'             " repeat plugin commands with
 Plugin 'tpope/vim-surround'           " format surroundings easily
@@ -62,23 +63,6 @@ call vundle#end()                      "req'd
 filetype plugin indent on              "req'd
 "}}}
 " Part I: Plugin Config {{{
-
-let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
-let g:shell_fullsreen_message = 0 " I know what I'm doing
-
-if &textwidth " Use textwidth if defined; else use 78
-    let g:goyo_width = &textwidth
-else
-    let g:goyo_width = 78
-endif
-let g:goyo_margin_top = 2
-let g:goyo_margin_bottom = 2
-
-let g:gundo_preview_bottom = 1 " Preview takes up full width
-
-let g:EasyMotion_do_mapping = 0 " Disable Easymotion default mappings
-let g:EasyMotion_prompt = '{n}/>> '
-let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
 " --- Ctrl-P options {{{
 let g:ctrlp_max_depth           = 100 " max depth of search
 let g:ctrlp_max_files           = 0   " no limit to how many files
@@ -94,7 +78,27 @@ let g:airline_section_b .= "%{&readonly ? ' !!' : ''}"
 
 let g:airline_section_c  = ""
 
-let g:airline_section_y  = '%2p%%'            " pp%
+" Word count section (hot mess) {{{
+let g:wcst = [
+            \ '%2p%%',
+            \ '%{Count("words")}w (%2p%%)',
+            \ '%{Count("bytes")}c (%2p%%)',
+            \ '%{Count("thisw")}/%{Count("words")}w (%2p%%)',
+            \ '%{Count("thisb")}/%{Count("bytes")}c (%2p%%)',
+            \ ]
+let g:wcsti = 0
+let g:airline_section_y  = g:wcst[g:wcsti]
+function! IterWC()
+    if g:wcsti >= len(g:wcst) - 1
+        let g:wcsti = 0
+    else
+        let g:wcsti += 1
+    endif
+    let g:airline_section_y  = g:wcst[g:wcsti]
+    AirlineRefresh
+endfunction
+nnoremap <silent> <F2> :call IterWC()<CR>
+" }}}
 
 let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
@@ -135,6 +139,22 @@ let g:airline#extensions#whitespace#trailing_format     = 'tw[%s]'
 let g:airline#extensions#whitespace#mixed_indent_format = 'mi[%s]'
 
 " --- }}}
+let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
+let g:shell_fullsreen_message = 0 " I know what I'm doing
+
+if &textwidth " Use textwidth if defined; else use 78
+    let g:goyo_width = &textwidth
+else
+    let g:goyo_width = 78
+endif
+let g:goyo_margin_top = 2
+let g:goyo_margin_bottom = 2
+
+let g:gundo_preview_bottom = 1 " Preview takes up full width
+
+let g:EasyMotion_do_mapping = 0 " Disable Easymotion default mappings
+let g:EasyMotion_prompt = '{n}/>> '
+let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
 " }}}
 " Part II: Custom functions {{{
 function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
