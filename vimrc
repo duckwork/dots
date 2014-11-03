@@ -265,6 +265,9 @@ set sidescroll=1       " scroll sideways by characters, not screens
 set wrap               " set wrapping
 set linebreak          " wrap at words. (:help breakat)
 
+set splitbelow         " split new windows below
+set splitright         " ... and at the right
+
 " Spelling
 hi SpellBad gui=undercurl
 " --- }}}
