@@ -86,16 +86,21 @@ let g:ctrlp_use_caching         = 1   " enable caching
 let g:ctrlp_clear_cache_on_exit = 0   " enable cross-session caching
 let g:ctrlp_cache_dir           = $HOME . '/.cache/ctrlp'
 let g:ctrlp_lazy_update         = 1   " Update only after done typing
-let g:ctrlp_match_window        = 'top,order:ttb'
+let g:ctrlp_match_window        = 'bottom,order:ttb'
 " --- }}}
 " --- Airline options {{{
+let g:airline_section_b  = "%<%f%{&modified ? ' +' : ''}"
+let g:airline_section_b .= "%{&readonly ? ' !!' : ''}"
+
+let g:airline_section_c  = ""
+
 let g:airline_section_y  = '%2p%%'            " pp%
 
 let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
 
 let g:airline#extensions#default#section_truncate_width = {
-    \ 'b': 79,
+    \ 'b': 40,
     \ 'x': 60,
     \ 'y': 68,
     \ 'z': 45,
@@ -122,9 +127,13 @@ let g:airline_mode_map = {
 let g:airline#extensions#tabline#enabled         = 1
 let g:airline#extensions#tabline#fnamemod        = ':t'
 let g:airline#extensions#tabline#buffer_idx_mode = 1
+let g:airline#extensions#ctrlp#show_adjacent_modes = 0
+let g:airline#extensions#quickfix#quickfix_text = 'Qf'
+let g:airline#extensions#quickfix#location_text = 'Lc'
 
 let g:airline#extensions#whitespace#trailing_format     = 'tw[%s]'
 let g:airline#extensions#whitespace#mixed_indent_format = 'mi[%s]'
+
 " --- }}}
 " }}}
 " Part II: Custom functions {{{
@@ -295,6 +304,9 @@ noremap ; :
 " j and k should work on visual lines, not code lines
 nnoremap <expr> j v:count ? 'j' : 'gj'
 nnoremap <expr> k v:count ? 'k' : 'gk'
+" H, L go to beginning, end of line
+nnoremap H ^
+nnoremap L $
 " Y should do similar things as C or D
 nnoremap Y y$
 " ESC is so far away...
@@ -312,6 +324,8 @@ vnoremap <leader>< <gv
 nnoremap \ :Explore<CR>
 " Map dD to remove line but leave blank
 nnoremap dD ddO<Esc>
+" :w!! to sudo save file (Linux only)
+cmap w!! %!sudo tee > /dev/null %
 " --- --- }}}
 " --- --- Keybinds for window management {{{
 " --- --- --- Switching windows
@@ -323,10 +337,10 @@ nnoremap <S-UP>    <C-w>K
 nnoremap <S-DOWN>  <C-w>J
 nnoremap <S-LEFT>  <C-w>H
 nnoremap <S-RIGHT> <C-w>L
-"nnoremap <C-UP>    <C-w>k
-"nnoremap <C-DOWN>  <C-w>j
-"nnoremap <C-LEFT>  <C-w>h
-"nnoremap <C-RIGHT> <C-w>l
+nnoremap <C-UP>    <C-w>+
+nnoremap <C-DOWN>  <C-w>-
+nnoremap <C-LEFT>  <C-w>>
+nnoremap <C-RIGHT> <C-w><
 " --- --- }}}
 " --- --- Leader binds {{{
 " Easily edit $MYVIMRC
