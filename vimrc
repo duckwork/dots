@@ -82,14 +82,15 @@ let g:airline_section_b .= "%{&readonly ? ' !!' : ''}"
 let g:airline_section_c  = ""
 
 " TODO: get this toggling thing working
+" Something to do with modulos
+" counter % len(list) loops through list
 let g:ywc = [
             \ '%2p%%',
             \ '%{Count("words")}w',
             \ '%{Count("bytes")}c',
             \ '%{Count("thisw")}/%{Count("words")}w (%2p%%)',
             \ ]
-let g:airline_section_y  = g:ywc[g:ywcm]
-nnoremap <silent> <F7> :let g:ywci += 1<CR>:AirlineRefresh<CR>
+let g:airline_section_y  = g:ywc[0]
 
 let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
