@@ -81,7 +81,15 @@ let g:airline_section_b .= "%{&readonly ? ' !!' : ''}"
 
 let g:airline_section_c  = ""
 
-let g:airline_section_y  = '%2p%%'            " %%
+" TODO: get this toggling thing working
+let g:ywc = [
+            \ '%2p%%',
+            \ '%{Count("words")}w',
+            \ '%{Count("bytes")}c',
+            \ '%{Count("thisw")}/%{Count("words")}w (%2p%%)',
+            \ ]
+let g:airline_section_y  = g:ywc[g:ywcm]
+nnoremap <silent> <F7> :let g:ywci += 1<CR>:AirlineRefresh<CR>
 
 let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
@@ -125,10 +133,10 @@ let g:airline#extensions#whitespace#mixed_indent_format = 'mi[%s]'
 let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
 let g:shell_fullsreen_message = 0 " I know what I'm doing
 
-if &textwidth " Use textwidth if defined; else use 78
+if &textwidth " Use textwidth if defined; else use 80
     let g:goyo_width = &textwidth
 else
-    let g:goyo_width = 78
+    let g:goyo_width = 80
 endif
 let g:goyo_margin_top = 2
 let g:goyo_margin_bottom = 2
@@ -170,7 +178,7 @@ function! ToggleBackground() " {{{
         if &textwidth
             let &colorcolumn = &textwidth
         else
-            set colorcolumn=78
+            set colorcolumn=80
         endif
         set cursorline
     endif
@@ -229,7 +237,7 @@ set viminfo+=h                 " Disable 'hlsearch' on saved files
 set background=dark            " Dark background (duh)
 if has('gui_running') || &t_Co>=88
     colorscheme badwolf
-    set colorcolumn=78         " highlight column 78
+    set colorcolumn=80         " highlight column 80
     set cursorline             " highlight the line the cursor's on
 else                           " 8-color terms can't handle colors
     colorscheme desert
@@ -456,7 +464,7 @@ if has('gui_running') " --- GVIM {{{
     set guioptions-=r  " remove right-hand scroll
     set guioptions-=L  " remove left-hand scroll
     set guioptions-=e  " remove GUI tabline; use consoley one instead
-    set columns    =78
+    set columns    =80
     set lines      =36
     " --- Set fonts for different systems
     if has("gui_gtk2")
