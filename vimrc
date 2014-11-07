@@ -11,9 +11,12 @@ Plugin 'gmarik/Vundle.vim'            " let Vundle manage Vundle
 Plugin 'bling/vim-airline'            " a better statusline
 Plugin 'junegunn/goyo.vim'            " distraction-free writing
 Plugin 'junegunn/limelight.vim'       " highlight only active para
-Plugin 'reedes/vim-colors-pencil'     " pencil colorscheme
-Plugin 'nice/sweater'                 " light scheme
+
+" COLORS
+Plugin 'reedes/vim-colors-pencil'
+Plugin 'nice/sweater'
 Plugin 'altercation/vim-colors-solarized'
+Plugin 'sjl/badwolf'
 
 Plugin 'tpope/vim-repeat'             " repeat plugin commands with
 Plugin 'tpope/vim-surround'           " format surroundings easily
@@ -78,27 +81,7 @@ let g:airline_section_b .= "%{&readonly ? ' !!' : ''}"
 
 let g:airline_section_c  = ""
 
-" Word count section (hot mess) {{{
-let g:wcst = [
-            \ '%2p%%',
-            \ '%{Count("words")}w (%2p%%)',
-            \ '%{Count("bytes")}c (%2p%%)',
-            \ '%{Count("thisw")}/%{Count("words")}w (%2p%%)',
-            \ '%{Count("thisb")}/%{Count("bytes")}c (%2p%%)',
-            \ ]
-let g:wcsti = 0
-let g:airline_section_y  = g:wcst[g:wcsti]
-function! IterWC()
-    if g:wcsti >= len(g:wcst) - 1
-        let g:wcsti = 0
-    else
-        let g:wcsti += 1
-    endif
-    let g:airline_section_y  = g:wcst[g:wcsti]
-    AirlineRefresh
-endfunction
-nnoremap <silent> <F2> :call IterWC()<CR>
-" }}}
+let g:airline_section_y  = '%2p%%'            " %%
 
 let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
@@ -128,12 +111,12 @@ let g:airline_mode_map = {
     \ '' : 'S[',
     \ }
 
-let g:airline#extensions#tabline#enabled         = 1
-let g:airline#extensions#tabline#fnamemod        = ':t'
-let g:airline#extensions#tabline#buffer_idx_mode = 1
+let g:airline#extensions#tabline#enabled           = 1
+let g:airline#extensions#tabline#fnamemod          = ':t'
+let g:airline#extensions#tabline#buffer_idx_mode   = 1
 let g:airline#extensions#ctrlp#show_adjacent_modes = 0
-let g:airline#extensions#quickfix#quickfix_text = 'Qf'
-let g:airline#extensions#quickfix#location_text = 'Lc'
+let g:airline#extensions#quickfix#quickfix_text    = 'Qf'
+let g:airline#extensions#quickfix#location_text    = 'Lc'
 
 let g:airline#extensions#whitespace#trailing_format     = 'tw[%s]'
 let g:airline#extensions#whitespace#mixed_indent_format = 'mi[%s]'
@@ -161,15 +144,16 @@ function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     "character counting:
     let s:old_status = v:statusmsg
     let position = getpos(".")
-    exe ":silent normal g\<c-g>"
+    exe ':silent normal g\<c-g>'
     let stat = v:statusmsg
     let s:word_count = 0
+    let s:mode = mode()
     if stat != '--No lines in buffer--'
         let s:things = {
-                    \ "words": str2nr(split(stat)[11]),
-                    \ "thisw": str2nr(split(stat)[9]),
-                    \ "bytes": str2nr(split(stat)[15]),
-                    \ "thisb": str2nr(split(stat)[13]),
+                    \ 'words': str2nr(split(stat)[11]),
+                    \ 'thisw': str2nr(split(stat)[9]),
+                    \ 'bytes': str2nr(split(stat)[15]),
+                    \ 'thisb': str2nr(split(stat)[13]),
                     \ }
         let v:statusmsg = s:old_status
     endif
@@ -244,7 +228,7 @@ set viminfo+=h                 " Disable 'hlsearch' on saved files
 " --- Appearance {{{
 set background=dark            " Dark background (duh)
 if has('gui_running') || &t_Co>=88
-    colorscheme pencil
+    colorscheme badwolf
     set colorcolumn=78         " highlight column 78
     set cursorline             " highlight the line the cursor's on
 else                           " 8-color terms can't handle colors
@@ -271,8 +255,6 @@ set wildmenu           " tab completion with a menu
 set ruler              " show ruler
 set showcmd            " Show partial commands as-you-type
 
-match ErrorMsg '\s\+$' " Show trailing whitespace as error
-
 set scrolloff=8        " keep lines at bottom and top when scrolling
 set sidescrolloff=4    " keep lines at left and right when scrolling
 set sidescroll=1       " scroll sideways by characters, not screens
@@ -288,6 +270,19 @@ hi SpellBad gui=undercurl
 " --- Acting {{{
 set directory=$HOME/.vim/swap//    " directory for swap files
 set backupdir=$HOME/.vim/backup//  " directory for backups
+set undodir=$HOME/.vim/undoes//    " directory for UNDO TREE
+" Just in case they don't exist -- make 'em {{{
+if !isdirectory(expand(&directory))
+    call mkdir(expand(&directory), "p")
+endif
+if !isdirectory(expand(&backupdir))
+    call mkdir(expand(&backupdir), "p")
+endif
+if !isdirectory(expand(&undodir))
+    call mkdir(expand(&undodir), "p")
+endif
+" }}}
+
 set backupcopy=yes  " copy the original and overwrite
 set backup          " Keep backup files, just in case
 
@@ -309,6 +304,7 @@ set smartcase         " ... unless a capital appears
 set foldenable        " Enable folding
 set foldmethod=marker " {{{ }}} mark folds
 set foldlevel=2       " Start open to second level
+set foldcolumn=2      " Fold columns in gutter
 
 set magic             " use better regexp
 " --- }}}
@@ -328,6 +324,13 @@ nnoremap L $
 nnoremap Y y$
 " ESC is so far away...
 inoremap jj <Esc>
+" <Space> to open AND close folds
+nnoremap <Space> za
+vnoremap <Space> za
+nnoremap <S-Space> zA
+vnoremap <S-Space> zA
+nnoremap <C-Space> zM
+nnoremap <C-S-Space> zR
 " make K the opposite of J (split lines at cursor)
 nnoremap K i<CR><Esc>
 " More useful <F1> bind -- looks up :h <cursor>
@@ -339,6 +342,9 @@ vnoremap <leader>> >gv
 vnoremap <leader>< <gv
 " \ does netrw window
 nnoremap \ :Explore<CR>
+" gs to begin a search
+nnoremap gs :%s/
+xnoremap gs :s/
 " Map dD to remove line but leave blank
 nnoremap dD ddO<Esc>
 " :w!! to sudo save file (Linux only)
@@ -370,9 +376,9 @@ nnoremap <leader>cd :cd %:p:h<CR>
 nnoremap <leader>/ :nohlsearch<return><Esc>
 
 " Remove whitespace from the ends of lines
-nnoremap <leader>rs :%s/\s\+$//e<CR>
+nnoremap <silent><leader>rs mz:%s/\s\+$//<CR>:let @/=''<CR>`z
 " Remove blank lines
-noremap <leader>rb :g/^$/d<CR>
+noremap <silent><leader>rb :g/^$/d<CR>
 " --- --- }}}
 " --- --- Function keybinds {{{
 " --- --- --- Count() {{{
@@ -388,6 +394,7 @@ nnoremap <S-F11> :Fullscreen<CR>
 nnoremap <F5>    :GundoToggle<CR>
 vnoremap \|      :Tabularize /
 let g:user_emmet_leader_key = '<c-e>'
+nnoremap <C-o>   :CtrlPMRU<CR>
 
 nmap f <Plug>(easymotion-bd-f)
 nmap t <Plug>(easymotion-bd-t)
@@ -400,27 +407,43 @@ nmap <Leader>, <Plug>(easymotion-repeat)
 " Part V: Autocommands {{{
 " Change local current directory to buffer's directory
 autocmd BufEnter * silent! lcd %:p:h
-augroup GoyoEvents " Goyo fullscreens
+augroup GoyoEvents "{{{
+    " Goyo fullscreens
     autocmd!
     autocmd User GoyoEnter Limelight
     autocmd User GoyoLeave Limelight!
-augroup END
-augroup TextEditing " For texty filetypes
+augroup END "}}}
+augroup TextEditing "{{{
+    " For texty filetypes
     autocmd!
     autocmd BufNewFile,BufRead *.md set ft=markdown spell
     autocmd FileType vimwiki,markdown,text setlocal spell
     " TODO: switch back when not a texty filetype
-    autocmd FileType help setlocal nospell
-augroup END
-augroup ReloadVimrc " Source $MYVIMRC on save
+augroup END "}}}
+augroup ReloadVimrc "{{{
+    " Source $MYVIMRC on save
     autocmd!
     autocmd BufWritePost $MYVIMRC source $MYVIMRC | AirlineRefresh
-augroup END
-augroup AirlineShowmode " Toggle showmode for enter/exit airline
-    autocmd!
-    autocmd User AirlineToggledOn set noshowmode
-    autocmd User AirlineToggledOff set showmode
-augroup END
+augroup END "}}}
+augroup CurLine "{{{
+    " Only show cursorline in current window + normal mode
+    au!
+    au WinLeave,InsertEnter * set nocursorline
+    au WinEnter,InsertLeave * set cursorline
+augroup END "}}}
+augroup Trailing "{{{
+    " Only show trailing spaces when out of insert mode
+    au!
+    au InsertEnter * :match none '\s\+$'
+    au InsertLeave * :match Error '\s\+$'
+augroup END " }}}
+augroup ft_help
+    au!
+    au FileType help setlocal nospell
+    au BufWinEnter *.txt
+                \ if &ft == 'help' && &columns >= 156 |
+                \     wincmd L |
+                \ endif
 " }}}
 " Part VI: Can I has() options? {{{
 if has('mouse')
