@@ -1,7 +1,7 @@
 " ______________________ VIMRC -- CASE DUCKWORTH _________________________
 " vim:foldlevel=0:textwidth=0:nowrap:nolinebreak
 set nocompatible
-" Part 0: Vundle {{{
+" Part 0:   Vundle {{{
 filetype off
 set runtimepath+=$HOME/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -69,7 +69,7 @@ endif
 call vundle#end()                      "req'd
 filetype plugin indent on              "req'd
 "}}}
-" Part I: Plugin Config {{{
+" Part I:   Plugin Config {{{
 " --- Ctrl-P options {{{
 let g:ctrlp_max_depth           = 100 " max depth of search
 let g:ctrlp_max_files           = 0   " no limit to how many files
@@ -80,27 +80,30 @@ let g:ctrlp_lazy_update         = 1   " Update only after done typing
 let g:ctrlp_match_window        = 'bottom,order:ttb'
 " --- }}}
 " --- Airline options {{{
-" --- --- Section definition "{{{
+" --- --- Section definition {{{
+let g:airline_section_a  = '%2c'
 let g:airline_section_b  = "%<%f%{&modified ? ' +' : ''}"
 
 let g:airline_section_c  = '%#__accent_red#%{airline#util#wrap(airline#parts#readonly(),0)}%#__restore__#'
 
 " g:airline_section_y "{{{
 let g:ywc = [
-            \ '%2p%%',
+            \ '',
             \ '%{Count("words")}w',
             \ '%{Count("bytes")}c',
-            \ '%{Count("thisw")}/%{Count("words")}w (%2p%%)',
+            \ '%{Count("thisw")}/%{Count("words")}w',
             \ ]
 let g:ywci = len(g:ywc)
 let g:airline_section_y  = g:ywc[0]
-nnoremap <F7> :let g:ywci += 1<CR>
+nnoremap <silent> <F8> :let g:ywci += 1<CR>
             \ :let g:airline_section_y = g:ywc[g:ywci % len(g:ywc)]<CR>
             \ :AirlineRefresh<CR>
 " "}}}
 
-let g:airline_section_z  = '_%02l'            " _ll
-let g:airline_section_z .= '|%02c'            " |cc
+ let g:airline_section_z  = '%2p%%'
+" let g:airline_section_z .= '_%02l'            " _ll
+" let g:airline_section_z .= '|%02c'            " |cc
+let g:airline_section_z .= '%{airline#util#append(airline#parts#paste(),0)}%{airline#util#append("",0)}%{airline#util#append(airline#parts#iminsert(),0)} '
 
 let g:airline#extensions#default#section_truncate_width = {
     \ 'b': 40,
@@ -109,7 +112,7 @@ let g:airline#extensions#default#section_truncate_width = {
     \ 'z': 45,
     \ }
 "}}}
-" --- --- Font & symbol options "{{{
+" --- --- Font & symbol options {{{
 let g:airline_powerline_fonts = 0
 let g:airline_left_sep        = ''
 let g:airline_right_sep       = ''
@@ -128,7 +131,7 @@ let g:airline_mode_map = {
     \ '' : 'S[',
     \ }
 "}}}
-" --- --- Extensions "{{{
+" --- --- Extensions {{{
 let g:airline#extensions#tabline#enabled           = 1
 let g:airline#extensions#tabline#fnamemod          = ':t'
 let g:airline#extensions#tabline#buffer_idx_mode   = 1
@@ -136,7 +139,7 @@ let g:airline#extensions#ctrlp#show_adjacent_modes = 0
 let g:airline#extensions#quickfix#quickfix_text    = 'Qf'
 let g:airline#extensions#quickfix#location_text    = 'Lc'
 
-let g:airline#extensions#whitespace#trailing_format     = '_%s_'
+let g:airline#extensions#whitespace#trailing_format     = ')%s('
 let g:airline#extensions#whitespace#mixed_indent_format = '>%s<'
 "}}}
 " --- }}}
@@ -144,10 +147,10 @@ let g:airline#extensions#whitespace#mixed_indent_format = '>%s<'
 let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
 let g:shell_fullsreen_message = 0 " I know what I'm doing
 
-if &textwidth " Use textwidth if defined; else use 80
+if &textwidth " Use textwidth if defined; else use 78
     let g:goyo_width = &textwidth
 else
-    let g:goyo_width = 80
+    let g:goyo_width = 78
 endif
 let g:goyo_margin_top = 2
 let g:goyo_margin_bottom = 2
@@ -158,7 +161,7 @@ let g:EasyMotion_do_mapping = 0 " Disable Easymotion default mappings
 let g:EasyMotion_prompt = '{n}/>> '
 let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
 " }}}
-" Part II: Custom functions {{{
+" Part II:  Custom functions {{{
 function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     "character counting:
     let s:old_status = v:statusmsg
@@ -188,7 +191,7 @@ function! ToggleBackground() " {{{
         if &textwidth
             let &colorcolumn = &textwidth
         else
-            set colorcolumn=80
+            set colorcolumn=78
         endif
         set cursorline
     endif
@@ -236,11 +239,48 @@ function! MyFoldText() "{{{
     let fillcharcount = windowwidth - len(line) - len(foldedlinecount)
     return line . repeat("_",fillcharcount) . ' ' .foldedlinecount .  ' '
 endfunction "}}}
+function! Typewriter(switch) " {{{
+    if a:switch == 'on'
+        let g:typewriter_enabled = 1
+
+        let g:oldguifont = &guifont
+        let g:oldcolors  = g:colors_name
+
+        set guifont =Courier_Prime:h11:cANSI
+        colorscheme sweater
+        if exists("#airline")
+            let g:oldairlinetheme = g:airline_theme
+            AirlineTheme tomorrow
+        endif
+    elseif a:switch == 'off'
+        let g:typewriter_enabled = 0
+
+        let &guifont = exists('g:oldguifont') ? g:oldguifont : &guifont
+        if exists('g:oldcolors')
+            exec "color " . g:oldcolors
+        endif
+
+        if exists("#airline") && exists('g:oldairlinetheme')
+            exec "AirlineTheme " . g:oldairlinetheme
+        endif
+    elseif a:switch == 'tog'
+        if !exists('g:typewriter_enabled')
+            let g:typewriter_enabled = 1
+        endif
+
+        if g:typewriter_enabled
+            call Typewriter('off')
+        else
+            call Typewriter('on')
+        endif
+    endif
+endfunction " }}}
 " }}}
 " Part III: Better ViM defaults {{{
 " because vanilla vim, though great, is still lacking.
 syntax on                      " syntax highlighting is great
 set number                     " and line numbers, too
+set relativenumber             " and relative numbers on non-this line
 set autoread                   " reload on a change, automagically
 set lazyredraw                 " don't redraw macros til done
 set hidden                     " Don't close unused buffers
@@ -260,12 +300,12 @@ set viminfo+=<50               " Save 50 lines of registers
 set viminfo+=s10               " Save only first 10 Kb of each register
 set viminfo+=h                 " Disable 'hlsearch' on saved files
 "}}}
-" Part IV: Customization {{{
+" Part IV:  Customization {{{
 " --- Appearance {{{
 set background=dark            " Dark background (duh)
 if has('gui_running') || &t_Co>=88
     colorscheme badwolf
-    set colorcolumn=80         " highlight column 80
+    set colorcolumn=78         " highlight column 78
     set cursorline             " highlight the line the cursor's on
 else                           " 8-color terms can't handle colors
     colorscheme desert
@@ -341,10 +381,13 @@ set smartcase         " ... unless a capital appears
 set foldenable        " Enable folding
 set foldmethod=marker " {{{ }}} mark folds
 set foldlevel=2       " Start open to second level
-set foldcolumn=2      " Fold columns in gutter
+set foldcolumn=0      " Fold columns in gutter
 set foldtext=MyFoldText() " custom function (above)
 
+set gdefault          " default to global (line) substitutions
 set magic             " use better regexp
+
+" set textwidth=78
 " --- }}}
 " --- Keybinds {{{
 " --- --- Keybinds for usability {{{
@@ -421,7 +464,8 @@ noremap <silent><leader>rb :g/^$/d<CR>
 " --- --- --- Count() {{{
 nnoremap <leader>wc :echo 'words: ' . Count("words")<CR>
 " --- --- --- }}}
-nnoremap <F6> :call ToggleBackground()<CR>
+nnoremap <silent> <F6> :call ToggleBackground()<CR>
+nnoremap <silent> <F7> :call Typewriter('tog')<CR>
 nnoremap gt :call NextTabOrBuffer(1)<CR>
 nnoremap gT :call NextTabOrBuffer(-1)<CR>
 " --- --- }}}
@@ -433,22 +477,26 @@ vnoremap \|      :Tabularize /
 let g:user_emmet_leader_key = '<c-e>'
 nnoremap <C-o>   :CtrlPMRU<CR>
 
-nmap f <Plug>(easymotion-bd-f)
-nmap t <Plug>(easymotion-bd-t)
-omap f <Plug>(easymotion-bd-f)
-omap t <Plug>(easymotion-bd-t)
+nmap f <Plug>(easymotion-f)
+nmap t <Plug>(easymotion-t)
+omap f <Plug>(easymotion-f)
+omap t <Plug>(easymotion-t)
+nmap F <Plug>(easymotion-F)
+nmap T <Plug>(easymotion-T)
+omap F <Plug>(easymotion-F)
+omap T <Plug>(easymotion-T)
 nmap <Leader>, <Plug>(easymotion-repeat)
 " --- --- }}}
 " --- }}}
 " }}}
-" Part V: Autocommands {{{
+" Part V:   Autocommands {{{
 " Change local current directory to buffer's directory
 autocmd BufEnter * silent! lcd %:p:h
 augroup GoyoEvents "{{{
     " Goyo fullscreens
     autocmd!
-    autocmd User GoyoEnter Limelight
-    autocmd User GoyoLeave Limelight!
+    autocmd User GoyoEnter Limelight | set nocursorline
+    autocmd User GoyoLeave Limelight! | set cursorline
 augroup END "}}}
 augroup TextEditing "{{{
     " For texty filetypes
@@ -474,15 +522,16 @@ augroup Trailing "{{{
     au InsertEnter * :match none '\s\+$'
     au InsertLeave * :match Error '\s\+$'
 augroup END " }}}
-augroup ft_help
+augroup ft_help "{{{
     au!
     au FileType help setlocal nospell
     au BufWinEnter *.txt
                 \ if &ft == 'help' && &columns >= 156 |
                 \     wincmd L |
                 \ endif
+augroup END "}}}
 " }}}
-" Part VI: Can I has() options? {{{
+" Part VI:  Can I has() options? {{{
 if has('mouse')
     set mouse=a       " Enable the mouse if present
 endif
@@ -497,7 +546,7 @@ if has('gui_running') " --- GVIM {{{
         au!
         au VimEnter * let &columns = &textwidth
                     \       ? &textwidth + &fdc + &nu * &nuw
-                    \       : 80 + &fdc + &nu * &nuw
+                    \       : 78 + &fdc + &nu * &nuw
         au VimEnter * set lines=36
     augroup END
     " --- Set fonts for different systems
