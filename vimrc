@@ -95,7 +95,7 @@ let g:ywc = [
             \ ]
 let g:ywci = len(g:ywc)
 let g:airline_section_y  = g:ywc[0]
-nnoremap <silent> <F8> :let g:ywci += 1<CR>
+nnoremap <silent> <F2> :let g:ywci += 1<CR>
             \ :let g:airline_section_y = g:ywc[g:ywci % len(g:ywc)]<CR>
             \ :AirlineRefresh<CR>
 " "}}}
@@ -163,19 +163,40 @@ let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
 " }}}
 " Part II:  Custom functions {{{
 function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
-    "character counting:
     let s:old_status = v:statusmsg
     let position = getpos(".")
     exe ":silent normal g\<c-g>"
     let stat = v:statusmsg
     let s:word_count = 0
-    if stat != '--No lines in buffer--' && mode() !=? 'v'
-        let s:things = {
-                    \ 'words': str2nr(split(stat)[11]),
-                    \ 'thisw': str2nr(split(stat)[9]),
-                    \ 'bytes': str2nr(split(stat)[15]),
-                    \ 'thisb': str2nr(split(stat)[13]),
-                    \ }
+    if stat != '--No lines in buffer--'
+        if mode() ==? 'v'
+            let s:words  = split(stat, '; ')[1]
+            let s:bytes  = split(stat, '; ')[2]
+            let s:things = {
+                        \ 'words': str2nr(split(s:words)[2]),
+                        \ 'thisw': str2nr(split(s:words)[0]),
+                        \ 'bytes': str2nr(split(s:bytes)[2]),
+                        \ 'thisb': str2nr(split(s:bytes)[0]),
+                        \ }
+        elseif mode() == ''
+            let s:words  = split(stat, '; ')[2]
+            let s:bytes  = split(stat, '; ')[3]
+            let s:things = {
+                        \ 'words': str2nr(split(s:words)[2]),
+                        \ 'thisw': str2nr(split(s:words)[0]),
+                        \ 'bytes': str2nr(split(s:bytes)[2]),
+                        \ 'thisb': str2nr(split(s:bytes)[0]),
+                        \ }
+        else
+            let s:words  = split(stat, '; ')[2]
+            let s:bytes  = split(stat, '; ')[3]
+            let s:things = {
+                        \ 'words': str2nr(split(s:words)[3]),
+                        \ 'thisw': str2nr(split(s:words)[1]),
+                        \ 'bytes': str2nr(split(s:bytes)[3]),
+                        \ 'thisb': str2nr(split(s:bytes)[1]),
+                        \ }
+        endif
         let v:statusmsg = s:old_status
     endif
     call setpos('.', position)
@@ -465,7 +486,7 @@ noremap <silent><leader>rb :g/^$/d<CR>
 nnoremap <leader>wc :echo 'words: ' . Count("words")<CR>
 " --- --- --- }}}
 nnoremap <silent> <F6> :call ToggleBackground()<CR>
-nnoremap <silent> <F7> :call Typewriter('tog')<CR>
+nnoremap <silent> <F10> :call Typewriter('tog')<CR>
 nnoremap gt :call NextTabOrBuffer(1)<CR>
 nnoremap gT :call NextTabOrBuffer(-1)<CR>
 " --- --- }}}
