@@ -139,8 +139,8 @@ let g:airline#extensions#ctrlp#show_adjacent_modes = 0
 let g:airline#extensions#quickfix#quickfix_text    = 'Qf'
 let g:airline#extensions#quickfix#location_text    = 'Lc'
 
-let g:airline#extensions#whitespace#trailing_format     = ')%s('
-let g:airline#extensions#whitespace#mixed_indent_format = '>%s<'
+let g:airline#extensions#whitespace#trailing_format     = '_%s'
+let g:airline#extensions#whitespace#mixed_indent_format = '>%s'
 "}}}
 " --- }}}
 
