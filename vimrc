@@ -162,6 +162,7 @@ let g:EasyMotion_prompt = '{n}/>> '
 let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
 " }}}
 " Part II:  Custom functions {{{
+" TODO: Move switch-testing to subfunctions?
 function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     let s:old_status = v:statusmsg
     let position = getpos(".")
@@ -170,6 +171,8 @@ function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     let s:word_count = 0
     if stat != '--No lines in buffer--'
         if mode() ==? 'v'
+            " TODO: with selections, show line & column count too
+            " Selected {n} of {m} lines; {n} of {m} words; {n} of {m} bytes
             let s:words  = split(stat, '; ')[1]
             let s:bytes  = split(stat, '; ')[2]
             let s:things = {
@@ -179,6 +182,8 @@ function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
                         \ 'thisb': str2nr(split(s:bytes)[0]),
                         \ }
         elseif mode() == ''
+            " Selected {n} Cols; {n} of {m} lines; {n} of {m} words;
+            " \ {n} of {m} bytes
             let s:words  = split(stat, '; ')[2]
             let s:bytes  = split(stat, '; ')[3]
             let s:things = {
@@ -188,6 +193,8 @@ function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
                         \ 'thisb': str2nr(split(s:bytes)[0]),
                         \ }
         else
+            " Col {n} of {m}; Line {n} of {m}; Word {n} of {m};
+            " \ Byte {n} of {m}
             let s:words  = split(stat, '; ')[2]
             let s:bytes  = split(stat, '; ')[3]
             let s:things = {
@@ -261,35 +268,48 @@ function! MyFoldText() "{{{
     return line . repeat("_",fillcharcount) . ' ' .foldedlinecount .  ' '
 endfunction "}}}
 function! Typewriter(switch) " {{{
+    " Typewriter on ----------------------
     if a:switch == 'on'
         let g:typewriter_enabled = 1
 
-        let g:oldguifont = &guifont
-        let g:oldcolors  = g:colors_name
+        let g:oldgfn  = &guifont
+        let g:oldcolo = g:colors_name
+        let g:oldbg   = &background
+        let g:oldcul  = &cursorline
+        let g:oldcc   = &colorcolumn
 
         set guifont =Courier_Prime:h11:cANSI
         colorscheme sweater
+        set nocursorline colorcolumn=0
+
         if exists("#airline")
             let g:oldairlinetheme = g:airline_theme
             AirlineTheme tomorrow
         endif
+    " Typewriter off ---------------------
     elseif a:switch == 'off'
         let g:typewriter_enabled = 0
 
-        let &guifont = exists('g:oldguifont') ? g:oldguifont : &guifont
-        if exists('g:oldcolors')
-            exec "color " . g:oldcolors
+        let &guifont     = exists('g:oldgfn') ? g:oldguifont  : &gfn
+        let &background  = exists('g:oldbg')  ? g:oldbg       : &bg
+        let &cursorline  = exists('g:oldcul') ? g:oldcul      : &cul
+        let &colorcolumn = exists('g:oldcc')  ? g:oldcc       : &cc
+        if exists('g:oldcolo')
+            exec "color " . g:oldcolo
         endif
 
         if exists("#airline") && exists('g:oldairlinetheme')
             exec "AirlineTheme " . g:oldairlinetheme
         endif
-    elseif a:switch == 'tog'
+    " Test if enabled --------------------
+    elseif a:switch == 'is?'
         if !exists('g:typewriter_enabled')
-            let g:typewriter_enabled = 1
+            let g:typewriter_enabled = 0
         endif
-
-        if g:typewriter_enabled
+        return g:typewriter_enabled
+    " Toggle -----------------------------
+    elseif a:switch == 'tog'
+        if Typewriter('is?')
             call Typewriter('off')
         else
             call Typewriter('on')
@@ -535,7 +555,8 @@ augroup CurLine "{{{
     " Only show cursorline in current window + normal mode
     au!
     au WinLeave,InsertEnter * set nocursorline
-    au WinEnter,InsertLeave * set cursorline
+    au WinEnter,InsertLeave * if !Typewriter('is?') |
+                              \ set cursorline | endif
 augroup END "}}}
 augroup Trailing "{{{
     " Only show trailing spaces when out of insert mode
