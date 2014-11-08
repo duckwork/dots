@@ -80,13 +80,12 @@ let g:ctrlp_lazy_update         = 1   " Update only after done typing
 let g:ctrlp_match_window        = 'bottom,order:ttb'
 " --- }}}
 " --- Airline options {{{
+" --- --- Section definition "{{{
 let g:airline_section_b  = "%<%f%{&modified ? ' +' : ''}"
 
 let g:airline_section_c  = '%#__accent_red#%{airline#util#wrap(airline#parts#readonly(),0)}%#__restore__#'
 
-" TODO: get this toggling thing working
-" Something to do with modulos
-" counter % len(list) loops through list
+" g:airline_section_y "{{{
 let g:ywc = [
             \ '%2p%%',
             \ '%{Count("words")}w',
@@ -98,6 +97,7 @@ let g:airline_section_y  = g:ywc[0]
 nnoremap <F7> :let g:ywci += 1<CR>
             \ :let g:airline_section_y = g:ywc[g:ywci % len(g:ywc)]<CR>
             \ :AirlineRefresh<CR>
+" "}}}
 
 let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
@@ -108,7 +108,8 @@ let g:airline#extensions#default#section_truncate_width = {
     \ 'y': 68,
     \ 'z': 45,
     \ }
-
+"}}}
+" --- --- Font & symbol options "{{{
 let g:airline_powerline_fonts = 0
 let g:airline_left_sep        = ''
 let g:airline_right_sep       = ''
@@ -126,7 +127,8 @@ let g:airline_mode_map = {
     \ 'S'  : 'S_',
     \ '' : 'S[',
     \ }
-
+"}}}
+" --- --- Extensions "{{{
 let g:airline#extensions#tabline#enabled           = 1
 let g:airline#extensions#tabline#fnamemod          = ':t'
 let g:airline#extensions#tabline#buffer_idx_mode   = 1
@@ -136,8 +138,9 @@ let g:airline#extensions#quickfix#location_text    = 'Lc'
 
 let g:airline#extensions#whitespace#trailing_format     = '_%s_'
 let g:airline#extensions#whitespace#mixed_indent_format = '>%s<'
-
+"}}}
 " --- }}}
+
 let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
 let g:shell_fullsreen_message = 0 " I know what I'm doing
 
@@ -149,7 +152,7 @@ endif
 let g:goyo_margin_top = 2
 let g:goyo_margin_bottom = 2
 
-let g:gundo_preview_bottom = 1 " Preview takes up full width
+let g:gundo_preview_bottom = 1 " Gundo preview takes up full width
 
 let g:EasyMotion_do_mapping = 0 " Disable Easymotion default mappings
 let g:EasyMotion_prompt = '{n}/>> '
@@ -236,7 +239,6 @@ endfunction "}}}
 " }}}
 " Part III: Better ViM defaults {{{
 " because vanilla vim, though great, is still lacking.
-
 syntax on                      " syntax highlighting is great
 set number                     " and line numbers, too
 set autoread                   " reload on a change, automagically
@@ -244,7 +246,7 @@ set lazyredraw                 " don't redraw macros til done
 set hidden                     " Don't close unused buffers
 
 set formatoptions-=ro          " disable autocomments in (I)
-set history=1000               " set history of commands to 1000 long.
+set history=1000               " set history length
 set backspace=indent,eol,start " backspace across these things
 
 set encoding=utf-8             " encoding = utf-8.
@@ -274,6 +276,7 @@ endif
 set laststatus=2               " use status line, always.
 
 " Statusline
+" TODO: this should reflect airline -ish
 set statusline=\>\ b%n              " buffernumber
 set statusline+=\>\ %f              " basename of file
 set statusline+=%m                  " modified flag [+] or [-] if ro
@@ -302,10 +305,10 @@ set splitright         " ... and at the right
 hi SpellBad gui=undercurl
 " --- }}}
 " --- Acting {{{
+" --- --- ViM Operational Directories {{{
 set directory=$HOME/.vim/swap//    " directory for swap files
 set backupdir=$HOME/.vim/backup//  " directory for backups
 set undodir=$HOME/.vim/undoes//    " directory for UNDO TREE
-" Just in case they don't exist -- make 'em {{{
 if !isdirectory(expand(&directory))
     call mkdir(expand(&directory), "p")
 endif
@@ -345,8 +348,6 @@ set magic             " use better regexp
 " --- }}}
 " --- Keybinds {{{
 " --- --- Keybinds for usability {{{
-" \ is a dumb mapleader.
-let mapleader = ","
 " <Shift> AND ; is SO MUCH WORK
 noremap ; :
 " j and k should work on visual lines, not code lines
@@ -401,6 +402,7 @@ nnoremap <C-LEFT>  <C-w>>
 nnoremap <C-RIGHT> <C-w><
 " --- --- }}}
 " --- --- Leader binds {{{
+let mapleader = ","
 " Easily edit $MYVIMRC
 nnoremap <leader>ev :edit $MYVIMRC<CR>
 nnoremap <leader>sv :source $MYVIMRC<CR>
@@ -491,10 +493,13 @@ if has('gui_running') " --- GVIM {{{
     set guioptions-=r  " remove right-hand scroll
     set guioptions-=L  " remove left-hand scroll
     set guioptions-=e  " remove GUI tabline; use consoley one instead
-    let &columns   = &textwidth
-                \       ? &textwidth + &fdc + &nu * &nuw
-                \       : 80 + &fdc + &nu * &nuw
-    set lines      =36
+    augroup OpenVimWithCustomSize
+        au!
+        au VimEnter * let &columns = &textwidth
+                    \       ? &textwidth + &fdc + &nu * &nuw
+                    \       : 80 + &fdc + &nu * &nuw
+        au VimEnter * set lines=36
+    augroup END
     " --- Set fonts for different systems
     if has("gui_gtk2")
         set guifont=Inconsolata
