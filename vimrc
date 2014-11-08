@@ -8,35 +8,39 @@ call vundle#begin()
 
 Plugin 'gmarik/Vundle.vim'            " let Vundle manage Vundle
 
-Plugin 'bling/vim-airline'            " a better statusline
+" MAKING EDITING EASIER
 Plugin 'junegunn/goyo.vim'            " distraction-free writing
 Plugin 'junegunn/limelight.vim'       " highlight only active para
+Plugin 'chrisbra/NrrwRgn'             " Open region in new win to ed
 
-" COLORS
+" COLORS & EYECANDY
 Plugin 'reedes/vim-colors-pencil'
 Plugin 'nice/sweater'
 Plugin 'altercation/vim-colors-solarized'
 Plugin 'sjl/badwolf'
+Plugin 'bling/vim-airline'            " a better statusline
 
+" TIM POPE
 Plugin 'tpope/vim-repeat'             " repeat plugin commands with
 Plugin 'tpope/vim-surround'           " format surroundings easily
 Plugin 'tpope/vim-abolish'            " Enhanced search and replace
 Plugin 'tpope/vim-speeddating'        " C-a C-x on dates and times
 Plugin 'tpope/vim-commentary'         " commenting
 
+" FORMATTING TEXT
 Plugin 'Lokaltog/vim-easymotion'      " No more counting objects
+Plugin 'godlygeek/tabular'            " easy formatting of text tabs
 Plugin 'reedes/vim-textobj-sentence'  " Improved sentence textobj
 
-Plugin 'dockyard/vim-easydir'         " Create new dirs on-the-fly
-Plugin 'chrisbra/NrrwRgn'             " Open region in new win to ed
+" FILESYSTEM
 Plugin 'kien/ctrlp.vim'               " a fuzzy finder
-Plugin 'godlygeek/tabular'            " easy formatting of text tabs
+Plugin 'dockyard/vim-easydir'         " Create new dirs on-the-fly
 
+" FILETYPES
 Plugin 'mattn/emmet-vim'              " Zencoding for HTML
 Plugin 'gregsexton/MatchTag'          " Match HTML tags with %
 Plugin 'vim-pandoc/vim-pandoc'        " Pandoc helpers
 Plugin 'vimwiki/vimwiki'              " Personal wiki with ViM
-
 Plugin 'sheerun/vim-polyglot'         " Many syntax defs
 Plugin 'hail2u/vim-css3-syntax'       " syntax file for CSS3
 Plugin 'vim-pandoc/vim-pandoc-syntax' " Pandoc syntax
@@ -44,6 +48,7 @@ Plugin 'vim-pandoc/vim-pandoc-syntax' " Pandoc syntax
 Plugin 'xolox/vim-misc'
 Plugin 'xolox/vim-shell'
 
+" PLUGINS THAT REQUIRE X
 if executable('git')
     Plugin 'airblade/vim-gitgutter' " Git stuff in signs column
     Plugin 'tpope/vim-fugitive'     " Git integration
@@ -58,7 +63,6 @@ endif
 
 "Plugin 'chriskempson/base16-vim'   " base 16 colors
 "Plugin 'q335r49/microviche'        " infinite pannable vim
-"Plugin 'scrooloose/nerdcommenter'  " toggle comments easily
 "Plugin 'AndrewRadev/splitjoin.vim' " Split and join code easily
 "Plugin 'ervandew/supertab'         " tab completion in (I)
 
@@ -77,20 +81,21 @@ let g:ctrlp_match_window        = 'bottom,order:ttb'
 " --- }}}
 " --- Airline options {{{
 let g:airline_section_b  = "%<%f%{&modified ? ' +' : ''}"
-let g:airline_section_b .= "%{&readonly ? ' !!' : ''}"
 
-let g:airline_section_c  = ""
+let g:airline_section_c  = '%#__accent_red#%{airline#util#wrap(airline#parts#readonly(),0)}%#__restore__#'
 
 " TODO: get this toggling thing working
 " Something to do with modulos
 " counter % len(list) loops through list
 let g:ywc = [
-            \ '%2p%%',
-            \ '%{Count("words")}w',
-            \ '%{Count("bytes")}c',
-            \ '%{Count("thisw")}/%{Count("words")}w (%2p%%)',
+            \ "%2p%%",
+            \ "%{Count("words")}w",
+            \ "%{Count("bytes")}c",
+            \ "%{Count("thisw")}/%{Count("words")}w (%2p%%)",
             \ ]
-let g:airline_section_y  = g:ywc[0]
+let g:ywci = len(g:ywc)
+let g:airline_section_y  = '%{g:ywc[g:ywci % len(g:ywc)]}'
+nnoremap <F7> :let g:ywci += 1<CR>:AirlineRefresh<CR>
 
 let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
@@ -127,8 +132,8 @@ let g:airline#extensions#ctrlp#show_adjacent_modes = 0
 let g:airline#extensions#quickfix#quickfix_text    = 'Qf'
 let g:airline#extensions#quickfix#location_text    = 'Lc'
 
-let g:airline#extensions#whitespace#trailing_format     = 'tw[%s]'
-let g:airline#extensions#whitespace#mixed_indent_format = 'mi[%s]'
+let g:airline#extensions#whitespace#trailing_format     = '_%s_'
+let g:airline#extensions#whitespace#mixed_indent_format = '>%s<'
 
 " --- }}}
 let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
@@ -157,7 +162,7 @@ function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     let stat = v:statusmsg
     let s:word_count = 0
     let s:mode = mode()
-    if stat != '--No lines in buffer--'
+    if stat != '--No lines in buffer--' && s:mode !=? 'v' && s:mode != ''
         let s:things = {
                     \ 'words': str2nr(split(stat)[11]),
                     \ 'thisw': str2nr(split(stat)[9]),
@@ -208,6 +213,25 @@ function! CloseBufferOrWindow() " {{{
         quit
     endif
 endfunction " }}}
+function! MyFoldText() "{{{
+    " Custom text on folds
+    let line = getline(v:foldstart)
+
+    let nucolwidth = &fdc + &number * &numberwidth
+    let windowwidth = winwidth(0) - nucolwidth - 2
+    let foldedlinecount = v:foldend - v:foldstart
+
+    " expand tabs into spaces
+    let onetab = strpart('          ', 0, &tabstop)
+    let line = substitute(line, '\t', onetab, 'g')
+
+    let foldchars = substitute(&fmr, ',.*', '', '')
+    let line = substitute(line, foldchars, '', '')
+
+    let line = strpart(line, 0, windowwidth - 2 -len(foldedlinecount))
+    let fillcharcount = windowwidth - len(line) - len(foldedlinecount)
+    return line . repeat("_",fillcharcount) . ' ' .foldedlinecount .  ' '
+endfunction "}}}
 " }}}
 " Part III: Better ViM defaults {{{
 " because vanilla vim, though great, is still lacking.
@@ -314,6 +338,7 @@ set foldenable        " Enable folding
 set foldmethod=marker " {{{ }}} mark folds
 set foldlevel=2       " Start open to second level
 set foldcolumn=2      " Fold columns in gutter
+set foldtext=MyFoldText() " custom function (above)
 
 set magic             " use better regexp
 " --- }}}
@@ -465,7 +490,9 @@ if has('gui_running') " --- GVIM {{{
     set guioptions-=r  " remove right-hand scroll
     set guioptions-=L  " remove left-hand scroll
     set guioptions-=e  " remove GUI tabline; use consoley one instead
-    set columns    =80
+    let &columns   = &textwidth
+                \       ? &textwidth + &fdc + &nu * &nuw
+                \       : 80 + &fdc + &nu * &nuw
     set lines      =36
     " --- Set fonts for different systems
     if has("gui_gtk2")
