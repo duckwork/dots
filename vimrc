@@ -88,14 +88,16 @@ let g:airline_section_c  = '%#__accent_red#%{airline#util#wrap(airline#parts#rea
 " Something to do with modulos
 " counter % len(list) loops through list
 let g:ywc = [
-            \ "%2p%%",
-            \ "%{Count("words")}w",
-            \ "%{Count("bytes")}c",
-            \ "%{Count("thisw")}/%{Count("words")}w (%2p%%)",
+            \ '%2p%%',
+            \ '%{Count("words")}w',
+            \ '%{Count("bytes")}c',
+            \ '%{Count("thisw")}/%{Count("words")}w (%2p%%)',
             \ ]
 let g:ywci = len(g:ywc)
-let g:airline_section_y  = '%{g:ywc[g:ywci % len(g:ywc)]}'
-nnoremap <F7> :let g:ywci += 1<CR>:AirlineRefresh<CR>
+let g:airline_section_y  = g:ywc[0]
+nnoremap <F7> :let g:ywci += 1<CR>
+            \ :let g:airline_section_y = g:ywc[g:ywci % len(g:ywc)]<CR>
+            \ :AirlineRefresh<CR>
 
 let g:airline_section_z  = '_%02l'            " _ll
 let g:airline_section_z .= '|%02c'            " |cc
@@ -158,11 +160,10 @@ function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     "character counting:
     let s:old_status = v:statusmsg
     let position = getpos(".")
-    exe ':silent normal g\<c-g>'
+    exe ":silent normal g\<c-g>"
     let stat = v:statusmsg
     let s:word_count = 0
-    let s:mode = mode()
-    if stat != '--No lines in buffer--' && s:mode !=? 'v' && s:mode != ''
+    if stat != '--No lines in buffer--' && mode() !=? 'v'
         let s:things = {
                     \ 'words': str2nr(split(stat)[11]),
                     \ 'thisw': str2nr(split(stat)[9]),
