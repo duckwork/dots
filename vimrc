@@ -18,7 +18,7 @@ Plugin 'reedes/vim-colors-pencil'
 Plugin 'nice/sweater'
 Plugin 'altercation/vim-colors-solarized'
 Plugin 'sjl/badwolf'
-Plugin 'bling/vim-airline'            " a better statusline
+" Plugin 'bling/vim-airline'            " a better statusline
 
 " TIM POPE
 Plugin 'tpope/vim-repeat'             " repeat plugin commands with
@@ -79,70 +79,70 @@ let g:ctrlp_cache_dir           = $HOME . '/.cache/ctrlp'
 let g:ctrlp_lazy_update         = 1   " Update only after done typing
 let g:ctrlp_match_window        = 'bottom,order:ttb'
 " --- }}}
-" --- Airline options {{{
-" --- --- Section definition {{{
-let g:airline_section_a  = '%2c'
-let g:airline_section_b  = "%<%f%{&modified ? ' +' : ''}"
+" " --- Airline options {{{
+" " --- --- Section definition {{{
+" let g:airline_section_a  = '%2c'
+" let g:airline_section_b  = "%<%f%{&modified ? ' +' : ''}"
 
-let g:airline_section_c  = '%#__accent_red#%{airline#util#wrap(airline#parts#readonly(),0)}%#__restore__#'
+" let g:airline_section_c  = '%#__accent_red#%{airline#util#wrap(airline#parts#readonly(),0)}%#__restore__#'
 
-" g:airline_section_y "{{{
-let g:ywc = [
-            \ '',
-            \ '%{Count("words")}w',
-            \ '%{Count("bytes")}c',
-            \ '%{Count("thisw")}/%{Count("words")}w',
-            \ ]
-let g:ywci = len(g:ywc)
-let g:airline_section_y  = g:ywc[0]
-nnoremap <silent> <F2> :let g:ywci += 1<CR>
-            \ :let g:airline_section_y = g:ywc[g:ywci % len(g:ywc)]<CR>
-            \ :AirlineRefresh<CR>
+" " g:airline_section_y "{{{
+" let g:ywc = [
+"             \ '',
+"             \ '%{Count("words")}w',
+"             \ '%{Count("bytes")}c',
+"             \ '%{Count("thisw")}/%{Count("words")}w',
+"             \ ]
+" let g:ywci = len(g:ywc)
+" let g:airline_section_y  = g:ywc[0]
+" nnoremap <silent> <F2> :let g:ywci += 1<CR>
+"             \ :let g:airline_section_y = g:ywc[g:ywci % len(g:ywc)]<CR>
+"             \ :AirlineRefresh<CR>
+" " "}}}
+
+"  let g:airline_section_z  = '%P'
+" " let g:airline_section_z .= '_%02l'            " _ll
+" " let g:airline_section_z .= '|%02c'            " |cc
+" let g:airline_section_z .= '%{airline#util#append(airline#parts#paste(),0)}%{airline#util#append("",0)}%{airline#util#append(airline#parts#iminsert(),0)} '
+
+" let g:airline#extensions#default#section_truncate_width = {
+"     \ 'b': 40,
+"     \ 'x': 60,
+"     \ 'y': 68,
+"     \ 'z': 45,
+"     \ }
 " "}}}
+" " --- --- Font & symbol options {{{
+" let g:airline_powerline_fonts = 0
+" let g:airline_left_sep        = ''
+" let g:airline_right_sep       = ''
 
- let g:airline_section_z  = '%P'
-" let g:airline_section_z .= '_%02l'            " _ll
-" let g:airline_section_z .= '|%02c'            " |cc
-let g:airline_section_z .= '%{airline#util#append(airline#parts#paste(),0)}%{airline#util#append("",0)}%{airline#util#append(airline#parts#iminsert(),0)} '
+" let g:airline_mode_map = {
+"     \ '__' : '--',
+"     \ 'n'  : 'Nr',
+"     \ 'i'  : 'In',
+"     \ 'R'  : 'Re',
+"     \ 'c'  : 'Cm',
+"     \ 'v'  : 'Vi',
+"     \ 'V'  : 'V_',
+"     \ '' : 'V[',
+"     \ 's'  : 'Se',
+"     \ 'S'  : 'S_',
+"     \ '' : 'S[',
+"     \ }
+" "}}}
+" " --- --- Extensions {{{
+" let g:airline#extensions#tabline#enabled           = 1
+" let g:airline#extensions#tabline#fnamemod          = ':t'
+" let g:airline#extensions#tabline#buffer_idx_mode   = 1
+" let g:airline#extensions#ctrlp#show_adjacent_modes = 0
+" let g:airline#extensions#quickfix#quickfix_text    = 'Qf'
+" let g:airline#extensions#quickfix#location_text    = 'Lc'
 
-let g:airline#extensions#default#section_truncate_width = {
-    \ 'b': 40,
-    \ 'x': 60,
-    \ 'y': 68,
-    \ 'z': 45,
-    \ }
-"}}}
-" --- --- Font & symbol options {{{
-let g:airline_powerline_fonts = 0
-let g:airline_left_sep        = ''
-let g:airline_right_sep       = ''
-
-let g:airline_mode_map = {
-    \ '__' : '--',
-    \ 'n'  : 'Nr',
-    \ 'i'  : 'In',
-    \ 'R'  : 'Re',
-    \ 'c'  : 'Cm',
-    \ 'v'  : 'Vi',
-    \ 'V'  : 'V_',
-    \ '' : 'V[',
-    \ 's'  : 'Se',
-    \ 'S'  : 'S_',
-    \ '' : 'S[',
-    \ }
-"}}}
-" --- --- Extensions {{{
-let g:airline#extensions#tabline#enabled           = 1
-let g:airline#extensions#tabline#fnamemod          = ':t'
-let g:airline#extensions#tabline#buffer_idx_mode   = 1
-let g:airline#extensions#ctrlp#show_adjacent_modes = 0
-let g:airline#extensions#quickfix#quickfix_text    = 'Qf'
-let g:airline#extensions#quickfix#location_text    = 'Lc'
-
-let g:airline#extensions#whitespace#trailing_format     = '_%s'
-let g:airline#extensions#whitespace#mixed_indent_format = '>%s'
-"}}}
-" --- }}}
+" let g:airline#extensions#whitespace#trailing_format     = '_%s'
+" let g:airline#extensions#whitespace#mixed_indent_format = '>%s'
+" "}}}
+" " --- }}}
 
 let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
 let g:shell_fullsreen_message = 0 " I know what I'm doing
@@ -209,21 +209,6 @@ function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     call setpos('.', position)
     return s:things[a:thing]
 endfunction "}}}
-function! ToggleBackground() " {{{
-    if &background=="dark"
-        set background=light
-        set colorcolumn=0
-        set nocursorline
-    else
-        set background=dark
-        if &textwidth
-            let &colorcolumn = &textwidth
-        else
-            set colorcolumn=78
-        endif
-        set cursorline
-    endif
-endfunction " }}}
 function! NextTabOrBuffer(dir) " {{{
     " TODO: add count
     " if there's only one tab, switch bufs; else switch tabs
@@ -324,6 +309,77 @@ function! Typewriter(switch) " {{{
         endif
     endif
 endfunction " }}}
+function! Status(winnr) "{{{
+    let stat = ''
+    let active = winnr() == a:winnr
+    let buffer = winbufnr(a:winnr)
+
+    let modified = getbufvar(buffer, '&modified')
+    let readonly = getbufvar(buffer, '&readonly')
+    let fname = bufname(buffer)
+
+    function! Color(active, num, content)
+        if a:active
+            return '%' . a:num . '*' . a:content . '%*'
+        else
+            return a:content
+        endif
+    endfunction
+
+    " column
+    let stat .= '%1*' . (col(".") / 100 >= 1 ? '%v ' : ' %2v ') . '%*'
+
+    " file
+    let stat .= Color(active, 4, active ? ' >' : ' <')
+    let stat .= ' %<'
+
+    if fname == '__Gundo__'
+        let stat .= 'Gundo'
+    elseif fname == '__Gundo_Preview__'
+        let stat .= 'Gundo Preview'
+    else
+        let stat .= '%f'
+    endif
+
+    let stat .= ' ' . Color(active, 4, active ? '<' : '>')
+
+    " file modified
+    let stat .= Color(active, 2, modified ? ' +' : '')
+
+    " readonly
+    let stat .= Color(active, 2, readonly ? ' !!' : '')
+
+    " paste
+    if active && &paste
+        let stat .= '%2*' . 'P' . '%*'
+    endif
+
+    " gutter & right side
+    let stat .= '%='
+
+    let stat .= '%P' " TODO: % like: Top, 01-99%, Bot
+
+    return stat
+endfunction
+
+" --- Status Autocmd
+function! SetStatus()
+    for nr in range(1, winnr('$'))
+        call setwinvar(nr, '&statusline', '%!Status('.nr.')')
+    endfor
+endfunction
+
+augroup Statuses
+    au!
+    au VimEnter,WinEnter,BufWinEnter,BufUnload * call SetStatus()
+augroup END
+
+" --- Status Colors
+hi User1 ctermfg=33 guifg=#268bd2 ctermbg=15=15 guibg=#fdf6e3 gui=bold
+hi User2 ctermfg=125 guifg=#d33682 ctermbg=7 guibg=#eee8d5 gui=bold
+hi User3 ctermfg=64 guifg=#719e07 ctermbg=7 guibg=#eee8d5 gui=bold
+hi User4 ctermfg=37 guifg=#2aa198 ctermbg=7 guibg=#eee8d5 gui=bold
+"}}}
 " }}}
 " Part III: Better ViM defaults {{{
 " because vanilla vim, though great, is still lacking.
@@ -376,6 +432,15 @@ set statusline+=\<%3p%%)            " scroll percentage
 set statusline+=_%02l               " current line / total lines
 set statusline+=\|%02c              " current column
 "set statusline+={%{Count('words')}w " word count function
+
+set statusline =\ %2c
+set stl        +=\ %<%f
+set stl        +=\ %{&modified\ ?\ '+'\ :\ ''}
+set stl        +=\ %{&readonly\ ?\ '!!'\ :\ ''}
+set stl        +=\ %{&paste\ ?\ 'P'\ :\ ''}
+set stl        +=%=
+set stl        +=%y
+set stl        +=\ %P
 
 set wildmenu           " tab completion with a menu
 set ruler              " show ruler
@@ -556,7 +621,7 @@ augroup END "}}}
 augroup ReloadVimrc "{{{
     " Source $MYVIMRC on save
     autocmd!
-    autocmd BufWritePost $MYVIMRC source $MYVIMRC | AirlineRefresh
+    autocmd BufWritePost $MYVIMRC source $MYVIMRC | "AirlineRefresh
 augroup END "}}}
 augroup CurLine "{{{
     " Only show cursorline in current window + normal mode
