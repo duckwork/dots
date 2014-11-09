@@ -331,7 +331,7 @@ function! SetStatus()
     endfor
 endfunction
 
-augroup Statuses
+augroup StatusUpdate
     au!
     au VimEnter,WinEnter,BufWinEnter,BufUnload * call SetStatus()
     au BufWritePost $MYVIMRC call SetStatus()
@@ -516,7 +516,7 @@ nnoremap <silent><leader>rs mz:%s/\s\+$//<CR>:let @/=''<CR>`z
 noremap <silent><leader>rb :g/^$/d<CR>
 " --- --- }}}
 " --- --- Function keybinds {{{
-nnoremap <leader>wc :echo 'words: ' . Count("words")<CR>
+nnoremap <leader>wc :echo 'words: ' . Rulerer().words.tot<CR>
 nnoremap <silent> <F10> :call Typewriter('tog')<CR>
 nnoremap gt :call NextTabOrBuffer(1)<CR>
 nnoremap gT :call NextTabOrBuffer(-1)<CR>
