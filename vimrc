@@ -100,7 +100,7 @@ nnoremap <silent> <F2> :let g:ywci += 1<CR>
             \ :AirlineRefresh<CR>
 " "}}}
 
- let g:airline_section_z  = '%2p%%'
+ let g:airline_section_z  = '%P'
 " let g:airline_section_z .= '_%02l'            " _ll
 " let g:airline_section_z .= '|%02c'            " |cc
 let g:airline_section_z .= '%{airline#util#append(airline#parts#paste(),0)}%{airline#util#append("",0)}%{airline#util#append(airline#parts#iminsert(),0)} '
@@ -268,6 +268,9 @@ function! MyFoldText() "{{{
     return line . repeat("_",fillcharcount) . ' ' .foldedlinecount .  ' '
 endfunction "}}}
 function! Typewriter(switch) " {{{
+    " TODO: break out into plugin (GASP)
+    "   - g:typewriter_font = Courier_New (?)
+    "   - g:typewriter_colo = peachpuff
     " Typewriter on ----------------------
     if a:switch == 'on'
         let g:typewriter_enabled = 1
@@ -277,23 +280,28 @@ function! Typewriter(switch) " {{{
         let g:oldbg   = &background
         let g:oldcul  = &cursorline
         let g:oldcc   = &colorcolumn
+        let g:oldrnu  = &relativenumber
+        let g:oldnu   = &number
 
         set guifont =Courier_Prime:h11:cANSI
         colorscheme sweater
         set nocursorline colorcolumn=0
+        set norelativenumber number
 
         if exists("#airline")
-            let g:oldairlinetheme = g:airline_theme
+            let oldairlinetheme = g:airline_theme
             AirlineTheme tomorrow
         endif
     " Typewriter off ---------------------
     elseif a:switch == 'off'
         let g:typewriter_enabled = 0
 
-        let &guifont     = exists('g:oldgfn') ? g:oldguifont  : &gfn
+        let &guifont     = exists('g:oldgfn') ? g:oldgfn      : &gfn
         let &background  = exists('g:oldbg')  ? g:oldbg       : &bg
         let &cursorline  = exists('g:oldcul') ? g:oldcul      : &cul
         let &colorcolumn = exists('g:oldcc')  ? g:oldcc       : &cc
+        let &relativenumber = exists('g:oldrnu') ? g:oldrnu   : &rnu
+        let &number      = exists('g:oldnu')  ? g:oldnu       : &nu
         if exists('g:oldcolo')
             exec "color " . g:oldcolo
         endif
@@ -502,10 +510,7 @@ nnoremap <silent><leader>rs mz:%s/\s\+$//<CR>:let @/=''<CR>`z
 noremap <silent><leader>rb :g/^$/d<CR>
 " --- --- }}}
 " --- --- Function keybinds {{{
-" --- --- --- Count() {{{
 nnoremap <leader>wc :echo 'words: ' . Count("words")<CR>
-" --- --- --- }}}
-nnoremap <silent> <F6> :call ToggleBackground()<CR>
 nnoremap <silent> <F10> :call Typewriter('tog')<CR>
 nnoremap gt :call NextTabOrBuffer(1)<CR>
 nnoremap gT :call NextTabOrBuffer(-1)<CR>
@@ -537,7 +542,9 @@ augroup GoyoEvents "{{{
     " Goyo fullscreens
     autocmd!
     autocmd User GoyoEnter Limelight | set nocursorline
-    autocmd User GoyoLeave Limelight! | set cursorline
+    autocmd User GoyoLeave Limelight! |
+                \ if !Typewriter('is?') |
+                \     set cursorline | endif
 augroup END "}}}
 augroup TextEditing "{{{
     " For texty filetypes
