@@ -1,4 +1,4 @@
-" ______________________ VIMRC -- CASE DUCKWORTH _________________________
+" ___________________ VIMRC -- CASE DUCKWORTH ______________________
 " vim:foldlevel=0:textwidth=0:nowrap:nolinebreak
 set nocompatible
 " Part 0:   Vundle {{{
@@ -18,7 +18,6 @@ Plugin 'reedes/vim-colors-pencil'
 Plugin 'nice/sweater'
 Plugin 'altercation/vim-colors-solarized'
 Plugin 'sjl/badwolf'
-" Plugin 'bling/vim-airline'            " a better statusline
 
 " TIM POPE
 Plugin 'tpope/vim-repeat'             " repeat plugin commands with
@@ -79,70 +78,6 @@ let g:ctrlp_cache_dir           = $HOME . '/.cache/ctrlp'
 let g:ctrlp_lazy_update         = 1   " Update only after done typing
 let g:ctrlp_match_window        = 'bottom,order:ttb'
 " --- }}}
-" " --- Airline options {{{
-" " --- --- Section definition {{{
-" let g:airline_section_a  = '%2c'
-" let g:airline_section_b  = "%<%f%{&modified ? ' +' : ''}"
-
-" let g:airline_section_c  = '%#__accent_red#%{airline#util#wrap(airline#parts#readonly(),0)}%#__restore__#'
-
-" " g:airline_section_y "{{{
-" let g:ywc = [
-"             \ '',
-"             \ '%{Count("words")}w',
-"             \ '%{Count("bytes")}c',
-"             \ '%{Count("thisw")}/%{Count("words")}w',
-"             \ ]
-" let g:ywci = len(g:ywc)
-" let g:airline_section_y  = g:ywc[0]
-" nnoremap <silent> <F2> :let g:ywci += 1<CR>
-"             \ :let g:airline_section_y = g:ywc[g:ywci % len(g:ywc)]<CR>
-"             \ :AirlineRefresh<CR>
-" " "}}}
-
-"  let g:airline_section_z  = '%P'
-" " let g:airline_section_z .= '_%02l'            " _ll
-" " let g:airline_section_z .= '|%02c'            " |cc
-" let g:airline_section_z .= '%{airline#util#append(airline#parts#paste(),0)}%{airline#util#append("",0)}%{airline#util#append(airline#parts#iminsert(),0)} '
-
-" let g:airline#extensions#default#section_truncate_width = {
-"     \ 'b': 40,
-"     \ 'x': 60,
-"     \ 'y': 68,
-"     \ 'z': 45,
-"     \ }
-" "}}}
-" " --- --- Font & symbol options {{{
-" let g:airline_powerline_fonts = 0
-" let g:airline_left_sep        = ''
-" let g:airline_right_sep       = ''
-
-" let g:airline_mode_map = {
-"     \ '__' : '--',
-"     \ 'n'  : 'Nr',
-"     \ 'i'  : 'In',
-"     \ 'R'  : 'Re',
-"     \ 'c'  : 'Cm',
-"     \ 'v'  : 'Vi',
-"     \ 'V'  : 'V_',
-"     \ '' : 'V[',
-"     \ 's'  : 'Se',
-"     \ 'S'  : 'S_',
-"     \ '' : 'S[',
-"     \ }
-" "}}}
-" " --- --- Extensions {{{
-" let g:airline#extensions#tabline#enabled           = 1
-" let g:airline#extensions#tabline#fnamemod          = ':t'
-" let g:airline#extensions#tabline#buffer_idx_mode   = 1
-" let g:airline#extensions#ctrlp#show_adjacent_modes = 0
-" let g:airline#extensions#quickfix#quickfix_text    = 'Qf'
-" let g:airline#extensions#quickfix#location_text    = 'Lc'
-
-" let g:airline#extensions#whitespace#trailing_format     = '_%s'
-" let g:airline#extensions#whitespace#mixed_indent_format = '>%s'
-" "}}}
-" " --- }}}
 
 let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
 let g:shell_fullsreen_message = 0 " I know what I'm doing
@@ -269,14 +204,10 @@ function! Typewriter(switch) " {{{
         let g:oldnu   = &number
 
         set guifont =Courier_Prime:h11:cANSI
-        colorscheme sweater
+        " colorscheme sweater
+        set background=light
         set nocursorline colorcolumn=0
         set norelativenumber number
-
-        if exists("#airline")
-            let oldairlinetheme = g:airline_theme
-            AirlineTheme tomorrow
-        endif
     " Typewriter off ---------------------
     elseif a:switch == 'off'
         let g:typewriter_enabled = 0
@@ -289,10 +220,6 @@ function! Typewriter(switch) " {{{
         let &number      = exists('g:oldnu')  ? g:oldnu       : &nu
         if exists('g:oldcolo')
             exec "color " . g:oldcolo
-        endif
-
-        if exists("#airline") && exists('g:oldairlinetheme')
-            exec "AirlineTheme " . g:oldairlinetheme
         endif
     " Test if enabled --------------------
     elseif a:switch == 'is?'
@@ -319,7 +246,7 @@ function! Status(winnr) "{{{
     let fname = bufname(buffer)
 
     function! Color(active, num, content)
-        if a:active
+        if a:active && !has('win32')
             return '%' . a:num . '*' . a:content . '%*'
         else
             return a:content
@@ -330,34 +257,38 @@ function! Status(winnr) "{{{
     let stat .= '%1*' . (col(".") / 100 >= 1 ? '%v ' : ' %2v ') . '%*'
 
     " file
-    let stat .= Color(active, 4, active ? ' >' : ' <')
+    let stat .= ' ' . Color(active, 4, active ? '»' : '›')
     let stat .= ' %<'
 
     if fname == '__Gundo__'
         let stat .= 'Gundo'
     elseif fname == '__Gundo_Preview__'
         let stat .= 'Gundo Preview'
+    elseif fname == ''
+        let stat .= '______'
     else
         let stat .= '%f'
     endif
 
-    let stat .= ' ' . Color(active, 4, active ? '<' : '>')
+    let stat .= ' ' . Color(active, 4, active ? '«' : '')
 
     " file modified
-    let stat .= Color(active, 2, modified ? ' +' : '')
+    let stat .= Color(active, 2, modified ? ' + ' : '')
 
     " readonly
-    let stat .= Color(active, 2, readonly ? ' !!' : '')
+    let stat .= Color(active, 2, readonly ? 
+                \ &ft == 'help' ? ' ? ' : ' ‼ '
+                \ : '')
 
     " paste
     if active && &paste
-        let stat .= '%2*' . 'P' . '%*'
+        let stat .= '%2*' . ' P ' . '%*'
     endif
 
     " gutter & right side
     let stat .= '%='
 
-    let stat .= '%P' " TODO: % like: Top, 01-99%, Bot
+    let stat .= '%p%% ' " TODO: % like: Top, 01-99%, Bot
 
     return stat
 endfunction
@@ -372,13 +303,14 @@ endfunction
 augroup Statuses
     au!
     au VimEnter,WinEnter,BufWinEnter,BufUnload * call SetStatus()
+    au BufWritePost $MYVIMRC call SetStatus()
 augroup END
 
 " --- Status Colors
-hi User1 ctermfg=33 guifg=#268bd2 ctermbg=15=15 guibg=#fdf6e3 gui=bold
-hi User2 ctermfg=125 guifg=#d33682 ctermbg=7 guibg=#eee8d5 gui=bold
-hi User3 ctermfg=64 guifg=#719e07 ctermbg=7 guibg=#eee8d5 gui=bold
-hi User4 ctermfg=37 guifg=#2aa198 ctermbg=7 guibg=#eee8d5 gui=bold
+hi User1 guifg=#268bd2 gui=bold
+hi User2 guifg=#d33682 gui=bold
+hi User3 guifg=#719e07 gui=bold
+hi User4 guifg=#2aa198 gui=bold
 "}}}
 " }}}
 " Part III: Better ViM defaults {{{
@@ -409,7 +341,7 @@ set viminfo+=h                 " Disable 'hlsearch' on saved files
 " --- Appearance {{{
 set background=dark            " Dark background (duh)
 if has('gui_running') || &t_Co>=88
-    colorscheme badwolf
+    colorscheme solarized
     set colorcolumn=78         " highlight column 78
     set cursorline             " highlight the line the cursor's on
 else                           " 8-color terms can't handle colors
@@ -419,28 +351,6 @@ else                           " 8-color terms can't handle colors
 endif
 
 set laststatus=2               " use status line, always.
-
-" Statusline
-" TODO: this should reflect airline -ish
-set statusline=\>\ b%n              " buffernumber
-set statusline+=\>\ %f              " basename of file
-set statusline+=%m                  " modified flag [+] or [-] if ro
-set statusline+=%h                  " help buffer flag [help]
-set statusline+=%=                  " begin right-align
-set statusline+=\<%y\               " file type
-set statusline+=\<%3p%%)            " scroll percentage
-set statusline+=_%02l               " current line / total lines
-set statusline+=\|%02c              " current column
-"set statusline+={%{Count('words')}w " word count function
-
-set statusline =\ %2c
-set stl        +=\ %<%f
-set stl        +=\ %{&modified\ ?\ '+'\ :\ ''}
-set stl        +=\ %{&readonly\ ?\ '!!'\ :\ ''}
-set stl        +=\ %{&paste\ ?\ 'P'\ :\ ''}
-set stl        +=%=
-set stl        +=%y
-set stl        +=\ %P
 
 set wildmenu           " tab completion with a menu
 set ruler              " show ruler
@@ -621,7 +531,7 @@ augroup END "}}}
 augroup ReloadVimrc "{{{
     " Source $MYVIMRC on save
     autocmd!
-    autocmd BufWritePost $MYVIMRC source $MYVIMRC | "AirlineRefresh
+    autocmd BufWritePost $MYVIMRC source $MYVIMRC
 augroup END "}}}
 augroup CurLine "{{{
     " Only show cursorline in current window + normal mode
@@ -666,7 +576,6 @@ if has('gui_running') " --- GVIM {{{
     " --- Set fonts for different systems
     if has("gui_gtk2")
         set guifont=Inconsolata
-        let g:airline_powerline_fonts = 1
     elseif has("x11") " also works with GTK 1
         "set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has("gui_win32")
