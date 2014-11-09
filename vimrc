@@ -98,51 +98,82 @@ let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
 " }}}
 " Part II:  Custom functions {{{
 " TODO: Move switch-testing to subfunctions?
-function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
-    let s:old_status = v:statusmsg
-    let position = getpos(".")
+function! Rulerer() "{{{ A better ruler / Count() function
+    let s:oldstat = v:statusmsg
+    let position  = getpos('.')
     exe ":silent normal g\<c-g>"
-    let stat = v:statusmsg
-    let s:word_count = 0
-    if stat != '--No lines in buffer--'
-        if mode() ==? 'v'
-            " TODO: with selections, show line & column count too
-            " Selected {n} of {m} lines; {n} of {m} words; {n} of {m} bytes
-            let s:words  = split(stat, '; ')[1]
-            let s:bytes  = split(stat, '; ')[2]
-            let s:things = {
-                        \ 'words': str2nr(split(s:words)[2]),
-                        \ 'thisw': str2nr(split(s:words)[0]),
-                        \ 'bytes': str2nr(split(s:bytes)[2]),
-                        \ 'thisb': str2nr(split(s:bytes)[0]),
+    let status    = split(v:statusmsg, '; ')
+    let curmode   = mode()
+    let r  = {}
+
+    if status != ['--No lines in buffer--'] "{{{
+        if curmode ==? 'v' " Visual or V-line; v:statusmsg =
+            "  Selected {n} of {m} Lines; {n} of {m} Words;
+            " \ {n} of {m} Bytes
+            let r.lines = {
+                        \ 'sel': str2float(split(status[0])[1]),
+                        \ 'tot': str2float(split(status[0])[3])
                         \ }
-        elseif mode() == ''
-            " Selected {n} Cols; {n} of {m} lines; {n} of {m} words;
-            " \ {n} of {m} bytes
-            let s:words  = split(stat, '; ')[2]
-            let s:bytes  = split(stat, '; ')[3]
-            let s:things = {
-                        \ 'words': str2nr(split(s:words)[2]),
-                        \ 'thisw': str2nr(split(s:words)[0]),
-                        \ 'bytes': str2nr(split(s:bytes)[2]),
-                        \ 'thisb': str2nr(split(s:bytes)[0]),
+            let r.words = {
+                        \ 'sel': str2nr(split(status[1])[0]),
+                        \ 'tot': str2nr(split(status[1])[2])
                         \ }
-        else
+            let r.chars = {
+                        \ 'sel': str2nr(split(status[2])[0]),
+                        \ 'tot': str2nr(split(status[2])[2])
+                        \ }
+            let r.perc = float2nr((r.lines.sel/r.lines.tot)*100)
+            let r.lines.sel = float2nr(r.lines.sel)
+            let r.lines.tot = float2nr(r.lines.tot)
+        elseif curmode == '' " Visual block; v:statusmsg =
+            " Selected {n} Cols; {n} of {m} Lines; {n} of {m} Words;
+            " \ {n} of {m} Bytes
+            let r.cols = { 'sel': str2nr(split(status[0])[1]) }
+            let r.lines = {
+                        \ 'sel': str2float(split(status[1])[0]),
+                        \ 'tot': str2float(split(status[1])[2])
+                        \ }
+            let r.words = {
+                        \ 'sel': str2nr(split(status[2])[0]),
+                        \ 'tot': str2nr(split(status[2])[2])
+                        \ }
+            let r.chars = {
+                        \ 'sel': str2nr(split(status[3])[0]),
+                        \ 'tot': str2nr(split(status[3])[2])
+                        \ }
+            let r.perc = float2nr((r.lines.sel/r.lines.tot)*100)
+            let r.lines.sel = float2nr(r.lines.sel)
+            let r.lines.tot = float2nr(r.lines.tot)
+        else " anything else; v:statusmsg =
             " Col {n} of {m}; Line {n} of {m}; Word {n} of {m};
             " \ Byte {n} of {m}
-            let s:words  = split(stat, '; ')[2]
-            let s:bytes  = split(stat, '; ')[3]
-            let s:things = {
-                        \ 'words': str2nr(split(s:words)[3]),
-                        \ 'thisw': str2nr(split(s:words)[1]),
-                        \ 'bytes': str2nr(split(s:bytes)[3]),
-                        \ 'thisb': str2nr(split(s:bytes)[1]),
+            let r.cols = {
+                        \ 'cur': str2nr(split(status[0])[1]),
+                        \ 'tot': str2nr(split(status[0])[3])
                         \ }
+            let r.lines = {
+                        \ 'cur': str2float(split(status[1])[1]),
+                        \ 'tot': str2float(split(status[1])[3])
+                        \ }
+            let r.words = {
+                        \ 'cur': str2nr(split(status[2])[1]),
+                        \ 'tot': str2nr(split(status[2])[3])
+                        \ }
+            let r.chars = {
+                        \ 'cur': str2nr(split(status[3])[1]),
+                        \ 'tot': str2nr(split(status[3])[3])
+                        \ }
+            let r.perc = float2nr((r.lines.cur/r.lines.tot)*100)
+            let r.lines.cur = float2nr(r.lines.cur)
+            let r.lines.tot = float2nr(r.lines.tot)
         endif
-        let v:statusmsg = s:old_status
-    endif
+        let r.mode = curmode
+        let v:statusmsg = s:oldstat
+    endif " if status != '--No lines in buffer--' "}}}
+
     call setpos('.', position)
-    return s:things[a:thing]
+    return r
+
 endfunction "}}}
 function! NextTabOrBuffer(dir) " {{{
     " TODO: add count
@@ -276,7 +307,7 @@ function! Status(winnr) "{{{
     let stat .= Color(active, 2, modified ? ' + ' : '')
 
     " readonly
-    let stat .= Color(active, 2, readonly ? 
+    let stat .= Color(active, 2, readonly ?
                 \ &ft == 'help' ? ' ? ' : ' ‼ '
                 \ : '')
 
@@ -544,7 +575,7 @@ augroup Trailing "{{{
     " Only show trailing spaces when out of insert mode
     au!
     au InsertEnter * :match none '\s\+$'
-    au InsertLeave * :match Error '\s\+$'
+    au InsertLeave * :match ErrorMsg '\s\+$'
 augroup END " }}}
 augroup ft_help "{{{
     au!
