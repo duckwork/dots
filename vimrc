@@ -1,5 +1,5 @@
-" ___________________ VIMRC -- CASE DUCKWORTH ______________________
-" vim:foldlevel=0:textwidth=0:nowrap:nolinebreak
+" ________________________ VIMRC -- CASE DUCKWORTH ___________________________
+" vim:foldenable:foldlevel=0:textwidth=0:nowrap:nolinebreak
 set nocompatible
 " Part 0:   Vundle {{{
 filetype off
@@ -98,82 +98,94 @@ let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
 " }}}
 " Part II:  Custom functions {{{
 " TODO: Move switch-testing to subfunctions?
-function! Rulerer() "{{{ A better ruler / Count() function
-    let s:oldstat = v:statusmsg
-    let position  = getpos('.')
-    exe ":silent normal g\<c-g>"
-    let status    = split(v:statusmsg, '; ')
-    let curmode   = mode()
-    let r  = {}
+function! Rulerer() "{{{ A better ruler
+    function! s:r() "{{{
+        let s:oldstat = v:statusmsg
+        let position  = getpos('.')
+        exe ":silent normal g\<c-g>"
+        let status    = split(v:statusmsg, '; ')
+        let curmode   = mode()
+        let r  = {}
 
-    if status != ['--No lines in buffer--'] "{{{
-        if curmode ==? 'v' " Visual or V-line; v:statusmsg =
-            "  Selected {n} of {m} Lines; {n} of {m} Words;
-            " \ {n} of {m} Bytes
-            let r.lines = {
-                        \ 'sel': str2float(split(status[0])[1]),
-                        \ 'tot': str2float(split(status[0])[3])
-                        \ }
-            let r.words = {
-                        \ 'sel': str2nr(split(status[1])[0]),
-                        \ 'tot': str2nr(split(status[1])[2])
-                        \ }
-            let r.chars = {
-                        \ 'sel': str2nr(split(status[2])[0]),
-                        \ 'tot': str2nr(split(status[2])[2])
-                        \ }
-            let r.perc = float2nr((r.lines.sel/r.lines.tot)*100)
-            let r.lines.sel = float2nr(r.lines.sel)
-            let r.lines.tot = float2nr(r.lines.tot)
-        elseif curmode == '' " Visual block; v:statusmsg =
-            " Selected {n} Cols; {n} of {m} Lines; {n} of {m} Words;
-            " \ {n} of {m} Bytes
-            let r.cols = { 'sel': str2nr(split(status[0])[1]) }
-            let r.lines = {
-                        \ 'sel': str2float(split(status[1])[0]),
-                        \ 'tot': str2float(split(status[1])[2])
-                        \ }
-            let r.words = {
-                        \ 'sel': str2nr(split(status[2])[0]),
-                        \ 'tot': str2nr(split(status[2])[2])
-                        \ }
-            let r.chars = {
-                        \ 'sel': str2nr(split(status[3])[0]),
-                        \ 'tot': str2nr(split(status[3])[2])
-                        \ }
-            let r.perc = float2nr((r.lines.sel/r.lines.tot)*100)
-            let r.lines.sel = float2nr(r.lines.sel)
-            let r.lines.tot = float2nr(r.lines.tot)
-        else " anything else; v:statusmsg =
-            " Col {n} of {m}; Line {n} of {m}; Word {n} of {m};
-            " \ Byte {n} of {m}
-            let r.cols = {
-                        \ 'cur': str2nr(split(status[0])[1]),
-                        \ 'tot': str2nr(split(status[0])[3])
-                        \ }
-            let r.lines = {
-                        \ 'cur': str2float(split(status[1])[1]),
-                        \ 'tot': str2float(split(status[1])[3])
-                        \ }
-            let r.words = {
-                        \ 'cur': str2nr(split(status[2])[1]),
-                        \ 'tot': str2nr(split(status[2])[3])
-                        \ }
-            let r.chars = {
-                        \ 'cur': str2nr(split(status[3])[1]),
-                        \ 'tot': str2nr(split(status[3])[3])
-                        \ }
+        if status != ['--No lines in buffer--'] "{{{
+            if curmode ==? 'v' " Visual or V-line; v:statusmsg =
+                "  Selected {n} of {m} Lines; {n} of {m} Words;
+                " \ {n} of {m} Bytes
+                let r.lines = {
+                            \ 'cur': str2float(split(status[0])[1]),
+                            \ 'tot': str2float(split(status[0])[3])
+                            \ }
+                let r.words = {
+                            \ 'cur': str2nr(split(status[1])[0]),
+                            \ 'tot': str2nr(split(status[1])[2])
+                            \ }
+                let r.chars = {
+                            \ 'cur': str2nr(split(status[2])[0]),
+                            \ 'tot': str2nr(split(status[2])[2])
+                            \ }
+                let r.stmode = 'v'
+            elseif curmode == '' " Visual block; v:statusmsg =
+                " Selected {n} Cols; {n} of {m} Lines; {n} of {m} Words;
+                " \ {n} of {m} Bytes
+                let r.cols = { 'cur': str2nr(split(status[0])[1]) }
+                let r.lines = {
+                            \ 'cur': str2float(split(status[1])[0]),
+                            \ 'tot': str2float(split(status[1])[2])
+                            \ }
+                let r.words = {
+                            \ 'cur': str2nr(split(status[2])[0]),
+                            \ 'tot': str2nr(split(status[2])[2])
+                            \ }
+                let r.chars = {
+                            \ 'cur': str2nr(split(status[3])[0]),
+                            \ 'tot': str2nr(split(status[3])[2])
+                            \ }
+                let r.stmode = 'V'
+            else " anything else; v:statusmsg =
+                " Col {n} of {m}; Line {n} of {m}; Word {n} of {m};
+                " \ Byte {n} of {m}
+                let r.cols = {
+                            \ 'cur': str2nr(split(status[0])[1]),
+                            \ 'tot': str2nr(split(status[0])[3])
+                            \ }
+                let r.lines = {
+                            \ 'cur': str2float(split(status[1])[1]),
+                            \ 'tot': str2float(split(status[1])[3])
+                            \ }
+                let r.words = {
+                            \ 'cur': str2nr(split(status[2])[1]),
+                            \ 'tot': str2nr(split(status[2])[3])
+                            \ }
+                let r.chars = {
+                            \ 'cur': str2nr(split(status[3])[1]),
+                            \ 'tot': str2nr(split(status[3])[3])
+                            \ }
+                let r.stmode = 'n'
+            endif
+            let r.mode = curmode
             let r.perc = float2nr((r.lines.cur/r.lines.tot)*100)
             let r.lines.cur = float2nr(r.lines.cur)
             let r.lines.tot = float2nr(r.lines.tot)
+            let v:statusmsg = s:oldstat
+        endif "}}}
+
+        call setpos('.', position)
+        return r
+    endfunction "}}}
+    let R = s:r()
+
+    function! s:myperc(nr)
+        if a:nr == 0
+            return 'Top'
+        elseif a:nr == 100
+            return 'Bot'
+        else
+            return printf('%2d%%', a:nr)
         endif
-        let r.mode = curmode
-        let v:statusmsg = s:oldstat
-    endif " if status != '--No lines in buffer--' "}}}
+    endfunction "
+    let R.myperc = s:myperc(R.perc)
 
-    call setpos('.', position)
-    return r
-
+    return R
 endfunction "}}}
 function! NextTabOrBuffer(dir) " {{{
     " TODO: add count
@@ -319,7 +331,7 @@ function! Status(winnr) "{{{
     " gutter & right side
     let stat .= '%='
 
-    let stat .= '%p%% ' " TODO: % like: Top, 01-99%, Bot
+    let stat .= '%p%%'
 
     return stat
 endfunction
@@ -433,7 +445,7 @@ set hlsearch          " highlight search matches
 set ignorecase        " ignore case as we search
 set smartcase         " ... unless a capital appears
 
-set foldenable        " Enable folding
+set nofoldenable      " Disable folding
 set foldmethod=marker " {{{ }}} mark folds
 set foldlevel=2       " Start open to second level
 set foldcolumn=0      " Fold columns in gutter
