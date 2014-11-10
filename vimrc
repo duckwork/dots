@@ -1,6 +1,7 @@
 " ______________________ VIMRC -- CASE DUCKWORTH _________________________
 " vim:foldlevel=0:textwidth=0:nowrap:nolinebreak
 set nocompatible
+let g:mytw = 78
 " Part 0:   Vundle {{{
 filetype off
 set runtimepath+=$HOME/.vim/bundle/Vundle.vim
@@ -48,7 +49,7 @@ Plugin 'vim-pandoc/vim-pandoc-syntax' " Pandoc syntax
 Plugin 'xolox/vim-misc'
 Plugin 'xolox/vim-shell'
 
-" PLUGINS THAT REQUIRE X
+" PLUGINS THAT REQUIRE ...
 if executable('git')
     Plugin 'airblade/vim-gitgutter' " Git stuff in signs column
     Plugin 'tpope/vim-fugitive'     " Git integration
@@ -60,11 +61,6 @@ endif
 if has('python')
     Plugin 'vim-scripts/gundo'     " Visualize Vim's undo tree
 endif
-
-"Plugin 'chriskempson/base16-vim'   " base 16 colors
-"Plugin 'q335r49/microviche'        " infinite pannable vim
-"Plugin 'AndrewRadev/splitjoin.vim' " Split and join code easily
-"Plugin 'ervandew/supertab'         " tab completion in (I)
 
 call vundle#end()                      "req'd
 filetype plugin indent on              "req'd
@@ -147,11 +143,7 @@ let g:airline#extensions#whitespace#mixed_indent_format = '>%s'
 let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
 let g:shell_fullsreen_message = 0 " I know what I'm doing
 
-if &textwidth " Use textwidth if defined; else use 78
-    let g:goyo_width = &textwidth
-else
-    let g:goyo_width = 78
-endif
+let g:goyo_width = g:mytw
 let g:goyo_margin_top = 2
 let g:goyo_margin_bottom = 2
 
@@ -162,7 +154,6 @@ let g:EasyMotion_prompt = '{n}/>> '
 let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
 " }}}
 " Part II:  Custom functions {{{
-" TODO: Move switch-testing to subfunctions?
 function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     let s:old_status = v:statusmsg
     let position = getpos(".")
@@ -216,11 +207,7 @@ function! ToggleBackground() " {{{
         set nocursorline
     else
         set background=dark
-        if &textwidth
-            let &colorcolumn = &textwidth
-        else
-            set colorcolumn=78
-        endif
+        let &colorcolumn = g:mytw
         set cursorline
     endif
 endfunction " }}}
@@ -352,15 +339,9 @@ set viminfo+=h                 " Disable 'hlsearch' on saved files
 " Part IV:  Customization {{{
 " --- Appearance {{{
 set background=dark            " Dark background (duh)
-if has('gui_running') || &t_Co>=88
-    colorscheme badwolf
-    set colorcolumn=78         " highlight column 78
-    set cursorline             " highlight the line the cursor's on
-else                           " 8-color terms can't handle colors
-    colorscheme desert
-    set colorcolumn=0
-    set nocursorline
-endif
+colorscheme solarized
+let &colorcolumn = g:mytw
+set cursorline             " highlight the line the cursor's on
 
 set laststatus=2               " use status line, always.
 
@@ -436,7 +417,7 @@ set foldtext=MyFoldText() " custom function (above)
 set gdefault          " default to global (line) substitutions
 set magic             " use better regexp
 
-" set textwidth=78
+" let &textwidth = g:mytw
 " --- }}}
 " --- Keybinds {{{
 " --- --- Keybinds for usability {{{
@@ -593,9 +574,7 @@ if has('gui_running') " --- GVIM {{{
     set guioptions-=e  " remove GUI tabline; use consoley one instead
     augroup OpenVimWithCustomSize
         au!
-        au VimEnter * let &columns = &textwidth
-                    \       ? &textwidth + &fdc + &nu * &nuw
-                    \       : 78 + &fdc + &nu * &nuw
+        au VimEnter * let &columns = g:mytw + &fdc + &nu * &nuw
         au VimEnter * set lines=36
     augroup END
     " --- Set fonts for different systems
