@@ -216,19 +216,28 @@ function! MyFoldText() "{{{
     let line = getline(v:foldstart)
 
     let nucolwidth = &fdc + &number * &numberwidth
-    let windowwidth = winwidth(0) - nucolwidth - 2
-    let foldedlinecount = v:foldend - v:foldstart
+    let windowwidth = winwidth(0) - nucolwidth - 4
+    let foldedlinecount = printf('%3d', v:foldend - v:foldstart)
 
     " expand tabs into spaces
     let onetab = strpart('          ', 0, &tabstop)
     let line = substitute(line, '\t', onetab, 'g')
 
+    let line = substitute(line, '^\s*', repeat('-', v:foldlevel - 1).' ', '')
+
     let foldchars = substitute(&fmr, ',.*', '', '')
     let line = substitute(line, foldchars, '', '')
+    let commentstr = substitute(&cms, '^\(.*\)%s\(.*\)', '\1\|\2', '')
+    let commentstr = substitute(commentstr, '|$', '', '')
+    let commentstr = substitute(commentstr, '\([\[\]\$\^\.\*|\\]\)',
+                                \ '\\\1', 'g')
+    let line = substitute(line, commentstr, '', '')
 
     let line = strpart(line, 0, windowwidth - 2 -len(foldedlinecount))
     let fillcharcount = windowwidth - len(line) - len(foldedlinecount)
-    return line . repeat("_",fillcharcount) . ' ' .foldedlinecount .  ' '
+
+    let line = line . repeat(' ', fillcharcount)
+    return line . v:foldlevel . '> ' .foldedlinecount .  ' '
 endfunction "}}}
 function! Typewriter(switch) " {{{
     " TODO: break out into plugin (GASP)
@@ -593,7 +602,7 @@ augroup ft_help "{{{
     au!
     au FileType help setlocal nospell
     au BufWinEnter *.txt
-                \ if &ft == 'help' && &columns >= 156 |
+                \ if &ft == 'help' && winwidth(0) >= 2 * 78 |
                 \     wincmd L |
                 \ endif
 augroup END "}}}
