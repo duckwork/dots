@@ -14,6 +14,7 @@ Plugin 'junegunn/limelight.vim'       " highlight only active para
 Plugin 'chrisbra/NrrwRgn'             " Open region in new win to ed
 
 " COLORS & EYECANDY
+Plugin 'itchyny/lightline.vim'
 Plugin 'reedes/vim-colors-pencil'
 Plugin 'nice/sweater'
 Plugin 'altercation/vim-colors-solarized'
@@ -95,6 +96,7 @@ let g:gundo_preview_bottom = 1 " Gundo preview takes up full width
 let g:EasyMotion_do_mapping = 0 " Disable Easymotion default mappings
 let g:EasyMotion_prompt = '{n}/>> '
 let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
+
 " }}}
 " Part II:  Custom functions {{{
 " TODO: Move switch-testing to subfunctions?
@@ -288,82 +290,82 @@ function! Typewriter(switch) " {{{
         endif
     endif
 endfunction " }}}
-function! Status(winnr) "{{{
-    let stat = ''
-    let active = winnr() == a:winnr
-    let buffer = winbufnr(a:winnr)
+" function! Status(winnr) "{{{
+"     let stat = ''
+"     let active = winnr() == a:winnr
+"     let buffer = winbufnr(a:winnr)
 
-    let modified = getbufvar(buffer, '&modified')
-    let readonly = getbufvar(buffer, '&readonly')
-    let fname = bufname(buffer)
+"     let modified = getbufvar(buffer, '&modified')
+"     let readonly = getbufvar(buffer, '&readonly')
+"     let fname = bufname(buffer)
 
-    function! Color(active, num, content)
-        if a:active && !has('win32')
-            return '%' . a:num . '*' . a:content . '%*'
-        else
-            return a:content
-        endif
-    endfunction
+"     function! Color(active, num, content)
+"         if a:active && !has('win32')
+"             return '%' . a:num . '*' . a:content . '%*'
+"         else
+"             return a:content
+"         endif
+"     endfunction
 
-    " column
-    let stat .= '%1*' . (col(".") / 100 >= 1 ? '%v ' : ' %2v ') . '%*'
+"     " column
+"     let stat .= '%1*' . (col(".") / 100 >= 1 ? '%v ' : ' %2v ') . '%*'
 
-    " file
-    let stat .= ' ' . Color(active, 4, active ? '»' : '›')
-    let stat .= ' %<'
+"     " file
+"     let stat .= ' ' . Color(active, 4, active ? '»' : '›')
+"     let stat .= ' %<'
 
-    if fname == '__Gundo__'
-        let stat .= 'Gundo'
-    elseif fname == '__Gundo_Preview__'
-        let stat .= 'Gundo Preview'
-    elseif fname == ''
-        let stat .= '______'
-    else
-        let stat .= '%f'
-    endif
+"     if fname == '__Gundo__'
+"         let stat .= 'Gundo'
+"     elseif fname == '__Gundo_Preview__'
+"         let stat .= 'Gundo Preview'
+"     elseif fname == ''
+"         let stat .= '______'
+"     else
+"         let stat .= '%f'
+"     endif
 
-    let stat .= ' ' . Color(active, 4, active ? '«' : '')
+"     let stat .= ' ' . Color(active, 4, active ? '«' : '')
 
-    " file modified
-    let stat .= Color(active, 2, modified ? ' + ' : '')
+"     " file modified
+"     let stat .= Color(active, 2, modified ? ' + ' : '')
 
-    " readonly
-    let stat .= Color(active, 2, readonly ?
-                \ &ft == 'help' ? ' ? ' : ' ‼ '
-                \ : '')
+"     " readonly
+"     let stat .= Color(active, 2, readonly ?
+"                 \ &ft == 'help' ? ' ? ' : ' ‼ '
+"                 \ : '')
 
-    " paste
-    if active && &paste
-        let stat .= '%2*' . ' P ' . '%*'
-    endif
+"     " paste
+"     if active && &paste
+"         let stat .= '%2*' . ' P ' . '%*'
+"     endif
 
-    " gutter & right side
-    let stat .= '%='
+"     " gutter & right side
+"     let stat .= '%='
 
-    let stat .= '%p%%'
+"     let stat .= '%p%%'
 
-    return stat
-endfunction
+"     return stat
+" endfunction
 
-" --- Status Autocmd
-function! SetStatus()
-    for nr in range(1, winnr('$'))
-        call setwinvar(nr, '&statusline', '%!Status('.nr.')')
-    endfor
-endfunction
+" " --- Status Autocmd
+" function! SetStatus()
+"     for nr in range(1, winnr('$'))
+"         call setwinvar(nr, '&statusline', '%!Status('.nr.')')
+"     endfor
+" endfunction
 
-augroup StatusUpdate
-    au!
-    au VimEnter,WinEnter,BufWinEnter,BufUnload * call SetStatus()
-    au BufWritePost $MYVIMRC call SetStatus()
-augroup END
+" augroup StatusUpdate
+"     au!
+"     au VimEnter,WinEnter,BufWinEnter,BufUnload * call SetStatus()
+"     au BufWritePost $MYVIMRC call SetStatus()
+" augroup END
 
-" --- Status Colors
-hi User1 guifg=#268bd2 gui=bold
-hi User2 guifg=#d33682 gui=bold
-hi User3 guifg=#719e07 gui=bold
-hi User4 guifg=#2aa198 gui=bold
-"}}}
+" " --- Status Colors
+" hi User1 guifg=#268bd2 gui=bold
+" hi User2 guifg=#d33682 gui=bold
+" hi User3 guifg=#719e07 gui=bold
+" hi User4 guifg=#2aa198 gui=bold
+" "}}}
 " }}}
 " Part III: Better ViM defaults {{{
 " because vanilla vim, though great, is still lacking.
