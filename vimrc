@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 " ______________________ VIMRC -- CASE DUCKWORTH _________________________
 " vim:foldlevel=0:textwidth=0:nowrap:nolinebreak
 set nocompatible
@@ -7,163 +6,49 @@ let g:mytw = 78
 filetype off
 set runtimepath+=$HOME/.vim/bundle/Vundle.vim
 call vundle#begin()
-=======
-" ViMrc ReVised
-" Case Duckworth (mahatman2)
-" vim:foldenable:foldlevel=0:tw=0:nowrap:nolinebreak
-" TODO: Lightline config
 
-set nocompatible " be iMproved
+Plugin 'gmarik/Vundle.vim'            " let Vundle manage Vundle
 
-" SETTINGS {{{
-syntax on                         " syntax highlighting
+" MAKING EDITING EASIER
+Plugin 'junegunn/goyo.vim'            " distraction-free writing
+Plugin 'junegunn/limelight.vim'       " highlight only active para
+Plugin 'chrisbra/NrrwRgn'             " Open region in new win to ed
 
-set number                        " show line numbers in gutter
-set relativenumber                " show line nums relative to current line
+" COLORS & EYECANDY
+Plugin 'reedes/vim-colors-pencil'
+Plugin 'nice/sweater'
+Plugin 'altercation/vim-colors-solarized'
+Plugin 'sjl/badwolf'
+Plugin 'bling/vim-airline'            " a better statusline
 
-set autoread                      " reload on a change, automagically
-set lazyredraw                    " don't redraw macros til done
-set hidden                        " Don't close unused buffers
+" TIM POPE
+Plugin 'tpope/vim-repeat'             " repeat plugin commands with
+Plugin 'tpope/vim-surround'           " format surroundings easily
+Plugin 'tpope/vim-abolish'            " Enhanced search and replace
+Plugin 'tpope/vim-speeddating'        " C-a C-x on dates and times
+Plugin 'tpope/vim-commentary'         " commenting
 
-set noerrorbells                  " don't beep on errors
-set visualbell                    " flash instead of beeping
+" FORMATTING TEXT
+Plugin 'Lokaltog/vim-easymotion'      " No more counting objects
+Plugin 'godlygeek/tabular'            " easy formatting of text tabs
+Plugin 'reedes/vim-textobj-sentence'  " Improved sentence textobj
 
-set splitbelow                    " new splits appear below current window
-set splitright                    " new splits appear to right of current
+" FILESYSTEM
+Plugin 'kien/ctrlp.vim'               " a fuzzy finder
+Plugin 'dockyard/vim-easydir'         " Create new dirs on-the-fly
 
-set formatoptions-=ro             " disable autocomments in Insert mode
-set backspace=indent,eol,start    " backspace across these things
+" FILETYPES
+Plugin 'mattn/emmet-vim'              " Zencoding for HTML
+Plugin 'gregsexton/MatchTag'          " Match HTML tags with %
+Plugin 'vim-pandoc/vim-pandoc'        " Pandoc helpers
+Plugin 'vimwiki/vimwiki'              " Personal wiki with ViM
+Plugin 'sheerun/vim-polyglot'         " Many syntax defs
+Plugin 'hail2u/vim-css3-syntax'       " syntax file for CSS3
+Plugin 'vim-pandoc/vim-pandoc-syntax' " Pandoc syntax
 
-" Which keys allow movement between lines
-set whichwrap=b,s                 " <BS> and <Space>
-set ww      +=<,>                 " Arrow keys (N, V)
-set ww      +=[,]                 " Arrow keys (I, R)
+Plugin 'xolox/vim-misc'
+Plugin 'xolox/vim-shell'
 
-set encoding=utf-8                " encoding = utf-8.
-set fileencoding=utf-8            " because year = 2014.
-set fileformat=unix               " Unix file ending default
-set fileformats=unix,dos          " but recognize DOS line endings
-
-set spelllang=en                  " I write in English
-
-set history=1000                  " set history length
-
-" What's saved between sessions in a viminfo file
-set viminfo='100                  " Save marks for 100 files max
-set vi    ^=!                     " Save global all-caps variables
-set vi    +=<50                   " Save 50 lines of registers
-set vi    +=s10                   " Save only first 10 Kb of each register
-set vi    +=h                     " Disable 'hlsearch' on saved files
-
-set laststatus=2                  " Always show statusline
-" set statusline=%!StatusLine()     "   [see function below]
-" set showtabline=2                 " Always show tabline
-" set tabline=%!TabLine()           "   [see function below]
-set wildmenu                      " Enhanced command-line completion
-set ruler                         " Show where the cursor is in the file
-set showcmd                       " Show command as it's being typed
-
-set foldenable                    " Enable folding
-set foldmethod=marker             " {{{ }}} mark folds
-set foldlevel=2                   " Start open to second level
-set foldcolumn=0                  " Fold columns in gutter
-set foldtext=FoldLine()           " Define what folded folds look like
-
-set scrolloff=8                   " Keep lines between cursor and edges
-set sidescrolloff=2               " Keep columns between cursor and edges
-set sidescroll=1                  " Scroll one column at a time sideways
-
-let g:tw = 78                     " Set textwidth without really setting tw
-" let &textwidth = g:tw             " Set textwidth
-set wrap                          " Soft wrap lines to window
-set linebreak                     " Wrap at words (def by 'breakat')
-set breakindent                   " soft-wrapped lines indent to prev line
-set listchars=tab:»»,trail:·,nbsp:~ " make it easy to see these
-
-" Make too-long lines obvious, but only on those lines
-call matchadd('ColorColumn', '\%'.g:tw.'v', 100)
-
-set expandtab                     " use spaces instead of tabs
-set autoindent                    " copy indent when inserting a new line
-set smartindent                   " autoindent based on conditions
-set shiftwidth=4                  " number of spaces for (auto)indent
-set softtabstop=4                 " number of spaces a <Tab> equals
-set shiftround                    " indent to nearest tabstop
-
-set incsearch                     " find the next match as we type
-set hlsearch                      " highlight search matches
-set ignorecase                    " ignore case as we search
-set smartcase                     " ... unless a capital appears
-
-set gdefault                      " default to global (line) substitutions
-set magic                         " use better regexp
-" This is a test for a thing, yeah?
-set directory=$HOME/.vim/swap//   " directory for swap files
-set backupdir=$HOME/.vim/backup// " directory for backups
-set backupcopy=yes                " copy the original and overwrite
-set backup                        " Keep backup files, just in case
-
-set undolevels=10000
-"}}}
-" KEYMAPS {{{
->>>>>>> lightline
-
-" Easier mode changing
-noremap ; :
-inoremap jj <Esc>
-inoremap kk <Esc>
-" Better leader
-let mapleader = ','
-
-" Better movement
-nnoremap <expr> j v:count ? 'j' : 'gj'
-nnoremap <expr> k v:count ? 'k' : 'gk'
-nnoremap H ^
-nnoremap L $
-
-" Better folding
-nnoremap <Space> za
-vnoremap <Space> za
-nnoremap <S-Space> zA
-vnoremap <S-Space> zA
-nnoremap <C-Space> zM
-nnoremap <C-S-Space> zR
-
-" More consistent capital operators (C, D, Y)
-nnoremap Y y$
-" Make X opposite of D (delete to beginning of line)
-nnoremap X d0
-
-" <BS> backspaces in normal mode
-nnoremap <BS> X
-" Make K opposite of J (join).
-nnoremap K i<CR><Esc>
-" Make <F1> help better.
-nnoremap <F1> K
-
-" Keep selection after indenting
-vnoremap <leader>> >gv
-vnoremap <leader>< <gv
-
-" Easier searching
-nnoremap gs :%s/
-xnoremap gs :s/
-
-" Window management
-nnoremap <C-k> <C-w>k
-nnoremap <C-j> <C-w>j
-nnoremap <C-h> <C-w>h
-nnoremap <C-l> <C-w>l
-nnoremap <S-UP>    <C-w>K
-nnoremap <S-DOWN>  <C-w>J
-nnoremap <S-LEFT>  <C-w>H
-nnoremap <S-RIGHT> <C-w>L
-nnoremap <C-UP>    <C-w>+
-nnoremap <C-DOWN>  <C-w>-
-nnoremap <C-LEFT>  <C-w>>
-nnoremap <C-RIGHT> <C-w><
-
-<<<<<<< HEAD
 " PLUGINS THAT REQUIRE ...
 if executable('git')
     Plugin 'airblade/vim-gitgutter' " Git stuff in signs column
@@ -241,134 +126,33 @@ let g:airline_mode_map = {
     \ 'S'  : 'S_',
     \ '' : 'S[',
     \ }
-=======
-" Edit and source vimrc easily
-nnoremap <leader>ev :edit $MYVIMRC<CR>
-nnoremap <leader>sv :source $MYVIMRC<CR>
-
-" Change current directory to filepath
-nnoremap <leader>cd :cd %:p:h<CR>
-" Explore the current directory
-nnoremap <silent> \ :Explore<CR>
-
-" Remove search highlight
-nnoremap <leader>/ :nohlsearch<CR>
-" Remove end-of-line whitespace
-nnoremap <silent> <leader>rs mz:%s/\s\+$//<CR>:let @/=''<CR>`z
-" Remove blank lines
-nnoremap <silent> <leader>rb mz:g/^$/d<CR>:let @/=''<CR>`z
-
-" Linux only: because `sudo vim` is easy to forget
-cmap w!! %!sudo tee > /dev/null %
->>>>>>> lightline
 "}}}
-" AUTOCOMMANDS {{{
-autocmd BufEnter * silent! lcd %:p:h
-autocmd ColorScheme * call UpdateCursorLineNumber()
+" --- --- Extensions {{{
+let g:airline#extensions#tabline#enabled           = 1
+let g:airline#extensions#tabline#fnamemod          = ':t'
+let g:airline#extensions#tabline#buffer_idx_mode   = 1
+let g:airline#extensions#ctrlp#show_adjacent_modes = 0
+let g:airline#extensions#quickfix#quickfix_text    = 'Qf'
+let g:airline#extensions#quickfix#location_text    = 'Lc'
 
-augroup TextEditing
-    au!
-    au BufNewFile,BufRead *.md set ft=markdown spell
-    au FileTYpe vimwiki,markdown,text setlocal spell
-augroup END
-
-" augroup ReloadVimrc
-"     au!
-"     au BufWritePost $MYVIMRC source $MYVIMRC
-" augroup END
-
-augroup CursorLine
-    au!
-    au WinLeave,InsertEnter * set nocursorline
-    au WinEnter,InsertLeave * set cursorline
-augroup END
-
-augroup TrailingSpaces
-    au!
-    au InsertEnter * match none '\s\+$'
-    au InsertEnter * set nolist
-    au InsertLeave * match Error '\s\+$'
-    au InsertLeave * set list
-augroup END
-
-augroup ft_Help
-    au!
-    au FileType help setlocal nospell nocursorline
-    au BufWinEnter *.txt
-                \ if &ft == 'help' && winwidth(0) >=2 * g:tw |
-                \     wincmd L |
-                \ endif
-augroup END
-
-augroup DoStatusLine
-    au!
-    au VimEnter,WinEnter,BufWinEnter * call <SID>RefreshStatus()
-augroup END
+let g:airline#extensions#whitespace#trailing_format     = '_%s'
+let g:airline#extensions#whitespace#mixed_indent_format = '>%s'
 "}}}
-" CAN I HAS(?) {{{
-if has('win32') " {{{
-    let &runtimepath .= ',$HOME\.vim'
+" --- }}}
 
-    let &clipboard = has('unnamedplus') ? 'unnamedplus' : 'unnamed'
+let g:shell_mappings_enabled  = 0 " Disable vim-shell mappings
+let g:shell_fullsreen_message = 0 " I know what I'm doing
 
-<<<<<<< HEAD
 let g:goyo_width = g:mytw
 let g:goyo_margin_top = 2
 let g:goyo_margin_bottom = 2
-=======
-    set viminfo+=rA:,rB:
 
-    let g:ctrlp_cmd = 'CtrlP D:\Dropbox'
-endif " }}}
-if has('mouse') " {{{
-    set mouse=a
-endif " }}}
-if has('gui_running') " {{{
-    " Remove all the GUI cruft
-    set guioptions-=m " remove menu bar
-    set go        -=T " remove toolbar
-    set go        -=r " remove right-hand scrollbar
-    set go        -=L " remove left-hand scrollbar
-    set go        -=e " remove GUI tablines
+let g:gundo_preview_bottom = 1 " Gundo preview takes up full width
 
-    " Set colors to 256
-    set t_Co=256
-
-    " Change font based on system
-    if has('gui_gtk2')
-        set guifont=Inconsolata
-    elseif has('x11')
-        "set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
-    elseif has('gui_win32')
-        set guifont=Consolas:h11:cANSI
-    endif
->>>>>>> lightline
-
-    " Start at this size
-    augroup CustomSizeVim
-        au!
-        au VimEnter * let &columns = g:tw + &fdc + &nu * &nuw
-        au VimEnter * set lines=36
-    augroup END
-
-endif " }}}
-if has('persistent_undo') "{{{
-    set undodir=$HOME/.vim/undoes//   " directory for UNDO TREE
-    set undofile
-    set undoreload=10000
-endif "}}}
-" Create .vim/* directories if they don't exist {{{
-if !isdirectory(expand(&directory))
-    call mkdir(expand(&directory), 'p')
-endif
-if !isdirectory(expand(&backupdir))
-    call mkdir(expand(&backupdir), 'p')
-endif
-if !isdirectory(expand(&undodir))
-    call mkdir(expand(&undodir), 'p')
-endif
+let g:EasyMotion_do_mapping = 0 " Disable Easymotion default mappings
+let g:EasyMotion_prompt = '{n}/>> '
+let g:EasyMotion_keys = 'asdfghjkl;qwertyuiopzxcvbnm'
 " }}}
-<<<<<<< HEAD
 " Part II:  Custom functions {{{
 function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
     let s:old_status = v:statusmsg
@@ -399,98 +183,23 @@ function! Count(thing) " {{{ Count(words|bytes|thisw|thisb)
                         \ 'bytes': str2nr(split(s:bytes)[2]),
                         \ 'thisb': str2nr(split(s:bytes)[0]),
                         \ }
-=======
-"}}}
-" FUNCTIONS {{{
-" --- Tools
-function! Rulerer() "{{{ A better ruler?
-        let s:oldstat = v:statusmsg
-        let position  = getpos('.')
-        exe ":silent normal g\<c-g>"
-        let status    = split(v:statusmsg, '; ')
-        let curmode   = mode()
-        let r  = {}
-
-        if status != ['--No lines in buffer--'] "{{{
-            if curmode ==? 'v' " Visual or V-line; v:statusmsg =
-                "  Selected {n} of {m} Lines; {n} of {m} Words;
-                " \ {n} of {m} Bytes
-                let r.lines = {
-                            \ 'cur': str2float(split(status[0])[1]),
-                            \ 'tot': str2float(split(status[0])[3])
-                            \ }
-                let r.words = {
-                            \ 'cur': str2nr(split(status[1])[0]),
-                            \ 'tot': str2nr(split(status[1])[2])
-                            \ }
-                let r.chars = {
-                            \ 'cur': str2nr(split(status[2])[0]),
-                            \ 'tot': str2nr(split(status[2])[2])
-                            \ }
-                let r.stmode = 'v'
-            elseif curmode == '' " Visual block; v:statusmsg =
-                " Selected {n} Cols; {n} of {m} Lines; {n} of {m} Words;
-                " \ {n} of {m} Bytes
-                let r.cols = { 'cur': str2nr(split(status[0])[1]) }
-                let r.lines = {
-                            \ 'cur': str2float(split(status[1])[0]),
-                            \ 'tot': str2float(split(status[1])[2])
-                            \ }
-                let r.words = {
-                            \ 'cur': str2nr(split(status[2])[0]),
-                            \ 'tot': str2nr(split(status[2])[2])
-                            \ }
-                let r.chars = {
-                            \ 'cur': str2nr(split(status[3])[0]),
-                            \ 'tot': str2nr(split(status[3])[2])
-                            \ }
-                let r.stmode = 'V'
-            else " anything else; v:statusmsg =
-                " Col {n} of {m}; Line {n} of {m}; Word {n} of {m};
-                " \ Byte {n} of {m}
-                let r.cols = {
-                            \ 'cur': str2nr(split(status[0])[1]),
-                            \ 'tot': str2nr(split(status[0])[3])
-                            \ }
-                let r.lines = {
-                            \ 'cur': str2float(split(status[1])[1]),
-                            \ 'tot': str2float(split(status[1])[3])
-                            \ }
-                let r.words = {
-                            \ 'cur': str2nr(split(status[2])[1]),
-                            \ 'tot': str2nr(split(status[2])[3])
-                            \ }
-                let r.chars = {
-                            \ 'cur': str2nr(split(status[3])[1]),
-                            \ 'tot': str2nr(split(status[3])[3])
-                            \ }
-                let r.stmode = 'n'
-            endif
-            let r.mode = curmode
-            let r.perc = float2nr((r.lines.cur/r.lines.tot)*100)
-            let r.lines.cur = float2nr(r.lines.cur)
-            let r.lines.tot = float2nr(r.lines.tot)
-            let v:statusmsg = s:oldstat
-        endif "}}}
-
-        call setpos('.', position)
-        return r
-
-    function! s:myperc(nr)
-        if a:nr == 0
-            return 'Top'
-        elseif a:nr == 100
-            return 'Bot'
->>>>>>> lightline
         else
-            return printf('%2d%%', a:nr)
+            " Col {n} of {m}; Line {n} of {m}; Word {n} of {m};
+            " \ Byte {n} of {m}
+            let s:words  = split(stat, '; ')[2]
+            let s:bytes  = split(stat, '; ')[3]
+            let s:things = {
+                        \ 'words': str2nr(split(s:words)[3]),
+                        \ 'thisw': str2nr(split(s:words)[1]),
+                        \ 'bytes': str2nr(split(s:bytes)[3]),
+                        \ 'thisb': str2nr(split(s:bytes)[1]),
+                        \ }
         endif
-    endfunction "
-    let r.myperc = s:myperc(r.perc)
-
-    return r
+        let v:statusmsg = s:old_status
+    endif
+    call setpos('.', position)
+    return s:things[a:thing]
 endfunction "}}}
-<<<<<<< HEAD
 function! ToggleBackground() " {{{
     if &background=="dark"
         set background=light
@@ -500,154 +209,109 @@ function! ToggleBackground() " {{{
         set background=dark
         let &colorcolumn = g:mytw
         set cursorline
-=======
-function! RenameFile() " {{{
-    let old_name = expand('%')
-    let new_name = input('New file name:', expand('%'), 'file')
-    if new_name != '' && new_name != old_name
-        exec ':saveas ' . new_name
-        " only work on Linux?
-        exec ':silent !rm ' . old_name
-        redraw!
->>>>>>> lightline
     endif
 endfunction " }}}
-" --- Managing buffers, tabs, windows
-function! ChTabBuf(motion) " {{{
-    if tabpagenr('$') == 1
-        " there is only 1 tab; switch buffers
-        if a:motion < 0
-            bprevious a:motion
+function! NextTabOrBuffer(dir) " {{{
+    " TODO: add count
+    " if there's only one tab, switch bufs; else switch tabs
+    if tabpagenr('$') == 1 "there's only one 'tab' so switch bufs
+        if a:dir < 0 " negative numbers go previous
+            bprevious
         else
-            bnext a:motion
+            bnext
         endif
-    else
-        if a:motion < 0
-            tabprevious a:motion
+    else " real tabs exist
+        if a:dir < 0
+            tabprevious
         else
-            let s:move = tabpagenr('$') - a:motion
-            tabprevious s:move
+            tabnext
         endif
+    endif
 endfunction " }}}
-function! CloseBufWin() " {{{
-    if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1
+function! CloseBufferOrWindow() " {{{
+    if len(filter(range(1, bufnr("$")), "buflisted(v:val)")) > 1
         bdelete
     else
         quit
     endif
 endfunction " }}}
-" --- Custom interface lines
-function! FoldLine() " {{{
+function! MyFoldText() "{{{
+    " Custom text on folds
     let line = getline(v:foldstart)
-    " Calculate widths
-    let nucolwidth = &fdc + &nu * &nuw
-    let windowwidth = winwidth(0) - nucolwidth - 3
-    let foldedlinecount = printf('%3d', v:foldend - v:foldstart)
-    " Replace tabs with spaces
-    let onetab = strpart('        ', 0, &tabstop)
+
+    let nucolwidth = &fdc + &number * &numberwidth
+    let windowwidth = winwidth(0) - nucolwidth - 2
+    let foldedlinecount = v:foldend - v:foldstart
+
+    " expand tabs into spaces
+    let onetab = strpart('          ', 0, &tabstop)
     let line = substitute(line, '\t', onetab, 'g')
-    " Get rid of fold markers
-    let foldmarks = substitute(&fmr, ',.*', '', '')
-    let line = substitute(line, foldmarks, '', '')
-    " Get rid of commentstring
-    let commentstr = substitute(&cms, '^\(.*\)%s\(.*\)', '\1\|\2', '')
-    let commentstr = substitute(commentstr, '|$', '', '')
-    let commentstr = substitute(commentstr, '\([\[\]\$\^\.\*|\\]\)',
-                                \ '\\\1', 'g')
-    let line = substitute(line, commentstr, '', 'g')
-    " Replace initial whitespace with dashes indicating foldlevel
-    let line = substitute(line, '^\s*', v:folddashes . ' ', '')
-    " Adjust line width to fit window
-    let line = strpart(line, 0, windowwidth - 2 - len(foldedlinecount))
+
+    let foldchars = substitute(&fmr, ',.*', '', '')
+    let line = substitute(line, foldchars, '', '')
+
+    let line = strpart(line, 0, windowwidth - 2 -len(foldedlinecount))
     let fillcharcount = windowwidth - len(line) - len(foldedlinecount)
-    " Output foldline
-    let line = line . repeat(' ', fillcharcount)
-    return line . v:foldlevel . '> ' . foldedlinecount . ' '
-endfunction " }}}
-function! StatusLine(winnr) " {{{
-    let status = ''
-    let isactive = winnr() == a:winnr
-    let buffer = winbufnr(a:winnr)
+    return line . repeat("_",fillcharcount) . ' ' .foldedlinecount .  ' '
+endfunction "}}}
+function! Typewriter(switch) " {{{
+    " TODO: break out into plugin (GASP)
+    "   - g:typewriter_font = Courier_New (?)
+    "   - g:typewriter_colo = peachpuff
+    " Typewriter on ----------------------
+    if a:switch == 'on'
+        let g:typewriter_enabled = 1
 
-    let ismodified = getbufvar(buffer, '&modified')
-    let isreadonly = getbufvar(buffer, '&readonly')
-    let filename = bufname(buffer)
+        let g:oldgfn  = &guifont
+        let g:oldcolo = g:colors_name
+        let g:oldbg   = &background
+        let g:oldcul  = &cursorline
+        let g:oldcc   = &colorcolumn
+        let g:oldrnu  = &relativenumber
+        let g:oldnu   = &number
 
-    function! Color(isactive, group, content)
-        if a:isactive && !has('win32')
-            return '%' . a:group . '*' . a:content . '%*'
-        else
-            return a:content
+        set guifont =Courier_Prime:h11:cANSI
+        colorscheme sweater
+        set nocursorline colorcolumn=0
+        set norelativenumber number
+
+        if exists("#airline")
+            let oldairlinetheme = g:airline_theme
+            AirlineTheme tomorrow
         endif
-    endfunction
+    " Typewriter off ---------------------
+    elseif a:switch == 'off'
+        let g:typewriter_enabled = 0
 
-    " Left side ===================================================
-    " Column indicator
-    function! Column()
-        let vc = virtcol('.')
-        let ruler_width = max([strlen(line('$')), (&numberwidth - 1)])
-        let column_width = strlen(vc)
-        let padding = ruler_width - column_width
-        let column = ''
-
-        if padding <= 0
-            let column .= vc
-        else
-            let column .= ' ' . vc . repeat(' ', padding)
+        let &guifont     = exists('g:oldgfn') ? g:oldgfn      : &gfn
+        let &background  = exists('g:oldbg')  ? g:oldbg       : &bg
+        let &cursorline  = exists('g:oldcul') ? g:oldcul      : &cul
+        let &colorcolumn = exists('g:oldcc')  ? g:oldcc       : &cc
+        let &relativenumber = exists('g:oldrnu') ? g:oldrnu   : &rnu
+        let &number      = exists('g:oldnu')  ? g:oldnu       : &nu
+        if exists('g:oldcolo')
+            exec "color " . g:oldcolo
         endif
-        return ' ' . column
-    endfunction
-    let status .= '%#CursorLineNr#'
-    let status .= '%{Column()}'
-    let status .= '%#StatusLine#'
 
-    " Filename
-    let status .= ' ' . Color(isactive, 4, isactive ? '»' : '›')
-    let status .= ' %<'
-
-    if filename == '__Gundo__'
-        let status .= 'Gundo'
-    elseif filename == '__Gundo_Preview__'
-        let status .= 'Gundo Preview'
-    elseif filename == ''
-        let status .= '______'
-    else
-        let status .= '%f'
-    endif
-
-    let status .= ' ' . Color(isactive, 4, isactive ? '«' : '')
-
-    " File status indicators
-    let status .= Color(isactive, 2, ismodified ? ' + ' : '')
-    let status .= Color(isactive, 2, isreadonly ?
-                \ &ft == 'help' ? ' ? ' : ' ‼ '
-                \ : '')
-    if isactive && &paste
-        let status .= '%2*' . ' P ' . '%*'
-    endif
-
-    let status .= '%=' " Gutter ====================================
-
-    " Right side ===================================================
-    let status .= '%p%%'
-
-    return status
-endfunction " }}}
-function! s:RefreshStatus() " {{{
-    for nr in range(1, winnr('$'))
-        call setwinvar(nr, '&statusline', '%!StatusLine('.nr.')')
-    endfor
-endfunction " }}}
-" function! TabLine() " {{{
-" endfunction " }}}
-" Custom theming
-function! UpdateCursorLineNumber() " {{{
-    if &bg == 'dark'
-        hi CursorLineNr guifg=#6c71c4 gui=bold
+        if exists("#airline") && exists('g:oldairlinetheme')
+            exec "AirlineTheme " . g:oldairlinetheme
+        endif
+    " Test if enabled --------------------
+    elseif a:switch == 'is?'
+        if !exists('g:typewriter_enabled')
+            let g:typewriter_enabled = 0
+        endif
+        return g:typewriter_enabled
+    " Toggle -----------------------------
+    elseif a:switch == 'tog'
+        if Typewriter('is?')
+            call Typewriter('off')
+        else
+            call Typewriter('on')
+        endif
     endif
 endfunction " }}}
 " }}}
-<<<<<<< HEAD
 " Part III: Better ViM defaults {{{
 " because vanilla vim, though great, is still lacking.
 syntax on                      " syntax highlighting is great
@@ -678,178 +342,54 @@ set background=dark            " Dark background (duh)
 colorscheme solarized
 let &colorcolumn = g:mytw
 set cursorline             " highlight the line the cursor's on
-=======
-" PLUGINS {{{
-" Vundle {{{
-filetype off
-set runtimepath+=$HOME/.vim/bundle/Vundle.vim
-call vundle#begin()
->>>>>>> lightline
 
-Plugin 'gmarik/Vundle.vim'            " let Vundle manage Vundle
+set laststatus=2               " use status line, always.
 
-" MAKING WRITING EASIER
-Plugin 'junegunn/goyo.vim'            " distraction-free writing
-Plugin 'junegunn/limelight.vim'       " highlight current paragraph
-Plugin 'chrisbra/NrrwRgn'             " Open region in new win to edit
-Plugin 'nelstrom/vim-visual-star-search' " Use * or # from V-Block
+" Statusline
+" TODO: this should reflect airline -ish
+set statusline=\>\ b%n              " buffernumber
+set statusline+=\>\ %f              " basename of file
+set statusline+=%m                  " modified flag [+] or [-] if ro
+set statusline+=%h                  " help buffer flag [help]
+set statusline+=%=                  " begin right-align
+set statusline+=\<%y\               " file type
+set statusline+=\<%3p%%)            " scroll percentage
+set statusline+=_%02l               " current line / total lines
+set statusline+=\|%02c              " current column
+"set statusline+={%{Count('words')}w " word count function
 
-" COLORS & EYECANDY
-Plugin 'junegunn/seoul256.vim'
-Plugin 'altercation/vim-colors-solarized'
-" Plugin 'itchyny/lightline.vim'
-" Plugin 'bling/vim-airline'            " a better statusline
+set wildmenu           " tab completion with a menu
+set ruler              " show ruler
+set showcmd            " Show partial commands as-you-type
 
-" FORMATTING TEXT
-Plugin 'godlygeek/tabular'            " Easy aligning of text
-Plugin 'junegunn/vim-easy-align'      " Vim alignment plugin
-Plugin 'Lokaltog/vim-easymotion'      " No more counting objects
-Plugin 'osyo-manga/vim-over'          " Preview :s/ searches
-Plugin 'AndrewRadev/splitjoin.vim'    " Easily split and join code structs
-Plugin 'wellle/targets.vim'           " Lots of new textobjects
-Plugin 'michaeljsmith/vim-indent-object' " Provides a textobj for indentblocks
-" [ by TIM POPE ]
-Plugin 'tpope/vim-abolish'            " Enhanced search and replace
-Plugin 'tpope/vim-commentary'         " Easier commmenting
-Plugin 'tpope/vim-repeat'             " Repeat plugin commands with .
-Plugin 'tpope/vim-speeddating'        " <C-a>,<C-x> on dates and times
-Plugin 'tpope/vim-surround'           " Format surroundings easily
-Plugin 'tpope/vim-endwise'            " Auto-add 'end*'s in code
-Plugin 'tpope/vim-characterize'       " Modernize `ga` behavior
-" FILESYSTEM
-Plugin 'kien/ctrlp.vim'               " A fuzzy file finder
-Plugin 'dockyard/vim-easydir'         " Create new dirs on-the-fly
+set scrolloff=8        " keep lines at bottom and top when scrolling
+set sidescrolloff=4    " keep lines at left and right when scrolling
+set sidescroll=1       " scroll sideways by characters, not screens
+set wrap               " set wrapping
+set linebreak          " wrap at words. (:help breakat)
 
-Plugin 'xolox/vim-shell'              " Integrate ViM and environment
-Plugin 'xolox/vim-misc'               " Required by vim-shell
+set splitbelow         " split new windows below
+set splitright         " ... and at the right
 
-" FILETYPES
-Plugin 'mattn/emmet-vim'              " Zencoding for HTML
-Plugin 'gregsexton/MatchTag'          " Match HTML tags with %
-Plugin 'hail2u/vim-css3-syntax'       " syntax file for CSS3
-
-Plugin 'vim-pandoc/vim-pandoc'        " Pandoc helpers
-Plugin 'vim-pandoc/vim-pandoc-syntax' " Pandoc syntax
-
-Plugin 'vimwiki/vimwiki'              " Personal wiki with ViM
-
-Plugin 'sheerun/vim-polyglot'         " Many syntax defs
-
-" PLUGINS THAT REQUIRE THINGS
-if executable('git')
-    Plugin 'tpope/vim-fugitive'       " Git integration
-    Plugin 'airblade/vim-gitgutter'   " Git stuff in signs column
+" Spelling
+hi SpellBad gui=undercurl
+" --- }}}
+" --- Acting {{{
+" --- --- ViM Operational Directories {{{
+set directory=$HOME/.vim/swap//    " directory for swap files
+set backupdir=$HOME/.vim/backup//  " directory for backups
+set undodir=$HOME/.vim/undoes//    " directory for UNDO TREE
+if !isdirectory(expand(&directory))
+    call mkdir(expand(&directory), "p")
 endif
-if executable('ag')
-    Plugin 'rking/ag.vim'             " Ag implementation
-    let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
+if !isdirectory(expand(&backupdir))
+    call mkdir(expand(&backupdir), "p")
 endif
-if executable('diff')
-    Plugin 'mbbill/undotree'          " Visualize Vim's undo tree
-    nnoremap <F5> :UndotreeToggle<CR>
-elseif has('python')
-    Plugin 'vim-scripts/gundo'        " Visualize Vim's undo tree
-    nnoremap <F5> :GundoToggle<CR>
+if !isdirectory(expand(&undodir))
+    call mkdir(expand(&undodir), "p")
 endif
-
-call vundle#end()                     " req'd
-filetype plugin indent on             " req'd
-"}}}
-" Plugin settings {{{
-" Ag
-let g:agprg = 'ag --column --smart-case'
-let g:aghighlight = 1 " highlight searches
-" Ctrl-P
-let g:ctrlp_map = '<C-p>'
-let g:ctrlp_use_caching = 1
-let g:ctrlp_clear_cache_on_exit = 0
-let g:ctrlp_cache_dir = $HOME . '/.vim/cache/ctrlp'
-let g:ctrlp_max_depth = 100
-let g:ctrlp_max_files = 0
-let g:ctrlp_match_window = 'bottom,order:ttb'
-let g:ctrlp_lazy_update = 1
-let g:ctrlp_extensions = [ 'dir', 'line', 'mixed', ]
-" EasyMotion
-let g:EasyMotion_do_mapping       = 0 " disable default mappings
-let g:EasyMotion_prompt           = '{n}/>> ' " prompt
-let g:EasyMotion_keys             = 'asdfghjkl;qwertyuiopzxcvbnm' " hints
-let g:EasyMotion_smartcase        = 1 " case-insensitive searches
-let g:EasyMotion_use_smartsign_us = 1 " 'case'-insensitive number row
-let g:EasyMotion_enter_jump_first = 1 " <CR> jumps to first hint
-" Emmet
-let g:user_emmet_leader_key = '<C-e>'
-" Goyo
-let g:goyo_width         = g:tw
-let g:goyo_margin_top    = 2
-let g:goyo_margin_bottom = g:goyo_margin_top
-" Gundo
-let g:gundo_preview_bottom = 1 " show preview below all windows
-let g:gundo_auto_preview   = 1 " default; toggle to speed up Gundo
-" Lightline
-let g:lightline = {}
-let g:lightline.colorscheme = 'solarized'
-let g:lightline.mode_map = {
-            \   'n' : 'Nr', 
-            \   'i' : 'In',
-            \   'R' : 'Re',
-            \   'v' : 'Vi',
-            \   'V' : 'V_',
-            \   '': 'V[',
-            \   'c' : 'Co',
-            \   's' : 'Se',
-            \   'S' : 'S_',
-            \   '': 'S[',
-            \   '?' : '--',
-            \   }
-let g:lightline.separator = { 'left': '', 'right': '' }
-let g:lightline.subseparator = { 'left': '|', 'right': '|' }
-let g:lightline.active = {
-            \ 'left' : [
-            \            [ 'col-fn', 'ispaste' ],
-            \            [ 'filename', 'filestatus' ],
-            \          ],
-            \ 'right': [
-            \            [ 'lineinfo' ],
-            \            [ 'percent'  ],
-            \            [ 'filetype' ],
-            \          ],
-            \ }
-let g:lightline.inactive = {
-            \ 'left' : [
-            \            [ 'filename' ],
-            \          ],
-            \ 'right': [
-            \            [ 'lineinfo' ],
-            \            [ 'percent' ],
-            \          ],
-            \ }
-let g:lightline.component = { 'filetype' : '%y' }
-let g:lightline.component_function = {
-            \   'col-fn': 'ColumnOrFilename',
-            \   'ispaste': 'IsPaste',
-            \   'filestatus': 'FileStatus',
-            \   'filename': 'MyFilename',
-            \ }
-" Solarized
-let g:solarized_menu = 0
-" Splitjoin
-let g:splitjoin_split_mapping = 'gK'
-" Undotree
-let g:undotree_WindowLayout = 2
-let g:undotree_DiffAutoOpen = 1
-let g:undotree_SetFocusWhenToggle = 1
-" Vim-shell
-let g:shell_mappings_enabled   = 0 " disable default mappings
-let g:shell_fullscreen_message = 0 " don't help me to get out of fullscreen
-" Vimwiki
-let g:vimwiki_hl_headers = 0 " enable different colored headers
-let g:vimwiki_hl_cb_checked = 1 " hilight [X] with Comment
 " }}}
-" Plugin keymaps {{{
-nnoremap <F11> :Goyo<CR>
-nnoremap <S-F11> :Fullscreen<CR>
 
-<<<<<<< HEAD
 set backupcopy=yes  " copy the original and overwrite
 set backup          " Keep backup files, just in case
 
@@ -941,82 +481,67 @@ nnoremap <leader>ev :edit $MYVIMRC<CR>
 nnoremap <leader>sv :source $MYVIMRC<CR>
 " Change working directory to that of current buffer
 nnoremap <leader>cd :cd %:p:h<CR>
-=======
-vnoremap \| :Tabularize /
->>>>>>> lightline
 
-nnoremap gS :%S/
-vnoremap gS :S/
+" remove search highlight
+nnoremap <leader>/ :nohlsearch<return><Esc>
 
-nnoremap <C-P> :CtrlPMRU<CR>
+" Remove whitespace from the ends of lines
+nnoremap <silent><leader>rs mz:%s/\s\+$//<CR>:let @/=''<CR>`z
+" Remove blank lines
+noremap <silent><leader>rb :g/^$/d<CR>
+" --- --- }}}
+" --- --- Function keybinds {{{
+nnoremap <leader>wc :echo 'words: ' . Count("words")<CR>
+nnoremap <silent> <F10> :call Typewriter('tog')<CR>
+nnoremap gt :call NextTabOrBuffer(1)<CR>
+nnoremap gT :call NextTabOrBuffer(-1)<CR>
+" --- --- }}}
+" --- --- Plugin keybinds {{{
+nnoremap <F11>   :Goyo<CR>
+nnoremap <S-F11> :Fullscreen<CR>
+nnoremap <F5>    :GundoToggle<CR>
+vnoremap \|      :Tabularize /
+let g:user_emmet_leader_key = '<c-e>'
+nnoremap <C-o>   :CtrlPMRU<CR>
 
-nmap f <Plug>(easymotion-sl)
-nmap t <Plug>(easymotion-bd-tl)
-omap f <Plug>(easymotion-sl)
-omap t <Plug>(easymotion-bd-tl)
-nmap F <Plug>(easymotion-s)
-nmap T <Plug>(easymotion-bd-t)
-omap F <Plug>(easymotion-s)
-omap T <Plug>(easymotion-bd-t)
-nmap <Leader>; <Plug>(easymotion-next)
-nmap <Leader>, <Plug>(easymotion-prev)
-"}}}
-" Plugin functions {{{
-" ‼‹›℗←↑→↓◊∫∂↔↕Ω˂˃˄˅§«»±¶¤Ππ‘’“”⌂
-function! ColumnOrFilename()
-    let s:fname = expand('%:t')
-    if s:fname =~ '__Gundo'
-        let s:corf = ' ±'
-    elseif s:fname =~ 'ControlP'
-        let s:corf = ' π'
-    elseif s:fname =~ 'NrrwRgn_'
-        let s:corf = ' ↕'
-    elseif &ft == 'netrw'
-        let s:corf = ' ⌂'
-    else
-        let s:corf = winwidth(0) > 60
-                    \ ?
-                    \   col('.') / 100 >= 1
-                    \   ? printf('%d', col('.'))
-                    \   : printf('%2d', col('.'))
-                    \ : ''
-    endif
-    return s:corf
-endfunction
-function! IsPaste()
-    if &paste
-        return 'P'
-    else
-        return ''
-    endif
-endfunction
-function! FileStatus()
-    if &ft =~? 'help'
-        return '?'
-    elseif &readonly
-        return '‼'
-    elseif &modified
-        return '+'
-    else
-        return ''
-    endif
-endfunction
-function! MyFilename()
-    let fname = expand('%:t')
-    if fname =~ '__Gundo' || fname =~ 'ControlP' || fname =~ 'NrrwRgn_' ||
-                \ &ft == 'netrw'
-        return ''
-    elseif len(fname) == 0
-        return '[_]'
-    else
-        return fname
-    endif
-endfunction
+nmap f <Plug>(easymotion-f)
+nmap t <Plug>(easymotion-t)
+omap f <Plug>(easymotion-f)
+omap t <Plug>(easymotion-t)
+nmap F <Plug>(easymotion-F)
+nmap T <Plug>(easymotion-T)
+omap F <Plug>(easymotion-F)
+omap T <Plug>(easymotion-T)
+nmap <Leader>, <Plug>(easymotion-repeat)
+" --- --- }}}
+" --- }}}
 " }}}
-" Plugin autocommands {{{
-augroup GoyoEvents
+" Part V:   Autocommands {{{
+" Change local current directory to buffer's directory
+autocmd BufEnter * silent! lcd %:p:h
+augroup GoyoEvents "{{{
+    " Goyo fullscreens
+    autocmd!
+    autocmd User GoyoEnter Limelight | set nocursorline
+    autocmd User GoyoLeave Limelight! |
+                \ if !Typewriter('is?') |
+                \     set cursorline | endif
+augroup END "}}}
+augroup TextEditing "{{{
+    " For texty filetypes
+    autocmd!
+    autocmd BufNewFile,BufRead *.md set ft=markdown spell
+    autocmd FileType vimwiki,markdown,text setlocal spell
+    " TODO: switch back when not a texty filetype
+augroup END "}}}
+augroup ReloadVimrc "{{{
+    " Source $MYVIMRC on save
+    autocmd!
+    autocmd BufWritePost $MYVIMRC source $MYVIMRC | AirlineRefresh
+augroup END "}}}
+augroup CurLine "{{{
+    " Only show cursorline in current window + normal mode
     au!
-<<<<<<< HEAD
     au WinLeave,InsertEnter * set nocursorline
     au WinEnter,InsertLeave * if !Typewriter('is?') |
                               \ set cursorline | endif
@@ -1101,23 +626,6 @@ if has('win32') " --- WINDOWS {{{
     imap <c-s> <Esc>:w<CR>a
 
     set viminfo+=rA:,rB: " Don't store marks for A: or B:
-=======
-    au User GoyoEnter Limelight
-    au User GoyoEnter set nocursorline
-
-    au User GoyoLeave Limelight!
-    au User GoyoLeave set cursorline
-augroup END
-"}}}
-" Plugin can I has(?) {{{
-" Create directories if not exist
-if !isdirectory(expand(g:ctrlp_cache_dir))
-    call mkdir(expand(g:ctrlp_cache_dir), 'p')
->>>>>>> lightline
 endif
-
-let g:ctrlp_mruf_case_sensitive = has('win32') ? 0 : 1
+" --- }}}
 " }}}
-"}}}
-
-colorscheme solarized
