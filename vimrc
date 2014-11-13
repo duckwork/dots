@@ -34,6 +34,8 @@ set fileencoding=utf-8            " because year = 2014.
 set fileformat=unix               " Unix file ending default
 set fileformats=unix,dos          " but recognize DOS line endings
 
+set spelllang=en                  " I write in English
+
 set history=1000                  " set history length
 
 " What's saved between sessions in a viminfo file
@@ -45,7 +47,7 @@ set vi    +=h                     " Disable 'hlsearch' on saved files
 
 set laststatus=2                  " Always show statusline
 " set statusline=%!StatusLine()     "   [see function below]
-set showtabline=2                 " Always show tabline
+" set showtabline=2                 " Always show tabline
 " set tabline=%!TabLine()           "   [see function below]
 set wildmenu                      " Enhanced command-line completion
 set ruler                         " Show where the cursor is in the file
@@ -66,6 +68,10 @@ let g:tw = 78                     " Set textwidth without really setting tw
 set wrap                          " Soft wrap lines to window
 set linebreak                     " Wrap at words (def by 'breakat')
 set breakindent                   " soft-wrapped lines indent to prev line
+set listchars=tab:»»,trail:·,nbsp:~ " make it easy to see these
+
+" Make too-long lines obvious, but only on those lines
+call matchadd('ColorColumn', '\%'.g:tw.'v', 100)
 
 set expandtab                     " use spaces instead of tabs
 set autoindent                    " copy indent when inserting a new line
@@ -81,12 +87,13 @@ set smartcase                     " ... unless a capital appears
 
 set gdefault                      " default to global (line) substitutions
 set magic                         " use better regexp
-
+" This is a test for a thing, yeah?
 set directory=$HOME/.vim/swap//   " directory for swap files
 set backupdir=$HOME/.vim/backup// " directory for backups
-set undodir=$HOME/.vim/undoes//   " directory for UNDO TREE
 set backupcopy=yes                " copy the original and overwrite
 set backup                        " Keep backup files, just in case
+
+set undolevels=10000
 "}}}
 " KEYMAPS {{{
 
@@ -166,7 +173,7 @@ cmap w!! %!sudo tee > /dev/null %
 "}}}
 " AUTOCOMMANDS {{{
 autocmd BufEnter * silent! lcd %:p:h
-autocmd ColorScheme * call UpdateCursorLine()
+autocmd ColorScheme * call UpdateCursorLineNumber()
 
 augroup TextEditing
     au!
@@ -174,10 +181,10 @@ augroup TextEditing
     au FileTYpe vimwiki,markdown,text setlocal spell
 augroup END
 
-augroup ReloadVimrc
-    au!
-    au BufWritePost $MYVIMRC source $MYVIMRC
-augroup END
+" augroup ReloadVimrc
+"     au!
+"     au BufWritePost $MYVIMRC source $MYVIMRC
+" augroup END
 
 augroup CursorLine
     au!
@@ -188,22 +195,23 @@ augroup END
 augroup TrailingSpaces
     au!
     au InsertEnter * match none '\s\+$'
+    au InsertEnter * set nolist
     au InsertLeave * match Error '\s\+$'
+    au InsertLeave * set list
 augroup END
-
-" augroup StatusUpdate
-"     au!
-"     au VimEnter,WinEnter,BufWinEnter,BufUnload * call SetStatusLine()
-"     au BufWritePost $MYVIMRC call SetStatus()
-" augroup END
 
 augroup ft_Help
     au!
-    au FileType help setlocal nospell
+    au FileType help setlocal nospell nocursorline
     au BufWinEnter *.txt
                 \ if &ft == 'help' && winwidth(0) >=2 * g:tw |
                 \     wincmd L |
                 \ endif
+augroup END
+
+augroup DoStatusLine
+    au!
+    au VimEnter,WinEnter,BufWinEnter * call <SID>RefreshStatus()
 augroup END
 "}}}
 " CAN I HAS(?) {{{
@@ -247,6 +255,11 @@ if has('gui_running') " {{{
     augroup END
 
 endif " }}}
+if has('persistent_undo') "{{{
+    set undodir=$HOME/.vim/undoes//   " directory for UNDO TREE
+    set undofile
+    set undoreload=10000
+endif "}}}
 " Create .vim/* directories if they don't exist {{{
 if !isdirectory(expand(&directory))
     call mkdir(expand(&directory), 'p')
@@ -409,68 +422,84 @@ function! FoldLine() " {{{
     let line = line . repeat(' ', fillcharcount)
     return line . v:foldlevel . '> ' . foldedlinecount . ' '
 endfunction " }}}
-" function! StatusLine(winnr) " {{{
-"     let status = ''
-"     let isactive = winnr() == a:winnr
-"     let buffer = winbufnr(a:winnr)
+function! StatusLine(winnr) " {{{
+    let status = ''
+    let isactive = winnr() == a:winnr
+    let buffer = winbufnr(a:winnr)
 
-"     let ismodified = getbufvar(buffer, '&modified')
-"     let isreadonly = getbufvar(buffer, '&readonly')
-"     let filename = bufname(buffer)
+    let ismodified = getbufvar(buffer, '&modified')
+    let isreadonly = getbufvar(buffer, '&readonly')
+    let filename = bufname(buffer)
 
-"     function! Color(isactive, group, content)
-"         if a:isactive && !has('win32')
-"             return '%' . a:group . '*' . a:content . '%*'
-"         else
-"             return a:content
-"         endif
-"     endfunction
+    function! Color(isactive, group, content)
+        if a:isactive && !has('win32')
+            return '%' . a:group . '*' . a:content . '%*'
+        else
+            return a:content
+        endif
+    endfunction
 
-"     " Left side ===================================================
-"     " Column indicator
-"     let status .= '%1*' . (col('.') / 100 >= 1 ? '%v ' : ' %2v ') . '%*'
+    " Left side ===================================================
+    " Column indicator
+    function! Column()
+        let vc = virtcol('.')
+        let ruler_width = max([strlen(line('$')), (&numberwidth - 1)])
+        let column_width = strlen(vc)
+        let padding = ruler_width - column_width
+        let column = ''
 
-"     " Filename
-"     let status .= ' ' . Color(isactive, 4, isactive ? '»' : '›')
-"     let status .= ' %<'
+        if padding <= 0
+            let column .= vc
+        else
+            let column .= ' ' . vc . repeat(' ', padding)
+        endif
+        return ' ' . column
+    endfunction
+    let status .= '%#CursorLineNr#'
+    let status .= '%{Column()}'
+    let status .= '%#StatusLine#'
 
-"     if filename == '__Gundo__'
-"         let status .= 'Gundo'
-"     elseif filename == '__Gundo_Preview__'
-"         let status .= 'Gundo Preview'
-"     elseif filename == ''
-"         let status .= '______'
-"     else
-"         let status .= '%f'
-"     endif
+    " Filename
+    let status .= ' ' . Color(isactive, 4, isactive ? '»' : '›')
+    let status .= ' %<'
 
-"     let status .= ' ' . Color(isactive, 4, isactive ? '«' : '')
+    if filename == '__Gundo__'
+        let status .= 'Gundo'
+    elseif filename == '__Gundo_Preview__'
+        let status .= 'Gundo Preview'
+    elseif filename == ''
+        let status .= '______'
+    else
+        let status .= '%f'
+    endif
 
-"     " File status indicators
-"     let status .= Color(isactive, 2, ismodified ? ' + ' : '')
-"     let status .= Color(isactive, 2, isreadonly ?
-"                 \ &ft == 'help' ? ' ? ' : ' ‼ '
-"                 \ : '')
-"     if isactive && &paste
-"         let status .= '%2*' . ' P ' . '%*'
-"     endif
+    let status .= ' ' . Color(isactive, 4, isactive ? '«' : '')
 
-"     let status .= '%=' " Gutter ====================================
+    " File status indicators
+    let status .= Color(isactive, 2, ismodified ? ' + ' : '')
+    let status .= Color(isactive, 2, isreadonly ?
+                \ &ft == 'help' ? ' ? ' : ' ‼ '
+                \ : '')
+    if isactive && &paste
+        let status .= '%2*' . ' P ' . '%*'
+    endif
 
-"     " Right side ===================================================
-"     let status .= '%p%%'
+    let status .= '%=' " Gutter ====================================
 
-"     return status
-" endfunction " }}}
-" function! SetStatusLine() " {{{
-"     for nr in range(1, winnr('$'))
-"         call setwinvar(nr, '&statusline', '%!Status('.nr.')')
-"     endfor
-" endfunction " }}}
+    " Right side ===================================================
+    let status .= '%p%%'
+
+    return status
+endfunction " }}}
+function! s:RefreshStatus() " {{{
+    for nr in range(1, winnr('$'))
+        call setwinvar(nr, '&statusline', '%!StatusLine('.nr.')')
+    endfor
+endfunction " }}}
 " function! TabLine() " {{{
 " endfunction " }}}
 " Custom theming
-function! UpdateCursorLine() " {{{
+function! UpdateCursorLineNumber() " {{{
     if &bg == 'dark'
         hi CursorLineNr guifg=#6c71c4 gui=bold
     endif
@@ -488,11 +517,12 @@ Plugin 'gmarik/Vundle.vim'            " let Vundle manage Vundle
 Plugin 'junegunn/goyo.vim'            " distraction-free writing
 Plugin 'junegunn/limelight.vim'       " highlight current paragraph
 Plugin 'chrisbra/NrrwRgn'             " Open region in new win to edit
+Plugin 'nelstrom/vim-visual-star-search' " Use * or # from V-Block
 
 " COLORS & EYECANDY
 Plugin 'junegunn/seoul256.vim'
 Plugin 'altercation/vim-colors-solarized'
-Plugin 'itchyny/lightline.vim'
+" Plugin 'itchyny/lightline.vim'
 " Plugin 'bling/vim-airline'            " a better statusline
 
 " FORMATTING TEXT
@@ -500,13 +530,17 @@ Plugin 'godlygeek/tabular'            " Easy aligning of text
 Plugin 'junegunn/vim-easy-align'      " Vim alignment plugin
 Plugin 'Lokaltog/vim-easymotion'      " No more counting objects
 Plugin 'osyo-manga/vim-over'          " Preview :s/ searches
+Plugin 'AndrewRadev/splitjoin.vim'    " Easily split and join code structs
+Plugin 'wellle/targets.vim'           " Lots of new textobjects
+Plugin 'michaeljsmith/vim-indent-object' " Provides a textobj for indentblocks
 " [ by TIM POPE ]
 Plugin 'tpope/vim-abolish'            " Enhanced search and replace
 Plugin 'tpope/vim-commentary'         " Easier commmenting
 Plugin 'tpope/vim-repeat'             " Repeat plugin commands with .
 Plugin 'tpope/vim-speeddating'        " <C-a>,<C-x> on dates and times
 Plugin 'tpope/vim-surround'           " Format surroundings easily
-
+Plugin 'tpope/vim-endwise'            " Auto-add 'end*'s in code
+Plugin 'tpope/vim-characterize'       " Modernize `ga` behavior
 " FILESYSTEM
 Plugin 'kien/ctrlp.vim'               " A fuzzy file finder
 Plugin 'dockyard/vim-easydir'         " Create new dirs on-the-fly
@@ -535,8 +569,12 @@ if executable('ag')
     Plugin 'rking/ag.vim'             " Ag implementation
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
 endif
-if has('python')
+if executable('diff')
+    Plugin 'mbbill/undotree'          " Visualize Vim's undo tree
+    nnoremap <F5> :UndotreeToggle<CR>
+elseif has('python')
     Plugin 'vim-scripts/gundo'        " Visualize Vim's undo tree
+    nnoremap <F5> :GundoToggle<CR>
 endif
 
 call vundle#end()                     " req'd
@@ -555,16 +593,7 @@ let g:ctrlp_max_depth = 100
 let g:ctrlp_max_files = 0
 let g:ctrlp_match_window = 'bottom,order:ttb'
 let g:ctrlp_lazy_update = 1
-" let g:ctrlp_status_func = {
-"           \ 'main': 'CtrlPStatusLine',
-"           \ 'prog': 'CtrlPProgressLine',
-"           \ }
-let g:ctrlp_extensions = [
-            \ 'dir',
-            \ 'line',
-            \ 'mixed',
-            \ ] " Search for dirs to :cd, lines in open bufs,
-                " files, buffers, MRU at once
+let g:ctrlp_extensions = [ 'dir', 'line', 'mixed', ]
 " EasyMotion
 let g:EasyMotion_do_mapping       = 0 " disable default mappings
 let g:EasyMotion_prompt           = '{n}/>> ' " prompt
@@ -582,11 +611,58 @@ let g:goyo_margin_bottom = g:goyo_margin_top
 let g:gundo_preview_bottom = 1 " show preview below all windows
 let g:gundo_auto_preview   = 1 " default; toggle to speed up Gundo
 " Lightline
-let g:lightline = {
-            \ 'colorscheme': 'solarized'
+let g:lightline = {}
+let g:lightline.colorscheme = 'solarized'
+let g:lightline.mode_map = {
+            \   'n' : 'Nr', 
+            \   'i' : 'In',
+            \   'R' : 'Re',
+            \   'v' : 'Vi',
+            \   'V' : 'V_',
+            \   '': 'V[',
+            \   'c' : 'Co',
+            \   's' : 'Se',
+            \   'S' : 'S_',
+            \   '': 'S[',
+            \   '?' : '--',
+            \   }
+let g:lightline.separator = { 'left': '', 'right': '' }
+let g:lightline.subseparator = { 'left': '|', 'right': '|' }
+let g:lightline.active = {
+            \ 'left' : [
+            \            [ 'col-fn', 'ispaste' ],
+            \            [ 'filename', 'filestatus' ],
+            \          ],
+            \ 'right': [
+            \            [ 'lineinfo' ],
+            \            [ 'percent'  ],
+            \            [ 'filetype' ],
+            \          ],
+            \ }
+let g:lightline.inactive = {
+            \ 'left' : [
+            \            [ 'filename' ],
+            \          ],
+            \ 'right': [
+            \            [ 'lineinfo' ],
+            \            [ 'percent' ],
+            \          ],
+            \ }
+let g:lightline.component = { 'filetype' : '%y' }
+let g:lightline.component_function = {
+            \   'col-fn': 'ColumnOrFilename',
+            \   'ispaste': 'IsPaste',
+            \   'filestatus': 'FileStatus',
+            \   'filename': 'MyFilename',
             \ }
 " Solarized
 let g:solarized_menu = 0
+" Splitjoin
+let g:splitjoin_split_mapping = 'gK'
+" Undotree
+let g:undotree_WindowLayout = 2
+let g:undotree_DiffAutoOpen = 1
+let g:undotree_SetFocusWhenToggle = 1
 " Vim-shell
 let g:shell_mappings_enabled   = 0 " disable default mappings
 let g:shell_fullscreen_message = 0 " don't help me to get out of fullscreen
@@ -597,8 +673,6 @@ let g:vimwiki_hl_cb_checked = 1 " hilight [X] with Comment
 " Plugin keymaps {{{
 nnoremap <F11> :Goyo<CR>
 nnoremap <S-F11> :Fullscreen<CR>
-
-nnoremap <F5> :GundoToggle<CR>
 
 vnoremap \| :Tabularize /
 
@@ -619,10 +693,56 @@ nmap <Leader>; <Plug>(easymotion-next)
 nmap <Leader>, <Plug>(easymotion-prev)
 "}}}
 " Plugin functions {{{
-function! CtrlPStatusLine() " {{{
-endfunction " }}}
-function! CtrlPProgressLine() " {{{
-endfunction " }}}
+" ‼‹›℗←↑→↓◊∫∂↔↕Ω˂˃˄˅§«»±¶¤Ππ‘’“”⌂
+function! ColumnOrFilename()
+    let s:fname = expand('%:t')
+    if s:fname =~ '__Gundo'
+        let s:corf = ' ±'
+    elseif s:fname =~ 'ControlP'
+        let s:corf = ' π'
+    elseif s:fname =~ 'NrrwRgn_'
+        let s:corf = ' ↕'
+    elseif &ft == 'netrw'
+        let s:corf = ' ⌂'
+    else
+        let s:corf = winwidth(0) > 60
+                    \ ?
+                    \   col('.') / 100 >= 1
+                    \   ? printf('%d', col('.'))
+                    \   : printf('%2d', col('.'))
+                    \ : ''
+    endif
+    return s:corf
+endfunction
+function! IsPaste()
+    if &paste
+        return 'P'
+    else
+        return ''
+    endif
+endfunction
+function! FileStatus()
+    if &ft =~? 'help'
+        return '?'
+    elseif &readonly
+        return '‼'
+    elseif &modified
+        return '+'
+    else
+        return ''
+    endif
+endfunction
+function! MyFilename()
+    let fname = expand('%:t')
+    if fname =~ '__Gundo' || fname =~ 'ControlP' || fname =~ 'NrrwRgn_' ||
+                \ &ft == 'netrw'
+        return ''
+    elseif len(fname) == 0
+        return '[_]'
+    else
+        return fname
+    endif
+endfunction
 " }}}
 " Plugin autocommands {{{
 augroup GoyoEvents
