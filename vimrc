@@ -195,10 +195,10 @@ augroup InsertAnnoyances
                 \ set cursorline | endif
 
     au InsertEnter * match none '\s\+$'
-    au InsertEnter * set nolist
+    au InsertEnter * set nolist colorcolumn=0
     au InsertLeave * match Error '\s\+$'
     au InsertLeave * if !get(b:, 'typewriter_loaded', 0) |
-                \ set list | endif
+                \ set list | let &cc = g:tw | endif
 augroup END
 
 augroup ft_Help
@@ -290,16 +290,6 @@ function! WordCount() " {{{ I'm only using the WordCount part
                     \   split(status)[3] . '/' split(status)[5] . 'L'
     endif
 endfunction " }}}
-" function! RenameFile() " {{{
-"     let old_name = expand('%')
-"     let new_name = input('New file name:', expand('%'), 'file')
-"     if new_name != '' && new_name != old_name
-"         exec ':saveas ' . new_name
-"         " only work on Linux?
-"         exec ':silent !rm ' . old_name
-"         redraw!
-"     endif
-" endfunction " }}}
 " --- Managing buffers, tabs, windows
 function! ChTabBuf(motion) " {{{
     if tabpagenr('$') == 1
@@ -456,8 +446,8 @@ function! s:RefreshStatus() " {{{
         call setwinvar(nr, '&statusline', '%!StatusLine('.nr.')')
     endfor
 endfunction " }}}
-" function! TabLine() " {{{
-" endfunction " }}}
+function! TabLine() " {{{
+endfunction " }}}
 " Custom theming
 function! UpdateCursorLineNumber() " {{{
     if &bg == 'dark'
