@@ -441,10 +441,16 @@ function! StatusLine(winnr) " {{{
 
     return status
 endfunction " }}}
-function! s:RefreshStatus() " {{{
-    for nr in range(1, winnr('$'))
-        call setwinvar(nr, '&statusline', '%!StatusLine('.nr.')')
-    endfor
+function! s:RefreshStatus(...) " {{{
+    if !a:0
+        for nr in range(1, winnr('$'))
+            call setwinvar(nr, '&statusline', '%!StatusLine('.nr.')')
+        endfor
+    else
+        for nr in range(1, winnr('$'))
+            call setwinvar(nr, '&statusline', '')
+        endfor
+    endif
 endfunction " }}}
 function! TabLine() " {{{
 endfunction " }}}
@@ -667,9 +673,11 @@ augroup GoyoEvents
     au!
     au User GoyoEnter Limelight
     au User GoyoEnter set nocursorline
+    au User GoyoEnter call <SID>RefreshStatus(1)
 
     au User GoyoLeave Limelight!
-    au User GoyoLeave set cursorline
+    au User GoyoLeave set cursorline laststatus=2
+    au User GoyoLeave call <SID>RefreshStatus()
 augroup END
 "}}}
 " Plugin can I has(?) {{{
