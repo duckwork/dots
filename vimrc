@@ -69,8 +69,9 @@ set linebreak                     " Wrap at words (def by 'breakat')
 set breakindent                   " soft-wrapped lines indent to prev line
 set listchars=tab:»»,trail:·,nbsp:~ " make it easy to see these
 
-" Make too-long lines obvious, but only on those lines
-call matchadd('ColorColumn', '\%'.g:tw.'v', 100)
+" " Make too-long lines obvious, but only on those lines
+" call matchadd('ColorColumn', '\%'.g:tw.'v', 100)
+let &colorcolumn = g:tw
 
 set expandtab                     " use spaces instead of tabs
 set autoindent                    " copy indent when inserting a new line
@@ -176,8 +177,9 @@ autocmd ColorScheme * call UpdateCursorLineNumber()
 
 augroup TextEditing
     au!
-    au BufNewFile,BufRead *.md set ft=markdown spell
-    au FileTYpe vimwiki,markdown,text setlocal spell
+    au BufNewFile,BufRead *.{md,markdown,mdown,mkd,mkdn,txt} setf markdown
+    au FileType vimwiki,markdown setlocal spell
+    au FileType markdown call Typewriter('on')
 augroup END
 
 " augroup ReloadVimrc
@@ -185,18 +187,18 @@ augroup END
 "     au BufWritePost $MYVIMRC source $MYVIMRC
 " augroup END
 
-augroup CursorLine
+augroup InsertAnnoyances
     au!
-    au WinLeave,InsertEnter * set nocursorline
-    au WinEnter,InsertLeave * set cursorline
-augroup END
 
-augroup TrailingSpaces
-    au!
+    au WinLeave,InsertEnter * set nocursorline
+    au WinEnter,InsertLeave * if !get(b:, 'typewriter_loaded', 0) |
+                \ set cursorline | endif
+
     au InsertEnter * match none '\s\+$'
     au InsertEnter * set nolist
     au InsertLeave * match Error '\s\+$'
-    au InsertLeave * set list
+    au InsertLeave * if !get(b:, 'typewriter_loaded', 0) |
+                \ set list | endif
 augroup END
 
 augroup ft_Help
@@ -273,102 +275,31 @@ endif
 "}}}
 " FUNCTIONS {{{
 " --- Tools
-function! Rulerer() "{{{ A better ruler?
-        let s:oldstat = v:statusmsg
-        let position  = getpos('.')
-        exe ":silent normal g\<c-g>"
-        let status    = split(v:statusmsg, '; ')
-        let curmode   = mode()
-        let r  = {}
+function! WordCount() " {{{ I'm only using the WordCount part
+    let s:oldstat = v:statusmsg
+    let position = getpos('.')
+    exe ":silent normal g\<c-g>"
+    let status = v:statusmsg
 
-        if status != ['--No lines in buffer--'] "{{{
-            if curmode ==? 'v' " Visual or V-line; v:statusmsg =
-                "  Selected {n} of {m} Lines; {n} of {m} Words;
-                " \ {n} of {m} Bytes
-                let r.lines = {
-                            \ 'cur': str2float(split(status[0])[1]),
-                            \ 'tot': str2float(split(status[0])[3])
-                            \ }
-                let r.words = {
-                            \ 'cur': str2nr(split(status[1])[0]),
-                            \ 'tot': str2nr(split(status[1])[2])
-                            \ }
-                let r.chars = {
-                            \ 'cur': str2nr(split(status[2])[0]),
-                            \ 'tot': str2nr(split(status[2])[2])
-                            \ }
-                let r.stmode = 'v'
-            elseif curmode == '' " Visual block; v:statusmsg =
-                " Selected {n} Cols; {n} of {m} Lines; {n} of {m} Words;
-                " \ {n} of {m} Bytes
-                let r.cols = { 'cur': str2nr(split(status[0])[1]) }
-                let r.lines = {
-                            \ 'cur': str2float(split(status[1])[0]),
-                            \ 'tot': str2float(split(status[1])[2])
-                            \ }
-                let r.words = {
-                            \ 'cur': str2nr(split(status[2])[0]),
-                            \ 'tot': str2nr(split(status[2])[2])
-                            \ }
-                let r.chars = {
-                            \ 'cur': str2nr(split(status[3])[0]),
-                            \ 'tot': str2nr(split(status[3])[2])
-                            \ }
-                let r.stmode = 'V'
-            else " anything else; v:statusmsg =
-                " Col {n} of {m}; Line {n} of {m}; Word {n} of {m};
-                " \ Byte {n} of {m}
-                let r.cols = {
-                            \ 'cur': str2nr(split(status[0])[1]),
-                            \ 'tot': str2nr(split(status[0])[3])
-                            \ }
-                let r.lines = {
-                            \ 'cur': str2float(split(status[1])[1]),
-                            \ 'tot': str2float(split(status[1])[3])
-                            \ }
-                let r.words = {
-                            \ 'cur': str2nr(split(status[2])[1]),
-                            \ 'tot': str2nr(split(status[2])[3])
-                            \ }
-                let r.chars = {
-                            \ 'cur': str2nr(split(status[3])[1]),
-                            \ 'tot': str2nr(split(status[3])[3])
-                            \ }
-                let r.stmode = 'n'
-            endif
-            let r.mode = curmode
-            let r.perc = float2nr((r.lines.cur/r.lines.tot)*100)
-            let r.lines.cur = float2nr(r.lines.cur)
-            let r.lines.tot = float2nr(r.lines.tot)
-            let v:statusmsg = s:oldstat
-        endif "}}}
-
-        call setpos('.', position)
-        return r
-
-    function! s:myperc(nr)
-        if a:nr == 0
-            return 'Top'
-        elseif a:nr == 100
-            return 'Bot'
-        else
-            return printf('%2d%%', a:nr)
-        endif
-    endfunction "
-    let r.myperc = s:myperc(r.perc)
-
-    return r
-endfunction "}}}
-function! RenameFile() " {{{
-    let old_name = expand('%')
-    let new_name = input('New file name:', expand('%'), 'file')
-    if new_name != '' && new_name != old_name
-        exec ':saveas ' . new_name
-        " only work on Linux?
-        exec ':silent !rm ' . old_name
-        redraw!
+    if status != '--No lines in buffer--' && mode() !~? '[v]'
+        return str2nr(split(status)[11]) . 'w'
+    else
+        return mode() ==? 'v'
+                    \ ? split(status)[1] . '/' . split(status)[3] . 'L'
+                    \ : split(status)[1] . ':' .
+                    \   split(status)[3] . '/' split(status)[5] . 'L'
     endif
 endfunction " }}}
+" function! RenameFile() " {{{
+"     let old_name = expand('%')
+"     let new_name = input('New file name:', expand('%'), 'file')
+"     if new_name != '' && new_name != old_name
+"         exec ':saveas ' . new_name
+"         " only work on Linux?
+"         exec ':silent !rm ' . old_name
+"         redraw!
+"     endif
+" endfunction " }}}
 " --- Managing buffers, tabs, windows
 function! ChTabBuf(motion) " {{{
     if tabpagenr('$') == 1
@@ -513,7 +444,7 @@ function! StatusLine(winnr) " {{{
     let status .= showft ? ftype . ' ' : ''
     if ftype =~? 'text' || ftype =~? 'm.*d.*' || ftype ==? 'pandoc'
                 \|| ftype =~? 'wiki'
-        let status .= '%{Rulerer().words.tot}w '
+        let status .= '%{WordCount()} '
     endif
     let status .= '%#StatusLine#'
     let status .= Color(!isactive, 'CursorLine', ' %p%% ')
@@ -533,6 +464,49 @@ function! UpdateCursorLineNumber() " {{{
         hi CursorLineNr guifg=#6c71c4 gui=bold
     endif
 endfunction " }}}
+function! Typewriter(switch) " {{{
+    function! s:typewriter_on()
+        let s:wrap = &wrap
+        let s:linebreak = &linebreak
+        let s:tw = &textwidth
+        let s:list = &list
+        " let s:background = &background
+        let s:cursorline = &cursorline
+        let s:cursorcolumn = &cursorcolumn
+
+        setlocal wrap
+        setlocal linebreak
+        let &l:textwidth = get(g:, 'tw', 78)
+        setlocal nolist
+        " setlocal background=light
+        setlocal nocursorline
+        setlocal nocursorcolumn
+
+        return 1
+    endfunction
+
+    function! s:typewriter_off()
+        let &l:wrap = get(s:, 'wrap', &wrap)
+        let &l:linebreak = get(s:, 'linebreak', &linebreak)
+        let &l:textwidth = get(s:, 'textwidth', &textwidth)
+        let &l:list = get(s:, 'list', &list)
+        " let &l:background = get(s:, 'background', &background)
+        let &l:cursorline = get(s:, 'cursorline', &cursorline)
+        let &l:cursorcolumn = get(s:, 'cursorcolumn', &cursorcolumn)
+
+        return 0
+    endfunction
+
+    if a:switch ==? 'on'
+        let b:typewriter_loaded = <SID>typewriter_on()
+    elseif a:switch ==? 'off'
+        let b:typewriter_loaded = <SID>typewriter_off()
+    elseif a:switch =~? 'tog'
+        let b:typewriter_loaded = get(b:, 'typewriter_loaded', 0)
+                    \ ? <SID>typewriter_off()
+                    \ : <SID>typewriter_on()
+    endif
+endfunction " }}}
 " }}}
 " PLUGINS {{{
 " Vundle {{{
@@ -545,7 +519,7 @@ Plugin 'gmarik/Vundle.vim'            " let Vundle manage Vundle
 " MAKING WRITING EASIER
 Plugin 'junegunn/goyo.vim'            " distraction-free writing
 Plugin 'junegunn/limelight.vim'       " highlight current paragraph
-Plugin 'chrisbra/NrrwRgn'             " Open region in new win to edit
+" Plugin 'chrisbra/NrrwRgn'             " Open region in new win to edit
 Plugin 'nelstrom/vim-visual-star-search' " Use * or # from V-Block
 
 " COLORS & EYECANDY
@@ -558,7 +532,6 @@ Plugin 'altercation/vim-colors-solarized'
 Plugin 'godlygeek/tabular'            " Easy aligning of text
 Plugin 'junegunn/vim-easy-align'      " Vim alignment plugin
 Plugin 'Lokaltog/vim-easymotion'      " No more counting objects
-Plugin 'osyo-manga/vim-over'          " Preview :s/ searches
 Plugin 'AndrewRadev/splitjoin.vim'    " Easily split and join code structs
 Plugin 'wellle/targets.vim'           " Lots of new textobjects
 Plugin 'michaeljsmith/vim-indent-object' " Provides a textobj for indentblocks
@@ -665,7 +638,6 @@ nnoremap <S-F11> :Fullscreen<CR>
 vnoremap \| :Tabularize /
 
 nnoremap <C-o> :CtrlPMRU<CR>
-nnoremap <C-[> :CtrlPBuffer<CR>
 
 nnoremap gS :%S/
 vnoremap gS :S/
