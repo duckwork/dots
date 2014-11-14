@@ -665,6 +665,7 @@ nnoremap <S-F11> :Fullscreen<CR>
 vnoremap \| :Tabularize /
 
 nnoremap <C-o> :CtrlPMRU<CR>
+nnoremap <C-[> :CtrlPBuffer<CR>
 
 nnoremap gS :%S/
 vnoremap gS :S/
