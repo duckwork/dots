@@ -283,11 +283,11 @@ function! WordCount() " {{{ I'm only using the WordCount part
 
     if status != '--No lines in buffer--' && mode() !~? '[v]'
         return str2nr(split(status)[11]) . 'w'
-    else
-        return mode() ==? 'v'
-                    \ ? split(status)[1] . '/' . split(status)[3] . 'L'
-                    \ : split(status)[1] . ':' .
-                    \   split(status)[3] . '/' split(status)[5] . 'L'
+    " else
+    "     return mode() ==? 'v'
+    "                 \ ? split(status)[1] . '/' . split(status)[3] . 'L'
+    "                 \ : split(status)[1] . ':' .
+    "                 \   split(status)[3] . '/' split(status)[5] . 'L'
     endif
 endfunction " }}}
 " --- Managing buffers, tabs, windows
@@ -449,6 +449,8 @@ function! s:RefreshStatus(...) " {{{
     else
         for nr in range(1, winnr('$'))
             call setwinvar(nr, '&statusline', '')
+            call setwinvar(winnr(), '&statusline',
+                           \ '%=%#CursorLine# [ %{WordCount()} ] ')
         endfor
     endif
 endfunction " }}}
