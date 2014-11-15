@@ -7,6 +7,8 @@ set nocompatible " be iMproved
 " SETTINGS {{{
 syntax on                           " syntax highlighting
 
+runtime! $VIMRUNTIME/macros/matchit.vim
+
 set number                          " show line numbers in gutter
 set relativenumber                  " show line nums relative to current line
 
@@ -239,7 +241,8 @@ if has('gui_running') " {{{
     elseif has('x11')
         "set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
-        set guifont=Consolas:h11:cANSI
+        " set guifont=Consolas:h11:cANSI
+        set guifont=Fantasque_Sans_Mono:h11:cANSI
     endif
 
     " Start at this size
@@ -528,14 +531,16 @@ function! ListPlus(switch) "{{{
         return 1
     endfunction
 
-    if a:switch ==? 'on'
-        let b:listplus_enabled = <SID>listplus_on()
-    elseif a:switch ==? 'off'
-        let b:listplus_enabled = <SID>listplus_off()
-    elseif a:switch =~? 'tog'
-        let b:listplus_enabled = get(b: 'listplus_enabled', 0)
-                    \ ? <SID>listplus_off()
-                    \ : <SID>listplus_on()
+    if &ft !~? 'help'
+        if a:switch ==? 'on'
+            let b:listplus_enabled = <SID>listplus_on()
+        elseif a:switch ==? 'off'
+            let b:listplus_enabled = <SID>listplus_off()
+        elseif a:switch =~? 'tog'
+            let b:listplus_enabled = get(b: 'listplus_enabled', 0)
+                        \ ? <SID>listplus_off()
+                        \ : <SID>listplus_on()
+        endif
     endif
 endfunction "}}}
 " }}}
@@ -549,7 +554,7 @@ Plugin 'gmarik/Vundle.vim'            " let Vundle manage Vundle
 
 " MAKING WRITING EASIER
 Plugin 'junegunn/goyo.vim'            " distraction-free writing
-Plugin 'junegunn/limelight.vim'       " highlight current paragraph
+Plugin 'duckwork/limelight.vim'       " highlight current paragraph (MY FORK)
 " Plugin 'chrisbra/NrrwRgn'             " Open region in new win to edit
 Plugin 'nelstrom/vim-visual-star-search' " Use * or # from V-Block
 
@@ -594,10 +599,10 @@ Plugin 'vimwiki/vimwiki'              " Personal wiki with ViM
 Plugin 'sheerun/vim-polyglot'         " Many syntax defs
 
 " PLUGINS THAT REQUIRE THINGS
-if executable('git')
-    Plugin 'tpope/vim-fugitive'       " Git integration
-    Plugin 'airblade/vim-gitgutter'   " Git stuff in signs column
-endif
+" if executable('git')
+"     Plugin 'tpope/vim-fugitive'       " Git integration
+"     Plugin 'airblade/vim-gitgutter'   " Git stuff in signs column
+" endif
 if executable('ag')
     Plugin 'rking/ag.vim'             " Ag implementation
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
