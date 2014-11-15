@@ -5,93 +5,93 @@
 set nocompatible " be iMproved
 
 " SETTINGS {{{
-syntax on                         " syntax highlighting
+syntax on                           " syntax highlighting
 
-set number                        " show line numbers in gutter
-set relativenumber                " show line nums relative to current line
+set number                          " show line numbers in gutter
+set relativenumber                  " show line nums relative to current line
 
-set autoread                      " reload on a change, automagically
-set lazyredraw                    " don't redraw macros til done
-set hidden                        " Don't close unused buffers
+set autoread                        " reload on a change, automagically
+set lazyredraw                      " don't redraw macros til done
+set hidden                          " Don't close unused buffers
 
-set noerrorbells                  " don't beep on errors
-set visualbell                    " flash instead of beeping
+set noerrorbells                    " don't beep on errors
+set visualbell                      " flash instead of beeping
 
-set splitbelow                    " new splits appear below current window
-set splitright                    " new splits appear to right of current
+set splitbelow                      " new splits appear below current window
+set splitright                      " new splits appear to right of current
 
-set formatoptions-=ro             " disable autocomments in Insert mode
-set backspace=indent,eol,start    " backspace across these things
+set formatoptions-=ro               " disable autocomments in Insert mode
+set backspace=indent,eol,start      " backspace across these things
 
-" Which keys allow movement between lines
-set whichwrap=b,s                 " <BS> and <Space>
-set ww      +=<,>                 " Arrow keys (N, V)
-set ww      +=[,]                 " Arrow keys (I, R)
+" Which keys move between lines
+set whichwrap=b,s                   " <BS> and <Space>
+set ww      +=<,>                   " Arrow keys (N, V)
+set ww      +=[,]                   " Arrow keys (I, R)
 
-set encoding=utf-8                " encoding = utf-8.
-set fileencoding=utf-8            " because year = 2014.
-set fileformat=unix               " Unix file ending default
-set fileformats=unix,dos          " but recognize DOS line endings
+set encoding=utf-8                  " encoding = utf-8.
+set fileencoding=utf-8              " because year = 2014.
+set fileformat=unix                 " Unix file ending default
+set fileformats=unix,dos            " but recognize DOS line endings
 
-set spelllang=en                  " I write in English
+set spelllang=en                    " I write in English
 
-set history=1000                  " set history length
+set history=1000                    " set history length
 
-" What's saved between sessions in a viminfo file
-set viminfo='100                  " Save marks for 100 files max
-set vi    ^=!                     " Save global all-caps variables
-set vi    +=<50                   " Save 50 lines of registers
-set vi    +=s10                   " Save only first 10 Kb of each register
-set vi    +=h                     " Disable 'hlsearch' on saved files
+" What's saved between sessions
+set viminfo='100                    " Save marks for 100 files max
+set vi    ^=!                       " Save global all-caps variables
+set vi    +=<50                     " Save 50 lines of registers
+set vi    +=s10                     " Save only first 10 Kb of each register
+set vi    +=h                       " Disable 'hlsearch' on saved files
 
-set laststatus=2                  " Always show statusline
-" set statusline=%!StatusLine()     "   [see function below]
+set laststatus=2                    " Always show statusline
 " set showtabline=2                 " Always show tabline
-" set tabline=%!TabLine()           "   [see function below]
-set wildmenu                      " Enhanced command-line completion
-set ruler                         " Show where the cursor is in the file
-set showcmd                       " Show command as it's being typed
+" set tabline=%!TabLine()           " [see function below]
+set wildmenu                        " Enhanced command-line completion
+set ruler                           " Show where the cursor is in the file
+set showcmd                         " Show command as it's being typed
 
-set foldenable                    " Enable folding
-set foldmethod=marker             " {{{ }}} mark folds
-set foldlevel=2                   " Start open to second level
-set foldcolumn=0                  " Fold columns in gutter
-set foldtext=FoldLine()           " Define what folded folds look like
+set foldenable                      " Enable folding
+set foldmethod=marker               " {{{ }}} mark folds
+set foldlevel=2                     " Start open to second level
+set foldcolumn=0                    " Fold columns in gutter
+set foldtext=FoldLine()             " Define what folded folds look like
 
-set scrolloff=8                   " Keep lines between cursor and edges
-set sidescrolloff=2               " Keep columns between cursor and edges
-set sidescroll=1                  " Scroll one column at a time sideways
+set scrolloff=8                     " Keep lines between cursor and edges
+set sidescrolloff=2                 " Keep columns between cursor and edges
+set sidescroll=1                    " Scroll one column at a time sideways
 
-let g:tw = 78                     " Set textwidth without really setting tw
+let g:tw = 78                       " Set textwidth without really setting tw
 " let &textwidth = g:tw             " Set textwidth
-set wrap                          " Soft wrap lines to window
-set linebreak                     " Wrap at words (def by 'breakat')
-set breakindent                   " soft-wrapped lines indent to prev line
+set wrap                            " Soft wrap lines to window
+set linebreak                       " Wrap at words (def by 'breakat')
+set breakindent                     " soft-wrapped lines indent to prev line
+set list                            " show some non-printing characters
 set listchars=tab:»»,trail:·,nbsp:~ " make it easy to see these
+match Error /\s\+$/                 " match trailing whitespace to error
 
-" " Make too-long lines obvious, but only on those lines
-" call matchadd('ColorColumn', '\%'.g:tw.'v', 100)
 let &colorcolumn = g:tw
+set cursorline
 
-set expandtab                     " use spaces instead of tabs
-set autoindent                    " copy indent when inserting a new line
-set smartindent                   " autoindent based on conditions
-set shiftwidth=4                  " number of spaces for (auto)indent
-set softtabstop=4                 " number of spaces a <Tab> equals
-set shiftround                    " indent to nearest tabstop
+set expandtab                       " use spaces instead of tabs
+set autoindent                      " copy indent when inserting a new line
+set smartindent                     " autoindent based on conditions
+set shiftwidth=4                    " number of spaces for (auto)indent
+set softtabstop=4                   " number of spaces a <Tab> equals
+set shiftround                      " indent to nearest tabstop
 
-set incsearch                     " find the next match as we type
-set hlsearch                      " highlight search matches
-set ignorecase                    " ignore case as we search
-set smartcase                     " ... unless a capital appears
+set incsearch                       " find the next match as we type
+set hlsearch                        " highlight search matches
+set ignorecase                      " ignore case as we search
+set smartcase                       " ... unless a capital appears
 
-set gdefault                      " default to global (line) substitutions
-set magic                         " use better regexp
-" This is a test for a thing, yeah?
-set directory=$HOME/.vim/swap//   " directory for swap files
-set backupdir=$HOME/.vim/backup// " directory for backups
-set backupcopy=yes                " copy the original and overwrite
-set backup                        " Keep backup files, just in case
+set gdefault                        " default to global (line) substitutions
+set magic                           " use better regexp
+
+set directory=$HOME/.vim/swap//     " directory for swap files
+set backupdir=$HOME/.vim/backup//   " directory for backups
+set backupcopy=yes                  " copy the original and overwrite
+set backup                          " Keep backup files, just in case
 
 set undolevels=10000
 "}}}
@@ -167,6 +167,8 @@ nnoremap <leader>/ :nohlsearch<CR>
 nnoremap <silent> <leader>rs mz:%s/\s\+$//<CR>:let @/=''<CR>`z
 " Remove blank lines
 nnoremap <silent> <leader>rb mz:g/^$/d<CR>:let @/=''<CR>`z
+" Toggle background
+nnoremap <silent> <leader>bg :call ToggleBG()<CR>
 
 " Linux only: because `sudo vim` is easy to forget
 cmap w!! %!sudo tee > /dev/null %
@@ -189,21 +191,13 @@ augroup END
 
 augroup InsertAnnoyances
     au!
-
-    au WinLeave,InsertEnter * set nocursorline
-    au WinEnter,InsertLeave * if !get(b:, 'typewriter_loaded', 0) |
-                \ set cursorline | endif
-
-    au InsertEnter * match none '\s\+$'
-    au InsertEnter * set nolist colorcolumn=0
-    au InsertLeave * match Error '\s\+$'
-    au InsertLeave * if !get(b:, 'typewriter_loaded', 0) |
-                \ set list | let &cc = g:tw | endif
+    au WinLeave,InsertEnter * call ListPlus('off')
+    au WinEnter,InsertLeave * call ListPlus('on')
 augroup END
 
 augroup ft_Help
     au!
-    au FileType help setlocal nospell nocursorline
+    au FileType help setlocal nospell
     au BufWinEnter *.txt
                 \ if &ft == 'help' && winwidth(0) >=2 * g:tw |
                 \     wincmd L |
@@ -280,15 +274,16 @@ function! WordCount() " {{{ I'm only using the WordCount part
     let position = getpos('.')
     exe ":silent normal g\<c-g>"
     let status = v:statusmsg
+    let s:wordcount = ''
 
     if status != '--No lines in buffer--' && mode() !~? '[v]'
-        return str2nr(split(status)[11]) . 'w'
-    " else
-    "     return mode() ==? 'v'
-    "                 \ ? split(status)[1] . '/' . split(status)[3] . 'L'
-    "                 \ : split(status)[1] . ':' .
-    "                 \   split(status)[3] . '/' split(status)[5] . 'L'
+        let s:wordcount = str2nr(split(status)[11]) . 'w'
     endif
+
+    let v:statusmsg = s:oldstat
+    call setpos('.', position)
+
+    return s:wordcount
 endfunction " }}}
 " --- Managing buffers, tabs, windows
 function! ChTabBuf(motion) " {{{
@@ -449,8 +444,6 @@ function! s:RefreshStatus(...) " {{{
     else
         for nr in range(1, winnr('$'))
             call setwinvar(nr, '&statusline', '')
-            call setwinvar(winnr(), '&statusline',
-                           \ '%=%#CursorLine# [ %{WordCount()} ] ')
         endfor
     endif
 endfunction " }}}
@@ -468,7 +461,6 @@ function! Typewriter(switch) " {{{
         let s:linebreak = &linebreak
         let s:tw = &textwidth
         let s:list = &list
-        " let s:background = &background
         let s:cursorline = &cursorline
         let s:cursorcolumn = &cursorcolumn
 
@@ -476,7 +468,6 @@ function! Typewriter(switch) " {{{
         setlocal linebreak
         let &l:textwidth = get(g:, 'tw', 78)
         setlocal nolist
-        " setlocal background=light
         setlocal nocursorline
         setlocal nocursorcolumn
 
@@ -488,7 +479,6 @@ function! Typewriter(switch) " {{{
         let &l:linebreak = get(s:, 'linebreak', &linebreak)
         let &l:textwidth = get(s:, 'textwidth', &textwidth)
         let &l:list = get(s:, 'list', &list)
-        " let &l:background = get(s:, 'background', &background)
         let &l:cursorline = get(s:, 'cursorline', &cursorline)
         let &l:cursorcolumn = get(s:, 'cursorcolumn', &cursorcolumn)
 
@@ -505,6 +495,49 @@ function! Typewriter(switch) " {{{
                     \ : <SID>typewriter_on()
     endif
 endfunction " }}}
+function! ToggleBG()
+    if &bg == 'light'
+        set background=dark
+    else
+        set background=light
+    endif
+endfunction
+function! ListPlus(switch) "{{{
+    function! s:listplus_off()
+        let s:cul  = &cursorline
+        let s:cc   = &colorcolumn
+        let s:list = &list
+        let s:rnu  = &relativenumber
+
+        setlocal nocursorline
+        setlocal colorcolumn=
+        setlocal nolist
+        setlocal norelativenumber
+        match none /\s\+$/
+
+        return 0
+    endfunction
+
+    function! s:listplus_on()
+        let &l:cul  = get(s:, 'cul',  &cursorline)
+        let &l:cc   = get(s:, 'cc',   &colorcolumn)
+        let &l:list = get(s:, 'list', &list)
+        let &l:rnu  = get(s:, 'rnu',  &relativenumber)
+        match Error /\s\+$/
+
+        return 1
+    endfunction
+
+    if a:switch ==? 'on'
+        let b:listplus_enabled = <SID>listplus_on()
+    elseif a:switch ==? 'off'
+        let b:listplus_enabled = <SID>listplus_off()
+    elseif a:switch =~? 'tog'
+        let b:listplus_enabled = get(b: 'listplus_enabled', 0)
+                    \ ? <SID>listplus_off()
+                    \ : <SID>listplus_on()
+    endif
+endfunction "}}}
 " }}}
 " PLUGINS {{{
 " Vundle {{{
@@ -676,9 +709,11 @@ augroup GoyoEvents
     au User GoyoEnter Limelight
     au User GoyoEnter set nocursorline
     au User GoyoEnter call <SID>RefreshStatus(1)
+    au User GoyoEnter call setwinvar(winnr(), '&statusline',
+                       \ '%=%#Comment# [ %{WordCount()} ] ')
 
     au User GoyoLeave Limelight!
-    au User GoyoLeave set cursorline laststatus=2
+    au User GoyoLeave set cursorline
     au User GoyoLeave call <SID>RefreshStatus()
 augroup END
 "}}}
