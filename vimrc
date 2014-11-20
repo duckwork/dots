@@ -6,6 +6,7 @@ set nocompatible " be iMproved
 
 " SETTINGS {{{
 syntax on                           " syntax highlighting
+set synmaxcol=300                   " stop syntax coloring at 300 col
 
 runtime! $VIMRUNTIME/macros/matchit.vim
 
@@ -60,7 +61,7 @@ set foldcolumn=0                    " Fold columns in gutter
 set foldtext=FoldLine()             " Define what folded folds look like
 
 set scrolloff=8                     " Keep lines between cursor and edges
-set sidescrolloff=2                 " Keep columns between cursor and edges
+set sidescrolloff=1                 " Keep columns between cursor and edges
 set sidescroll=1                    " Scroll one column at a time sideways
 
 let g:tw = 78                       " Set textwidth without really setting tw
@@ -95,6 +96,8 @@ set backupdir=$HOME/.vim/backup//   " directory for backups
 set backupcopy=yes                  " copy the original and overwrite
 set backup                          " Keep backup files, just in case
 
+set confirm                         " Confirm before quit, instead of error
+
 set undolevels=10000
 "}}}
 " KEYMAPS {{{
@@ -128,7 +131,7 @@ nnoremap X d0
 " <BS> backspaces in normal mode
 nnoremap <BS> X
 " Make K opposite of J (join).
-nnoremap K i<CR><Esc>
+" nnoremap K i<CR><Esc>
 " Make <F1> help better.
 nnoremap <F1> K
 
@@ -172,6 +175,14 @@ nnoremap <silent> <leader>rb mz:g/^$/d<CR>:let @/=''<CR>`z
 " Toggle background
 nnoremap <silent> <leader>bg :call ToggleBG()<CR>
 
+" Close buffer, or if last buf, quit vim
+nnoremap <F12> :call CloseBufWin()<CR>
+" Navigate to previous-focused buffer
+nnoremap Q :b#<CR>
+" Move to next buffer if there's only one tab
+nnoremap gt :<C-U>call ChTabBuf(v:count1)<CR>
+nnoremap gT :<C-U>call ChTabBuf(-v:count1)<CR>
+
 " Linux only: because `sudo vim` is easy to forget
 cmap w!! %!sudo tee > /dev/null %
 "}}}
@@ -179,11 +190,16 @@ cmap w!! %!sudo tee > /dev/null %
 autocmd BufEnter * if &ft != 'help' | silent! lcd %:p:h | endif
 autocmd ColorScheme * call UpdateCursorLineNumber()
 
-augroup TextEditing
+" augroup TextEditing
+"     au!
+"     au BufNewFile,BufRead *.{md,markdown,mdown,mkd,mkdn,text} setf markdown
+"     au FileType *wiki,markdown setlocal spell
+"     au FileType markdown call Typewriter('on')
+" augroup END
+
+augroup AutoSave
     au!
-    au BufNewFile,BufRead *.{md,markdown,mdown,mkd,mkdn,txt} setf markdown
-    au FileType vimwiki,markdown setlocal spell
-    au FileType markdown call Typewriter('on')
+    au FocusLost * silent! wall
 augroup END
 
 " augroup ReloadVimrc
@@ -231,6 +247,7 @@ if has('gui_running') " {{{
     set go        -=r " remove right-hand scrollbar
     set go        -=L " remove left-hand scrollbar
     set go        -=e " remove GUI tablines
+    set go        +=c " don't use pop-up boxes
 
     " Set colors to 256
     set t_Co=256
@@ -293,17 +310,17 @@ function! ChTabBuf(motion) " {{{
     if tabpagenr('$') == 1
         " there is only 1 tab; switch buffers
         if a:motion < 0
-            bprevious a:motion
+            exe 'bprevious ' . abs(a:motion)
         else
-            bnext a:motion
+            exe 'bnext ' . abs(a:motion)
         endif
     else
         if a:motion < 0
-            tabprevious a:motion
+            exe 'tabprevious ' . abs(a:motion)
         else
-            let s:move = tabpagenr('$') - a:motion
-            tabprevious s:move
+            exe 'tabprevious ' . abs(tabpagenr('$') - a:motion)
         endif
+    endif
 endfunction " }}}
 function! CloseBufWin() " {{{
     if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1
@@ -340,6 +357,15 @@ function! FoldLine() " {{{
     let line = line . repeat(' ', fillcharcount)
     return line . v:foldlevel . '> ' . foldedlinecount . ' '
 endfunction " }}}
+function! NewFoldLine()
+    let line = getline(v:foldstart)
+    let foldedlinecount = printf('%3d', v:foldend - v:foldstart)
+    
+    let onetab = strpart('        ', 0, &tabstop)
+    let line = substitute(line, '\t', onetab, 'g')
+
+
+endfunction
 function! StatusLine(winnr) " {{{
     let status = ''
 
@@ -369,7 +395,7 @@ function! StatusLine(winnr) " {{{
     if isactive
         let status .= '%#CursorLineNr#'.'%3v '.'%#StatusLine#'
     else
-        let status .= '%#CursorLine#'.'%2n. '
+        let status .= '%#CursorLine#'.'>%n. '
     endif
 
     " ‼‹›℗←↑→↓◊∫∂↔↕Ω˂˃˄˅§«»±¶¤Ππ‘’“”⌂
@@ -429,7 +455,11 @@ function! StatusLine(winnr) " {{{
     let status .= '%=' " Gutter ====================================
 
     " Right side ===================================================
-    let status .= showft ? ftype . ' ' : ''
+    if showft || winwidth(0) > g:tw + &fdc + &nu * &nuw + 4
+        let status .= '[' . ftype . '] '
+    else
+        let status .= ''
+    endif
     if ftype =~? 'text' || ftype =~? 'm.*d.*' || ftype ==? 'pandoc'
                 \|| ftype =~? 'wiki'
         let status .= '%{WordCount()} '
@@ -498,13 +528,13 @@ function! Typewriter(switch) " {{{
                     \ : <SID>typewriter_on()
     endif
 endfunction " }}}
-function! ToggleBG()
+function! ToggleBG() "{{{
     if &bg == 'light'
         set background=dark
     else
         set background=light
     endif
-endfunction
+endfunction "}}}
 function! ListPlus(switch) "{{{
     function! s:listplus_off()
         let s:cul  = &cursorline
@@ -550,78 +580,89 @@ filetype off
 set runtimepath+=$HOME/.vim/bundle/Vundle.vim
 call vundle#begin()
 
-Plugin 'gmarik/Vundle.vim'            " let Vundle manage Vundle
+Plugin 'gmarik/Vundle.vim'                " let Vundle manage Vundle
 
-" MAKING WRITING EASIER
-Plugin 'junegunn/goyo.vim'            " distraction-free writing
-Plugin 'duckwork/limelight.vim'       " highlight current paragraph (MY FORK)
-" Plugin 'chrisbra/NrrwRgn'             " Open region in new win to edit
-Plugin 'nelstrom/vim-visual-star-search' " Use * or # from V-Block
-
-" COLORS & EYECANDY
-Plugin 'junegunn/seoul256.vim'
+" GUI
+Plugin 'ap/vim-buftabline'                " show vim buffers in tabline
+Plugin 'talek/obvious-resize'             " Resive ViM windows obviously
+" Colors
+Plugin 'reedes/vim-colors-pencil'
 Plugin 'altercation/vim-colors-solarized'
-" Plugin 'itchyny/lightline.vim'
-" Plugin 'bling/vim-airline'            " a better statusline
 
-" FORMATTING TEXT
-Plugin 'godlygeek/tabular'            " Easy aligning of text
-Plugin 'junegunn/vim-easy-align'      " Vim alignment plugin
-Plugin 'Lokaltog/vim-easymotion'      " No more counting objects
-Plugin 'AndrewRadev/splitjoin.vim'    " Easily split and join code structs
-Plugin 'wellle/targets.vim'           " Lots of new textobjects
-Plugin 'michaeljsmith/vim-indent-object' " Provides a textobj for indentblocks
-" [ by TIM POPE ]
-Plugin 'tpope/vim-abolish'            " Enhanced search and replace
-Plugin 'tpope/vim-commentary'         " Easier commmenting
-Plugin 'tpope/vim-repeat'             " Repeat plugin commands with .
-Plugin 'tpope/vim-speeddating'        " <C-a>,<C-x> on dates and times
-Plugin 'tpope/vim-surround'           " Format surroundings easily
-Plugin 'tpope/vim-endwise'            " Auto-add 'end*'s in code
-Plugin 'tpope/vim-characterize'       " Modernize `ga` behavior
-" FILESYSTEM
-Plugin 'kien/ctrlp.vim'               " A fuzzy file finder
-Plugin 'dockyard/vim-easydir'         " Create new dirs on-the-fly
+" WRITING
+" Prose
+Plugin 'junegunn/goyo.vim'                " distraction-free writing
+Plugin 'duckwork/limelight.vim'           " highlight current paragraph
 
-Plugin 'xolox/vim-shell'              " Integrate ViM and environment
-Plugin 'xolox/vim-misc'               " Required by vim-shell
+" Code
+Plugin 'tpope/vim-commentary'             " Easier commmenting
+Plugin 'tpope/vim-endwise'                " Auto-add 'end*'s in code
+Plugin 'tpope/vim-characterize'           " Modernize `ga` behavior
+
+" NAVIGATING FILESYSTEM
+Plugin 'kien/ctrlp.vim'                   " A fuzzy file finder
+Plugin 'dockyard/vim-easydir'             " Create new dirs on-the-fly
+Plugin 'xolox/vim-shell'                  " Integrate ViM and environment
+                                          " I use this for :Fullscreen
+Plugin 'xolox/vim-misc'                   " Required by vim-shell
+
+" EXTENDING VIM OPERATIONS
+Plugin 'tpope/vim-repeat'                 " Repeat plugin commands with .
+" Search & Replace
+Plugin 'nelstrom/vim-visual-star-search'  " Use * or # from V-Block
+Plugin 'tpope/vim-abolish'                " Enhanced search and replace
+" Formatting
+Plugin 'godlygeek/tabular'                " Easy aligning of text
+Plugin 'junegunn/vim-easy-align'          " Vim alignment plugin
+Plugin 'AndrewRadev/splitjoin.vim'        " Easily split and join code
+Plugin 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
+" Textobjects
+Plugin 'Lokaltog/vim-easymotion'          " No more counting objects
+Plugin 'wellle/targets.vim'               " Lots of new textobjects
+Plugin 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
+Plugin 'tpope/vim-surround'               " Format surroundings easily
 
 " FILETYPES
-Plugin 'mattn/emmet-vim'              " Zencoding for HTML
-Plugin 'gregsexton/MatchTag'          " Match HTML tags with %
-Plugin 'hail2u/vim-css3-syntax'       " syntax file for CSS3
+Plugin 'mattn/emmet-vim'                  " Zencoding for HTML
+Plugin 'gregsexton/MatchTag'              " Match HTML tags with %
+Plugin 'hail2u/vim-css3-syntax'           " syntax file for CSS3
 
-Plugin 'vim-pandoc/vim-pandoc'        " Pandoc helpers
-Plugin 'vim-pandoc/vim-pandoc-syntax' " Pandoc syntax
+Plugin 'vim-pandoc/vim-pandoc'            " Pandoc helpers
+Plugin 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
+Plugin 'reedes/vim-litecorrect'           " autocorrect w/customization
 
-Plugin 'vimwiki/vimwiki'              " Personal wiki with ViM
+Plugin 'vimwiki/vimwiki'                  " Personal wiki with ViM
 
-Plugin 'sheerun/vim-polyglot'         " Many syntax defs
+Plugin 'sheerun/vim-polyglot'             " Many syntax defs
 
 " PLUGINS THAT REQUIRE THINGS
-" if executable('git')
-"     Plugin 'tpope/vim-fugitive'       " Git integration
-"     Plugin 'airblade/vim-gitgutter'   " Git stuff in signs column
-" endif
+if executable('git')
+    Plugin 'tpope/vim-fugitive'           " Git integration
+" Plugin 'airblade/vim-gitgutter'           " Git stuff in signs column
+endif
 if executable('ag')
-    Plugin 'rking/ag.vim'             " Ag implementation
-    let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
+    Plugin 'rking/ag.vim'                 " Ag implementation
 endif
 if executable('diff')
-    Plugin 'mbbill/undotree'          " Visualize Vim's undo tree
+    Plugin 'mbbill/undotree'              " Visualize Vim's undo tree
+    let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
     nnoremap <F5> :UndotreeToggle<CR>
 elseif has('python')
-    Plugin 'vim-scripts/gundo'        " Visualize Vim's undo tree
+    Plugin 'vim-scripts/gundo'            " Visualize Vim's undo tree
     nnoremap <F5> :GundoToggle<CR>
 endif
 
-call vundle#end()                     " req'd
-filetype plugin indent on             " req'd
+call vundle#end()                         " req'd
+filetype plugin indent on                 " req'd
 "}}}
 " Plugin settings {{{
 " Ag
 let g:agprg = 'ag --column --smart-case'
 let g:aghighlight = 1 " highlight searches
+" Buftabline
+let g:buftabline_show = 1 " only show if at least 2 buffers
+let g:buftabline_numbers = 1 " show buffer numbers in list
+let g:buftabline_indicators = 1 " show if buffers are modified
 " Ctrl-P
 let g:ctrlp_map = '<C-p>'
 let g:ctrlp_use_caching = 1
@@ -652,6 +693,17 @@ let g:goyo_margin_bottom = g:goyo_margin_top
 " Gundo
 let g:gundo_preview_bottom = 1 " show preview below all windows
 let g:gundo_auto_preview   = 1 " default; toggle to speed up Gundo
+" Pandoc
+let g:pandoc#modules#disabled = [ 'menu' ] " Get rid of Pandoc menu
+let g:pandoc#command#custom_open = "PandocOpen" " function defined below
+let g:pandoc#filetypes#handled = [ 'markdown', 'rst', 'textile', 'extra' ]
+let g:pandoc#folding#fdc = &fdc
+let g:pandoc#formatting#mode = 'hA' " hard wrap, autoformat smart
+let g:pandoc#formatting#textwidth = g:tw
+let g:pandoc#keyboard#sections#header_style = 's' " enable setext for h1,2
+let g:pandoc#spell#default_langs = ['en']
+let g:pandoc#toc#position = "left" " Table of contents
+let g:pandoc#toc#close_after_navigating = 0 " <CR> navs, <C-CR> navs + closes
 " Solarized
 let g:solarized_menu = 0
 " Splitjoin
@@ -668,16 +720,22 @@ let g:vimwiki_hl_headers = 0 " enable different colored headers
 let g:vimwiki_hl_cb_checked = 1 " hilight [X] with Comment
 " }}}
 " Plugin keymaps {{{
+let maplocalleader = ',' " same as leader for now.
+
 nnoremap <F11> :Goyo<CR>
 nnoremap <S-F11> :Fullscreen<CR>
 
 vnoremap \| :Tabularize /
 
 nnoremap <C-o> :CtrlPMRU<CR>
-
+" see non-plugin mapping gs :s/
 nnoremap gS :%S/
 vnoremap gS :S/
-
+" J/K intelligently SplitJoin.vim or fallback to default
+nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin', 'J')<CR>
+nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit', "i")<CR>
+" remap motion maps !
+" TODO: progressive-enhance these.
 nmap f <Plug>(easymotion-sl)
 nmap t <Plug>(easymotion-bd-tl)
 omap f <Plug>(easymotion-sl)
@@ -707,6 +765,29 @@ function! CtrlPProgressLine(...) " {{{
     let dir = ' %=%<%#LineNr# '.getcwd().' %*'
     return len . dir
 endfunction " }}}
+function! PandocOpen(file)
+    if has('win32')
+        return 'start '. a:file
+    elseif executable('xdg-open')
+        return 'xdg-open '. a:file
+    else
+        return a:file
+    endif
+endfunction
+" Fallback functions {{{
+" from noahfrederick.com/log/vim-and-progressive-enhancement/
+function! s:try(cmd, default)
+    if exists(':' . a:cmd) && !v:count
+        let tick = b:changedtick
+        exe a:cmd
+        if tick == b:changedtick
+            exe join(['normal!', a:default])
+        endif
+    else
+        exe join(['normal! ', v:count, a:default], '')
+    endif
+endfunction
+" }}}
 " }}}
 " Plugin autocommands {{{
 augroup GoyoEvents
@@ -721,6 +802,11 @@ augroup GoyoEvents
     au User GoyoLeave set cursorline
     au User GoyoLeave call <SID>RefreshStatus()
 augroup END
+augroup Litecorrect
+    au!
+    au FileType markdown,mkd call litecorrect#init()
+    au FileType textile call litecorrect#init()
+augroup END
 "}}}
 " Plugin can I has(?) {{{
 " Create directories if not exist
@@ -733,3 +819,4 @@ let g:ctrlp_mruf_case_sensitive = has('win32') ? 0 : 1
 "}}}
 
 colorscheme solarized
+" colorscheme pencil
