@@ -586,86 +586,81 @@ function! DoCmds(...) " {{{
 endfunction " }}}
 " }}}
 " PLUGINS {{{
-" Vundle {{{
-filetype off
-set runtimepath+=$HOME/.vim/bundle/Vundle.vim
-call vundle#begin()
-
-Plugin 'gmarik/Vundle.vim'                " let Vundle manage Vundle
+" Vim-plug {{{
+call plug#begin('~/.vim/plugged')
 
 " GUI
-Plugin 'duckwork/vim-buftabline'          " show vim buffers in tabline
-" Plugin 'talek/obvious-resize'             " Resive ViM windows obviously
+Plug 'duckwork/vim-buftabline'          " show vim buffers in tabline
+" Plug 'talek/obvious-resize'             " Resive ViM windows obviously
 " Colors
-Plugin 'reedes/vim-colors-pencil'
-Plugin 'altercation/vim-colors-solarized'
+Plug 'reedes/vim-colors-pencil'
+Plug 'altercation/vim-colors-solarized'
 
 " WRITING
 " Prose
-Plugin 'junegunn/goyo.vim'                " distraction-free writing
-Plugin 'duckwork/limelight.vim'           " highlight current paragraph
+Plug 'junegunn/goyo.vim', { 'on': 'Goyo' } " distraction-free writing
+Plug 'duckwork/limelight.vim', { 'on': 'Limelight' } " highlight current para
 
 " Code
-Plugin 'tpope/vim-commentary'             " Easier commmenting
-Plugin 'tpope/vim-endwise'                " Auto-add 'end*'s in code
-Plugin 'tpope/vim-characterize'           " Modernize `ga` behavior
+Plug 'tpope/vim-commentary'             " Easier commmenting
+Plug 'tpope/vim-endwise'                " Auto-add 'end*'s in code
+Plug 'tpope/vim-characterize'           " Modernize `ga` behavior
 
 " NAVIGATING FILESYSTEM
-Plugin 'kien/ctrlp.vim'                   " A fuzzy file finder
-Plugin 'dockyard/vim-easydir'             " Create new dirs on-the-fly
-Plugin 'tpope-vim-vinegar'                " Better netrw integration
-Plugin 'xolox/vim-shell'                  " Integrate ViM and environment
-Plugin 'xolox/vim-misc'                   " Required by vim-shell
+Plug 'kien/ctrlp.vim'                   " A fuzzy file finder
+Plug 'dockyard/vim-easydir'             " Create new dirs on-the-fly
+Plug 'tpope-vim-vinegar'                " Better netrw integration
+Plug 'xolox/vim-shell'                  " Integrate ViM and environment
+Plug 'xolox/vim-misc'                   " Required by vim-shell
 
 " EXTENDING VIM OPERATIONS
-Plugin 'tpope/vim-repeat'                 " Repeat plugin commands with .
+Plug 'tpope/vim-repeat'                 " Repeat plugin commands with .
 " Search & Replace
-Plugin 'nelstrom/vim-visual-star-search'  " Use * or # from V-Block
-Plugin 'tpope/vim-abolish'                " Enhanced search and replace
+Plug 'nelstrom/vim-visual-star-search'  " Use * or # from V-Block
+Plug 'tpope/vim-abolish'                " Enhanced search and replace
 " Formatting
-Plugin 'godlygeek/tabular'                " Easy aligning of text
-" Plugin 'junegunn/vim-easy-align'          " Vim alignment plugin
-Plugin 'AndrewRadev/splitjoin.vim'        " Easily split and join code
-Plugin 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
-Plugin 'tommcdo/vim-exchange'             " Easy text exchange operator
+Plug 'godlygeek/tabular'                " Easy aligning of text
+" Plug 'junegunn/vim-easy-align'          " Vim alignment plugin
+Plug 'AndrewRadev/splitjoin.vim'        " Easily split and join code
+Plug 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
+Plug 'tommcdo/vim-exchange'             " Easy text exchange operator
 " Textobjects
-Plugin 'Lokaltog/vim-easymotion'          " No more counting objects
-Plugin 'wellle/targets.vim'               " Lots of new textobjects
-Plugin 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
-Plugin 'tpope/vim-surround'               " Format surroundings easily
+Plug 'Lokaltog/vim-easymotion'          " No more counting objects
+Plug 'wellle/targets.vim'               " Lots of new textobjects
+Plug 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
+Plug 'tpope/vim-surround'               " Format surroundings easily
 
 " FILETYPES
-" Plugin 'mattn/emmet-vim'                  " Zencoding for HTML
-" Plugin 'gregsexton/MatchTag'              " Match HTML tags with %
-" Plugin 'hail2u/vim-css3-syntax'           " syntax file for CSS3
+Plug 'mattn/emmet-vim', { 'for': 'html' } " Zencoding for HTML
+Plug 'gregsexton/MatchTag'              " Match HTML tags with %
+Plug 'hail2u/vim-css3-syntax'           " syntax file for CSS3
 
-Plugin 'vim-pandoc/vim-pandoc'            " Pandoc helpers
-Plugin 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
-Plugin 'reedes/vim-litecorrect'           " autocorrect w/customization
+Plug 'vim-pandoc/vim-pandoc'            " Pandoc helpers
+Plug 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
+Plug 'reedes/vim-litecorrect'           " autocorrect w/customization
 
-Plugin 'vimwiki/vimwiki'                  " Personal wiki with ViM
+Plug 'vimwiki/vimwiki'                  " Personal wiki with ViM
 
-Plugin 'sheerun/vim-polyglot'             " Many syntax defs
+Plug 'sheerun/vim-polyglot'             " Many syntax defs
 
 " PLUGINS THAT REQUIRE THINGS
 if executable('git')
-    Plugin 'tpope/vim-fugitive'           " Git integration
-    Plugin 'airblade/vim-gitgutter'       " Git stuff in signs column
+    Plug 'tpope/vim-fugitive'           " Git integration
+    Plug 'airblade/vim-gitgutter'       " Git stuff in signs column
 endif
 if executable('ag')
-    Plugin 'rking/ag.vim'                 " Ag implementation
+    Plug 'rking/ag.vim'                 " Ag implementation
 endif
 if executable('diff')
-    Plugin 'mbbill/undotree'              " Visualize Vim's undo tree
+    Plug 'mbbill/undotree'              " Visualize Vim's undo tree
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
     nnoremap <F5> :UndotreeToggle<CR>
 elseif has('python')
-    Plugin 'vim-scripts/gundo'            " Visualize Vim's undo tree
+    Plug 'vim-scripts/gundo'            " Visualize Vim's undo tree
     nnoremap <F5> :GundoToggle<CR>
 endif
 
-call vundle#end()                         " req'd
-filetype plugin indent on                 " req'd
+call plug#end()                         " req'd
 "}}}
 " Plugin settings {{{
 " Ag
