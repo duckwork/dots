@@ -54,6 +54,11 @@ set wildmenu                        " Enhanced command-line completion
 set ruler                           " Show where the cursor is in the file
 set showcmd                         " Show command as it's being typed
 
+set shortmess=a                     " same as shm=filmnrwx
+set shm     +=oO                    " overwrite file msgs
+set shm     +=tT                    " truncate msgs in [c] mode
+set shm     +=I                     " don't give intro msg on vim start
+
 set foldenable                      " Enable folding
 set foldmethod=marker               " {{{ }}} mark folds
 set foldlevel=2                     " Start open to second level
@@ -71,6 +76,7 @@ set linebreak                       " Wrap at words (def by 'breakat')
 set breakindent                     " soft-wrapped lines indent to prev line
 set list                            " show some non-printing characters
 set listchars=tab:»»,trail:·,nbsp:~ " make it easy to see these
+let &showbreak = '└ '
 match Error /\s\+$/                 " match trailing whitespace to error
 
 let &colorcolumn = g:tw
@@ -110,8 +116,8 @@ inoremap kk <Esc>
 let mapleader = ','
 
 " Better movement
-nnoremap <expr> j v:count ? 'j' : 'gj'
-nnoremap <expr> k v:count ? 'k' : 'gk'
+nnoremap <expr> j v:count > 0 ? 'j' : 'gj'
+nnoremap <expr> k v:count > 0 ? 'k' : 'gk'
 nnoremap H ^
 nnoremap L $
 
@@ -125,13 +131,11 @@ nnoremap <C-S-Space> zR
 
 " More consistent capital operators (C, D, Y)
 nnoremap Y y$
-" Make X opposite of D (delete to beginning of line)
-nnoremap X d0
+" Make S opposite of D (S = cc by default, so useless!)
+nnoremap S d0
 
 " <BS> backspaces in normal mode
 nnoremap <BS> X
-" Make K opposite of J (join).
-" nnoremap K i<CR><Esc>
 " Make <F1> help better.
 nnoremap <F1> K
 
@@ -164,7 +168,7 @@ nnoremap <leader>sv :source $MYVIMRC<CR>
 " Change current directory to filepath
 nnoremap <leader>cd :cd %:p:h<CR>
 " Explore the current directory
-nnoremap <silent> \ :Explore<CR>
+nnoremap <silent> - :Explore<CR>
 
 " Remove search highlight
 nnoremap <leader>/ :nohlsearch<CR>
@@ -187,45 +191,48 @@ nnoremap gT :<C-U>call ChTabBuf(-v:count1)<CR>
 cmap w!! %!sudo tee > /dev/null %
 "}}}
 " AUTOCOMMANDS {{{
-autocmd BufEnter * if &ft != 'help' | silent! lcd %:p:h | endif
 autocmd ColorScheme * call UpdateCursorLineNumber()
-
-" augroup TextEditing
-"     au!
-"     au BufNewFile,BufRead *.{md,markdown,mdown,mkd,mkdn,text} setf markdown
-"     au FileType *wiki,markdown setlocal spell
-"     au FileType markdown call Typewriter('on')
-" augroup END
-
-augroup AutoSave
+augroup Filestuff "{{{
     au!
+    " Autosave files
     au FocusLost * silent! wall
-augroup END
+    " Auto-remove whitespace when saving
+    au BufWritePre * %s/\s\+$//e
+    " Auto-source vimrc on save
+    "au BufWritePost $MYVIMRC source $MYVIMRC
 
-" augroup ReloadVimrc
-"     au!
-"     au BufWritePost $MYVIMRC source $MYVIMRC
-" augroup END
-
-augroup InsertAnnoyances
+    " Auto chdir
+    au BufEnter * if &ft != 'help' | silent! lcd %:p:h | endif
+    " Jump to previous position in file
+    au BufReadPost * normal `"
+augroup END "}}}
+augroup Windowstuff "{{{
     au!
+    " Remove annoying shit when in insert mode
     au WinLeave,InsertEnter * call ListPlus('off')
     au WinEnter,InsertLeave * call ListPlus('on')
-augroup END
 
+    " Update statusline
+    au VimEnter,WinEnter,BufWinEnter * call <SID>RefreshStatus()
+augroup END "}}}
+" Filetypes {{{
 augroup ft_Help
     au!
     au FileType help setlocal nospell
+    " Move help window to right if wide enough
     au BufWinEnter *.txt
                 \ if &ft == 'help' && winwidth(0) >=2 * g:tw |
                 \     wincmd L |
                 \ endif
 augroup END
 
-augroup DoStatusLine
-    au!
-    au VimEnter,WinEnter,BufWinEnter * call <SID>RefreshStatus()
-augroup END
+" augroup ft_Text
+"     au!
+"     au BufNewFile,BufRead *.{md,markdown,mdown,mkd,mkdn,text} setf markdown
+"     au FileType *wiki,markdown setlocal spell
+"     au FileType markdown call Typewriter('on')
+" augroup END
+" }}}
 "}}}
 " CAN I HAS(?) {{{
 if has('win32') " {{{
@@ -258,8 +265,9 @@ if has('gui_running') " {{{
     elseif has('x11')
         "set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
-        " set guifont=Consolas:h11:cANSI
-        set guifont=Fantasque_Sans_Mono:h11:cANSI
+        set guifont=Consolas:h11:cANSI
+        " set guifont=Fantasque_Sans_Mono:h11:cANSI
+        " set guifont=PT_Mono:h11:cANSI
     endif
 
     " Start at this size
@@ -288,7 +296,7 @@ endif
 " }}}
 "}}}
 " FUNCTIONS {{{
-" --- Tools
+" Tools
 function! WordCount() " {{{ I'm only using the WordCount part
     let s:oldstat = v:statusmsg
     let position = getpos('.')
@@ -305,7 +313,7 @@ function! WordCount() " {{{ I'm only using the WordCount part
 
     return s:wordcount
 endfunction " }}}
-" --- Managing buffers, tabs, windows
+" Managing buffers, tabs, windows
 function! ChTabBuf(motion) " {{{
     if tabpagenr('$') == 1
         " there is only 1 tab; switch buffers
@@ -329,16 +337,20 @@ function! CloseBufWin() " {{{
         quit
     endif
 endfunction " }}}
-" --- Custom interface lines
+" Custom interface lines
 function! FoldLine() " {{{
     let line = getline(v:foldstart)
     " Calculate widths
-    let nucolwidth = &fdc + &nu * &nuw
-    let windowwidth = winwidth(0) - nucolwidth - 3
+    " if winwidth(0) < g:tw
+    "     let nucolwidth = &fdc + &nu * &nuw
+    "     let windowwidth = winwidth(0) - nucolwidth - 7
+    " else
+    "     let windowwidth = g:tw - 7
+    " endif
     let foldedlinecount = printf('%3d', v:foldend - v:foldstart)
-    " Replace tabs with spaces
-    let onetab = strpart('        ', 0, &tabstop)
-    let line = substitute(line, '\t', onetab, 'g')
+    " " Replace tabs with spaces
+    " let onetab = strpart('        ', 0, &tabstop)
+    " let line = substitute(line, '\t', onetab, 'g')
     " Get rid of fold markers
     let foldmarks = substitute(&fmr, ',.*', '', '')
     let line = substitute(line, foldmarks, '', '')
@@ -351,21 +363,13 @@ function! FoldLine() " {{{
     " Replace initial whitespace with dashes indicating foldlevel
     let line = substitute(line, '^\s*', v:folddashes . ' ', '')
     " Adjust line width to fit window
-    let line = strpart(line, 0, windowwidth - 2 - len(foldedlinecount))
-    let fillcharcount = windowwidth - len(line) - len(foldedlinecount)
+    " let line = strpart(line, 0, windowwidth - len(foldedlinecount))
+    " let fillcharcount = windowwidth - len(line) - len(foldedlinecount)
     " Output foldline
-    let line = line . repeat(' ', fillcharcount)
-    return line . v:foldlevel . '> ' . foldedlinecount . ' '
+    " let line = line . repeat(' ', fillcharcount)
+    " return '> ' . line . v:foldlevel . ': ' . foldedlinecount . ' <'
+    return '> ' . v:foldlevel . ': ' . foldedlinecount . ' ' . line . ' <'
 endfunction " }}}
-function! NewFoldLine()
-    let line = getline(v:foldstart)
-    let foldedlinecount = printf('%3d', v:foldend - v:foldstart)
-    
-    let onetab = strpart('        ', 0, &tabstop)
-    let line = substitute(line, '\t', onetab, 'g')
-
-
-endfunction
 function! StatusLine(winnr) " {{{
     let status = ''
 
@@ -465,7 +469,7 @@ function! StatusLine(winnr) " {{{
         let status .= '%{WordCount()} '
     endif
     let status .= '%#StatusLine#'
-    let status .= Color(!isactive, 'CursorLine', ' %p%% ')
+    let status .= Color(!isactive, 'CursorLine', ' %3p%% ')
 
     return status
 endfunction " }}}
@@ -573,6 +577,13 @@ function! ListPlus(switch) "{{{
         endif
     endif
 endfunction "}}}
+function! DoCmds(...) " {{{
+    for cmd in a:000
+        if exists(":".cmd) == 2 " full match with command
+            exe "normal! ".cmd
+        endif
+    endfor
+endfunction " }}}
 " }}}
 " PLUGINS {{{
 " Vundle {{{
@@ -583,8 +594,8 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'                " let Vundle manage Vundle
 
 " GUI
-Plugin 'ap/vim-buftabline'                " show vim buffers in tabline
-Plugin 'talek/obvious-resize'             " Resive ViM windows obviously
+Plugin 'duckwork/vim-buftabline'          " show vim buffers in tabline
+" Plugin 'talek/obvious-resize'             " Resive ViM windows obviously
 " Colors
 Plugin 'reedes/vim-colors-pencil'
 Plugin 'altercation/vim-colors-solarized'
@@ -602,8 +613,8 @@ Plugin 'tpope/vim-characterize'           " Modernize `ga` behavior
 " NAVIGATING FILESYSTEM
 Plugin 'kien/ctrlp.vim'                   " A fuzzy file finder
 Plugin 'dockyard/vim-easydir'             " Create new dirs on-the-fly
+Plugin 'tpope-vim-vinegar'                " Better netrw integration
 Plugin 'xolox/vim-shell'                  " Integrate ViM and environment
-                                          " I use this for :Fullscreen
 Plugin 'xolox/vim-misc'                   " Required by vim-shell
 
 " EXTENDING VIM OPERATIONS
@@ -613,9 +624,10 @@ Plugin 'nelstrom/vim-visual-star-search'  " Use * or # from V-Block
 Plugin 'tpope/vim-abolish'                " Enhanced search and replace
 " Formatting
 Plugin 'godlygeek/tabular'                " Easy aligning of text
-Plugin 'junegunn/vim-easy-align'          " Vim alignment plugin
+" Plugin 'junegunn/vim-easy-align'          " Vim alignment plugin
 Plugin 'AndrewRadev/splitjoin.vim'        " Easily split and join code
 Plugin 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
+Plugin 'tommcdo/vim-exchange'             " Easy text exchange operator
 " Textobjects
 Plugin 'Lokaltog/vim-easymotion'          " No more counting objects
 Plugin 'wellle/targets.vim'               " Lots of new textobjects
@@ -623,9 +635,9 @@ Plugin 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
 Plugin 'tpope/vim-surround'               " Format surroundings easily
 
 " FILETYPES
-Plugin 'mattn/emmet-vim'                  " Zencoding for HTML
-Plugin 'gregsexton/MatchTag'              " Match HTML tags with %
-Plugin 'hail2u/vim-css3-syntax'           " syntax file for CSS3
+" Plugin 'mattn/emmet-vim'                  " Zencoding for HTML
+" Plugin 'gregsexton/MatchTag'              " Match HTML tags with %
+" Plugin 'hail2u/vim-css3-syntax'           " syntax file for CSS3
 
 Plugin 'vim-pandoc/vim-pandoc'            " Pandoc helpers
 Plugin 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
@@ -638,7 +650,7 @@ Plugin 'sheerun/vim-polyglot'             " Many syntax defs
 " PLUGINS THAT REQUIRE THINGS
 if executable('git')
     Plugin 'tpope/vim-fugitive'           " Git integration
-" Plugin 'airblade/vim-gitgutter'           " Git stuff in signs column
+    Plugin 'airblade/vim-gitgutter'       " Git stuff in signs column
 endif
 if executable('ag')
     Plugin 'rking/ag.vim'                 " Ag implementation
@@ -733,7 +745,7 @@ nnoremap gS :%S/
 vnoremap gS :S/
 " J/K intelligently SplitJoin.vim or fallback to default
 nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin', 'J')<CR>
-nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit', "i")<CR>
+nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit', "i\r")<CR>
 " remap motion maps !
 " TODO: progressive-enhance these.
 nmap f <Plug>(easymotion-sl)
@@ -765,7 +777,7 @@ function! CtrlPProgressLine(...) " {{{
     let dir = ' %=%<%#LineNr# '.getcwd().' %*'
     return len . dir
 endfunction " }}}
-function! PandocOpen(file)
+function! PandocOpen(file) " {{{
     if has('win32')
         return 'start '. a:file
     elseif executable('xdg-open')
@@ -773,7 +785,7 @@ function! PandocOpen(file)
     else
         return a:file
     endif
-endfunction
+endfunction " }}}
 " Fallback functions {{{
 " from noahfrederick.com/log/vim-and-progressive-enhancement/
 function! s:try(cmd, default)
@@ -781,10 +793,10 @@ function! s:try(cmd, default)
         let tick = b:changedtick
         exe a:cmd
         if tick == b:changedtick
-            exe join(['normal!', a:default])
+            exe 'normal! ' . a:default
         endif
     else
-        exe join(['normal! ', v:count, a:default], '')
+        exe 'normal! ' . v:count . a:default
     endif
 endfunction
 " }}}
@@ -818,5 +830,5 @@ let g:ctrlp_mruf_case_sensitive = has('win32') ? 0 : 1
 " }}}
 "}}}
 
-colorscheme solarized
-" colorscheme pencil
+" colorscheme solarized
+colorscheme pencil
