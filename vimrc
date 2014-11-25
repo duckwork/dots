@@ -1,6 +1,6 @@
 " ViMrc ReVised
 " Case Duckworth (mahatman2)
-" vim:foldenable:foldlevel=0:tw=0:nowrap:nolinebreak
+" vim:tw=0:nowrap:nolinebreak
 
 set nocompatible " be iMproved
 
@@ -61,7 +61,7 @@ set shm     +=I                     " don't give intro msg on vim start
 
 set foldenable                      " Enable folding
 set foldmethod=marker               " {{{ }}} mark folds
-set foldlevel=2                     " Start open to second level
+" set foldlevel=2                     " Start open to second level
 set foldcolumn=0                    " Fold columns in gutter
 set foldtext=FoldLine()             " Define what folded folds look like
 
@@ -72,8 +72,10 @@ set sidescroll=1                    " Scroll one column at a time sideways
 let g:tw = 78                       " Set textwidth without really setting tw
 " let &textwidth = g:tw             " Set textwidth
 set wrap                            " Soft wrap lines to window
-set linebreak                       " Wrap at words (def by 'breakat')
-set breakindent                     " soft-wrapped lines indent to prev line
+if has('linebreak')
+    set linebreak                   " Wrap at words (def by 'breakat')
+    set breakindent                 " soft-wrapped lines indent to prev line
+endif
 set list                            " show some non-printing characters
 set listchars=tab:»»,trail:·,nbsp:~ " make it easy to see these
 let &showbreak = '└ '
@@ -101,6 +103,13 @@ set directory=$HOME/.vim/swap//     " directory for swap files
 set backupdir=$HOME/.vim/backup//   " directory for backups
 set backupcopy=yes                  " copy the original and overwrite
 set backup                          " Keep backup files, just in case
+
+set viewdir=$HOME/.vim/views//      " Save fileviews
+set viewoptions=folds               " Include folds in fileviews
+set vop       +=cursor              " Include where the cursor was
+set vop       +=slash               " backslashes in fnames = forward
+set vop       +=unix                " Unix EOL fmt even when on Windows
+" set vop       +=options             " Include local options and mappings
 
 set confirm                         " Confirm before quit, instead of error
 
@@ -212,6 +221,12 @@ augroup Windowstuff "{{{
     au WinLeave,InsertEnter * call ListPlus('off')
     au WinEnter,InsertLeave * call ListPlus('on')
 
+    " Save and restore windowviews
+    au BufWinLeave * if bufname(0) != '' && &ft != 'help'
+                \ | mkview | endif
+    au BufWinEnter * if bufname(0) != '' && &ft != 'help'
+                \ | loadview | endif
+
     " Update statusline
     au VimEnter,WinEnter,BufWinEnter * call <SID>RefreshStatus()
 augroup END "}}}
@@ -293,11 +308,14 @@ endif
 if !isdirectory(expand(&undodir))
     call mkdir(expand(&undodir), 'p')
 endif
+if !isdirectory(expand(&viewdir))
+    call mkdir(expand(&viewdir), 'p')
+endif
 " }}}
 "}}}
 " FUNCTIONS {{{
 " Tools
-function! WordCount() " {{{ I'm only using the WordCount part
+function! WordCount() " {{{
     let s:oldstat = v:statusmsg
     let position = getpos('.')
     exe ":silent normal g\<c-g>"
@@ -340,18 +358,7 @@ endfunction " }}}
 " Custom interface lines
 function! FoldLine() " {{{
     let line = getline(v:foldstart)
-    " Calculate widths
-    " if winwidth(0) < g:tw
-    "     let nucolwidth = &fdc + &nu * &nuw
-    "     let windowwidth = winwidth(0) - nucolwidth - 7
-    " else
-    "     let windowwidth = g:tw - 7
-    " endif
     let foldedlinecount = printf('%3d', v:foldend - v:foldstart)
-    " " Replace tabs with spaces
-    " let onetab = strpart('        ', 0, &tabstop)
-    " let line = substitute(line, '\t', onetab, 'g')
-    " Get rid of fold markers
     let foldmarks = substitute(&fmr, ',.*', '', '')
     let line = substitute(line, foldmarks, '', '')
     " Get rid of commentstring
@@ -362,12 +369,6 @@ function! FoldLine() " {{{
     let line = substitute(line, commentstr, '', 'g')
     " Replace initial whitespace with dashes indicating foldlevel
     let line = substitute(line, '^\s*', v:folddashes . ' ', '')
-    " Adjust line width to fit window
-    " let line = strpart(line, 0, windowwidth - len(foldedlinecount))
-    " let fillcharcount = windowwidth - len(line) - len(foldedlinecount)
-    " Output foldline
-    " let line = line . repeat(' ', fillcharcount)
-    " return '> ' . line . v:foldlevel . ': ' . foldedlinecount . ' <'
     return '> ' . v:foldlevel . ': ' . foldedlinecount . ' ' . line . ' <'
 endfunction " }}}
 function! StatusLine(winnr) " {{{
