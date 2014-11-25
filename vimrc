@@ -609,7 +609,7 @@ Plug 'tpope/vim-characterize'           " Modernize `ga` behavior
 " NAVIGATING FILESYSTEM
 Plug 'kien/ctrlp.vim'                   " A fuzzy file finder
 Plug 'dockyard/vim-easydir'             " Create new dirs on-the-fly
-Plug 'tpope-vim-vinegar'                " Better netrw integration
+Plug 'tpope/vim-vinegar'                " Better netrw integration
 Plug 'xolox/vim-shell'                  " Integrate ViM and environment
 Plug 'xolox/vim-misc'                   " Required by vim-shell
 
