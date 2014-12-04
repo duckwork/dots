@@ -229,9 +229,9 @@ augroup Windowstuff "{{{
     " Update statusline
     au VimEnter,WinEnter,BufWinEnter * call <SID>RefreshStatus()
 
-    " Remove annoying shit when in insert mode or outside window
-    au WinLeave,InsertEnter,BufWinLeave * call ListPlus('off')
-    au WinEnter,InsertLeave,BufWinEnter * call ListPlus('on')
+    " Remove annoying shit when in insert mode
+    au InsertEnter * call ListPlus('off')
+    au InsertLeave * call ListPlus('on')
 
     " Save and restore windowviews
     au BufWinLeave * silent! mkview
@@ -248,13 +248,13 @@ augroup ft_Help
                 \ endif
     au FileType help nnoremap <buffer> <CR> <C-]>
     au FileType help nnoremap <buffer> <BS> <C-t>
+    au FileType help call ListPlus('off')
 augroup END
 
 augroup ft_Text
     au!
     au BufNewFile,BufRead *.txt setf pandoc
     au FileType *wiki,markdown,pandoc setlocal spell
-    " au FileType markdown call Typewriter('on')
 augroup END
 
 " augroup Status_ft
@@ -610,10 +610,10 @@ function! ToggleBG() "{{{
 endfunction "}}}
 function! ListPlus(switch) "{{{
     function! s:listplus_off()
-        let s:cul  = &cursorline
-        let s:cc   = &colorcolumn
-        let s:list = &list
-        let s:rnu  = &relativenumber
+        let s:cul  = &l:cursorline
+        let s:cc   = &l:colorcolumn
+        let s:list = &l:list
+        let s:rnu  = &l:relativenumber
 
         setlocal nocursorline
         setlocal colorcolumn=
@@ -634,16 +634,14 @@ function! ListPlus(switch) "{{{
         return 1
     endfunction
 
-    if getbufvar("%", "&ft") !~? 'help'
-        if a:switch ==? 'on'
-            let b:listplus_enabled = <SID>listplus_on()
-        elseif a:switch ==? 'off'
-            let b:listplus_enabled = <SID>listplus_off()
-        elseif a:switch =~? 'tog'
-            let b:listplus_enabled = get(b: 'listplus_enabled', 0)
-                        \ ? <SID>listplus_off()
-                        \ : <SID>listplus_on()
-        endif
+    if a:switch ==? 'on'
+        let b:listplus_enabled = <SID>listplus_on()
+    elseif a:switch ==? 'off'
+        let b:listplus_enabled = <SID>listplus_off()
+    elseif a:switch =~? 'tog'
+        let b:listplus_enabled = get(b: 'listplus_enabled', 0)
+                    \ ? <SID>listplus_off()
+                    \ : <SID>listplus_on()
     endif
 endfunction "}}}
 function! DoCmds(...) " {{{
