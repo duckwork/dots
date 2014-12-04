@@ -712,7 +712,8 @@ Plug 'tpope/vim-surround'               " Format surroundings easily
 " FILETYPES
 Plug 'mattn/emmet-vim',                 " Zencoding for HTML
             \ { 'for': [ 'html', 'xml', ] }
-Plug 'gregsexton/MatchTag'              " Match HTML tags with %
+Plug 'gregsexton/MatchTag',             " Match HTML tags with %
+            \ { 'for': [ 'html', 'xml', ] }
 
 Plug 'vim-pandoc/vim-pandoc'            " Pandoc helpers
 Plug 'reedes/vim-litecorrect'           " autocorrect w/customization
@@ -743,6 +744,9 @@ elseif has('python')
     Plug 'vim-scripts/gundo'            " Visualize Vim's undo tree
     nnoremap <F5> :GundoToggle<CR>
 endif
+
+" DEVELOPMENT
+Plug '~/my-plugins/concrastinate'       " Disable editing files when working
 
 call plug#end()                         " req'd
 "}}}
