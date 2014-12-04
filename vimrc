@@ -183,7 +183,7 @@ nnoremap <leader>cd :cd %:p:h<CR>
 " Explore the current directory
 nnoremap <silent> - :Explore<CR>
 " List open buffers and switch to one
-nnoremap gb :ls<CR>:b
+nnoremap gb :ls<CR>:b<Space>
 
 " Remove search highlight
 nnoremap <silent> <leader>/ :nohlsearch<CR>
@@ -382,6 +382,7 @@ command! -bar RangerChooser call RangeChooser()
 nnoremap <leader>f :<C-u>RangerChooser<CR>
 endif " }}}
 function! Concrastinate(cmd, ...) " {{{
+    " TODO: work with a file list
     " keep from vimrc hacking during work
     " timestart, timeend must be fmt %H%M
     " cmd is a exe command
@@ -633,8 +634,7 @@ function! ListPlus(switch) "{{{
         return 1
     endfunction
 
-    if &ft !~? 'help'
-        " TODO: fix this -- doesn't reenable
+    if getbufvar("%", "&ft") !~? 'help'
         if a:switch ==? 'on'
             let b:listplus_enabled = <SID>listplus_on()
         elseif a:switch ==? 'off'
@@ -644,8 +644,6 @@ function! ListPlus(switch) "{{{
                         \ ? <SID>listplus_off()
                         \ : <SID>listplus_on()
         endif
-    else
-        let b:listplus_enabled = <SID>listplus_off()
     endif
 endfunction "}}}
 function! DoCmds(...) " {{{
@@ -671,7 +669,7 @@ Plug 'talek/obvious-resize',            " Resive ViM windows obviously
 " Colors
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
-Plug 'zenorocha/dracula-theme'
+Plug 'zenorocha/dracula-theme', { 'rtp': 'vim' }
 Plug 'Suave/vim-colors-guardian'
 
 " WRITING
@@ -814,6 +812,8 @@ let g:splitjoin_split_mapping = 'gK'
 let g:undotree_WindowLayout = 2
 let g:undotree_DiffAutoOpen = 1
 let g:undotree_SetFocusWhenToggle = 1
+" Vim-Plug
+" let g:plug_url_format = 'https://github.com/%s.git'
 " Vim-shell
 let g:shell_mappings_enabled   = 0 " disable default mappings
 let g:shell_fullscreen_message = 0 " don't help me to get out of fullscreen
@@ -850,6 +850,10 @@ if exists('g:EasyMotion_loaded')
     nmap <Leader>; <Plug>(easymotion-next)
     nmap <Leader>, <Plug>(easymotion-prev)
 endif
+
+" Disable pandoc#formatting#autoformat
+" TODO: toggle?
+nnoremap <F3> :call pandoc#formatting#DisableAutoformat()<CR>
 
 " Window resizing with ObviousResize
 nnoremap <C-UP>    :<C-u>call <SID>try('ObviousResizeUp', 'wincmd +')<CR>
