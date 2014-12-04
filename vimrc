@@ -2,16 +2,14 @@
 " Case Duckworth (mahatman2)
 " vim:tw=0:nowrap:nolinebreak
 
-set nocompatible " be iMproved
+set nocompatible                    " be iMproved
 
 " SETTINGS {{{
 syntax on                           " syntax highlighting
 set synmaxcol=300                   " stop syntax coloring at 300 col
 
-runtime! $VIMRUNTIME/macros/matchit.vim
-
 set number                          " show line numbers in gutter
-set relativenumber                  " show line nums relative to current line
+set relativenumber                  " show line nums relative to current
 
 set autoread                        " reload on a change, automagically
 set lazyredraw                      " don't redraw macros til done
@@ -36,7 +34,8 @@ set fileencoding=utf-8              " because year = 2014.
 set fileformat=unix                 " Unix file ending default
 set fileformats=unix,dos            " but recognize DOS line endings
 
-set spelllang=en                    " I write in English
+set spelllang=en_us                 " I write in English
+set spellfile=~/.vim/spell/en.utf-8.add
 
 set history=1000                    " set history length
 
@@ -77,12 +76,18 @@ if has('linebreak')
     set breakindent                 " soft-wrapped lines indent to prev line
 endif
 set list                            " show some non-printing characters
-set listchars=tab:»»,trail:·,nbsp:~ " make it easy to see these
-let &showbreak = '└ '
+set listchars=tab:»»                " Show these non-printing characters
+set lcs     +=trail:·               " TODO: think about indenting chars
+set lcs     +=nbsp:~                "    (spaces or tabs?)
+let &showbreak = '└ '               " when a line wraps, show it with this
 match Error /\s\+$/                 " match trailing whitespace to error
 
-let &colorcolumn = g:tw
-set cursorline
+set nostartofline                   " stay in column with gg, G, etc.
+set virtualedit=insert              " allow cursor past EOL in Insert mode
+set ve        +=block               " allow cursor past EOL in V-block
+
+let &colorcolumn = g:tw             " highlight this column
+set cursorline                      " highlight the line being edited
 
 set expandtab                       " use spaces instead of tabs
 set autoindent                      " copy indent when inserting a new line
@@ -99,6 +104,8 @@ set smartcase                       " ... unless a capital appears
 set gdefault                        " default to global (line) substitutions
 set magic                           " use better regexp
 
+set autowriteall                    " autowrite on many commands
+
 set directory=$HOME/.vim/swap//     " directory for swap files
 set backupdir=$HOME/.vim/backup//   " directory for backups
 set backupcopy=yes                  " copy the original and overwrite
@@ -113,7 +120,7 @@ set vop       +=unix                " Unix EOL fmt even when on Windows
 
 set confirm                         " Confirm before quit, instead of error
 
-set undolevels=10000
+set undolevels=10000                " Max changes that can be undone
 "}}}
 " KEYMAPS {{{
 
@@ -165,22 +172,21 @@ nnoremap <S-UP>    <C-w>K
 nnoremap <S-DOWN>  <C-w>J
 nnoremap <S-LEFT>  <C-w>H
 nnoremap <S-RIGHT> <C-w>L
-nnoremap <C-UP>    <C-w>+
-nnoremap <C-DOWN>  <C-w>-
-nnoremap <C-LEFT>  <C-w>>
-nnoremap <C-RIGHT> <C-w><
 
-" Edit and source vimrc easily
-nnoremap <leader>ev :edit $MYVIMRC<CR>
-nnoremap <leader>sv :source $MYVIMRC<CR>
+" Edit and source rc easily
+" nnoremap <leader>er :edit $MYVIMRC<CR>
+nnoremap <leader>er :call Concrastinate('edit $MYVIMRC',1030,1700)<CR>
+nnoremap <leader>re :source $MYVIMRC<CR>
 
 " Change current directory to filepath
 nnoremap <leader>cd :cd %:p:h<CR>
 " Explore the current directory
 nnoremap <silent> - :Explore<CR>
+" List open buffers and switch to one
+nnoremap gb :ls<CR>:b
 
 " Remove search highlight
-nnoremap <leader>/ :nohlsearch<CR>
+nnoremap <silent> <leader>/ :nohlsearch<CR>
 " Remove end-of-line whitespace
 nnoremap <silent> <leader>rs mz:%s/\s\+$//<CR>:let @/=''<CR>`z
 " Remove blank lines
@@ -191,7 +197,7 @@ nnoremap <silent> <leader>bg :call ToggleBG()<CR>
 " Close buffer, or if last buf, quit vim
 nnoremap <F12> :call CloseBufWin()<CR>
 " Navigate to previous-focused buffer
-nnoremap Q :b#<CR>
+nnoremap <silent> Q :b#<CR>
 " Move to next buffer if there's only one tab
 nnoremap gt :<C-U>call ChTabBuf(v:count1)<CR>
 nnoremap gT :<C-U>call ChTabBuf(-v:count1)<CR>
@@ -200,7 +206,6 @@ nnoremap gT :<C-U>call ChTabBuf(-v:count1)<CR>
 cmap w!! %!sudo tee > /dev/null %
 "}}}
 " AUTOCOMMANDS {{{
-autocmd ColorScheme * call UpdateCursorLineNumber()
 augroup Filestuff "{{{
     au!
     " Autosave files
@@ -211,24 +216,26 @@ augroup Filestuff "{{{
     "au BufWritePost $MYVIMRC source $MYVIMRC
 
     " Auto chdir
-    au BufEnter * if &ft != 'help' | silent! lcd %:p:h | endif
+    au BufEnter * if &ft != 'help'
+                \ | silent! lcd %:p:h | endif
     " Jump to previous position in file
     au BufReadPost * normal `"
 augroup END "}}}
 augroup Windowstuff "{{{
     au!
-    " Remove annoying shit when in insert mode
-    au WinLeave,InsertEnter * call ListPlus('off')
-    au WinEnter,InsertLeave * call ListPlus('on')
-
-    " Save and restore windowviews
-    au BufWinLeave * if bufname(0) != '' && &ft != 'help'
-                \ | mkview | endif
-    au BufWinEnter * if bufname(0) != '' && &ft != 'help'
-                \ | loadview | endif
+    " Change cursorline to something okay
+    " autocmd ColorScheme * call UpdateCursorLineNumber()
 
     " Update statusline
     au VimEnter,WinEnter,BufWinEnter * call <SID>RefreshStatus()
+
+    " Remove annoying shit when in insert mode or outside window
+    au WinLeave,InsertEnter,BufWinLeave * call ListPlus('off')
+    au WinEnter,InsertLeave,BufWinEnter * call ListPlus('on')
+
+    " Save and restore windowviews
+    au BufWinLeave * silent! mkview
+    au BufWinEnter * silent! loadview
 augroup END "}}}
 " Filetypes {{{
 augroup ft_Help
@@ -239,23 +246,39 @@ augroup ft_Help
                 \ if &ft == 'help' && winwidth(0) >=2 * g:tw |
                 \     wincmd L |
                 \ endif
+    au FileType help nnoremap <buffer> <CR> <C-]>
+    au FileType help nnoremap <buffer> <BS> <C-t>
 augroup END
 
-" augroup ft_Text
+augroup ft_Text
+    au!
+    au BufNewFile,BufRead *.txt setf pandoc
+    au FileType *wiki,markdown,pandoc setlocal spell
+    " au FileType markdown call Typewriter('on')
+augroup END
+
+" augroup Status_ft
 "     au!
-"     au BufNewFile,BufRead *.{md,markdown,mdown,mkd,mkdn,text} setf markdown
-"     au FileType *wiki,markdown setlocal spell
-"     au FileType markdown call Typewriter('on')
+"     au FileType text,markdown,pandoc    let w:ftpart = '“ %%<%s ”' |
+"                 \                       let w:ftshow = 0
+"     au FileType html,css,javascript,php let w:ftpart = '< %%<%s >' |
+"                 \                       let w:ftshow = 0
+"     au FileType *wiki                   let w:ftpart = '= %%<%s =' |
+"                 \                       let w:ftshow = 0
+"     au FileType help                    let w:ftpart = '| %%<%s |' |
+"                 \                       let w:ftshow = 0
+"     au FileType *sh                     let w:ftpart = '[ %%<%s ]' |
+"                 \                       let w:ftshow = 0
 " augroup END
 " }}}
 "}}}
 " CAN I HAS(?) {{{
 if has('win32') " {{{
     let &runtimepath .= ',$HOME\.vim'
-
     let &clipboard = has('unnamedplus') ? 'unnamedplus' : 'unnamed'
-
     set viminfo+=rA:,rB:
+
+    nnoremap <silent> <F10> :simalt ~n<CR>
 
     let g:ctrlp_cmd = 'CtrlP D:\Dropbox'
 endif " }}}
@@ -299,18 +322,16 @@ if has('persistent_undo') "{{{
     set undoreload=10000
 endif "}}}
 " Create .vim/* directories if they don't exist {{{
-if !isdirectory(expand(&directory))
-    call mkdir(expand(&directory), 'p')
-endif
-if !isdirectory(expand(&backupdir))
-    call mkdir(expand(&backupdir), 'p')
-endif
-if !isdirectory(expand(&undodir))
-    call mkdir(expand(&undodir), 'p')
-endif
-if !isdirectory(expand(&viewdir))
-    call mkdir(expand(&viewdir), 'p')
-endif
+for directory in [
+            \ &directory,
+            \ &backupdir,
+            \ &undodir,
+            \ &viewdir,
+            \ ]
+    if !isdirectory(expand(directory))
+        call mkdir(expand(directory), 'p')
+    endif
+endfor
 " }}}
 "}}}
 " FUNCTIONS {{{
@@ -330,6 +351,54 @@ function! WordCount() " {{{
     call setpos('.', position)
 
     return s:wordcount
+endfunction " }}}
+if executable('ranger') " {{{
+function! RangeChooser()
+    let temp = tempname()
+    " The option --choosefiles was added in ranger 1.5.1. Use the next line
+    " with ranger 1.4.2 through 1.5.0 instead.
+    " exec 'silent !ranger --choosefile=' . shellescape(temp)
+    exec 'silent !ranger --choosefiles=' . shellescape(temp)
+    if !filereadable(temp)
+        redraw!
+        " Nothing to read
+        return
+    endif
+    let names = readfile(temp)
+    if empty(names)
+        redraw!
+        " Nothing to open
+        return
+    endif
+    " Edit the first item
+    exec 'edit ' . fnameescape(names[0])
+    " Add any remaining items to the arg/buffer list
+    for name in names[1:]
+        exec 'argadd ' . fnameescape(name)
+    endfor
+    redraw!
+endfunction
+command! -bar RangerChooser call RangeChooser()
+nnoremap <leader>f :<C-u>RangerChooser<CR>
+endif " }}}
+function! Concrastinate(cmd, ...) " {{{
+    " keep from vimrc hacking during work
+    " timestart, timeend must be fmt %H%M
+    " cmd is a exe command
+    let current_time = strftime("%H%M")
+    let s:timestart = exists("a:1") ? a:1 : 0800
+    let s:timeend  = exists("a:2") ? a:2 : 1800
+
+    if current_time >= s:timestart && current_time <= s:timeend
+        echohl WarningMsg
+        echom "Sorry, can't " a:cmd ", it's b/w "
+                    \ s:timestart " and " s:timeend "."
+        echohl None
+    else
+        " TODO: fnameescape() it
+        " TODO: add option to add TODO: to end of file
+        exe a:cmd
+    endif
 endfunction " }}}
 " Managing buffers, tabs, windows
 function! ChTabBuf(motion) " {{{
@@ -372,13 +441,13 @@ function! FoldLine() " {{{
     return '> ' . v:foldlevel . ': ' . foldedlinecount . ' ' . line . ' <'
 endfunction " }}}
 function! StatusLine(winnr) " {{{
-    let status = ''
+    let status     = ''
 
-    let buffer = winbufnr(a:winnr)
-    let fname  = bufname(buffer)
-    let ftype  = getbufvar(buffer, '&filetype')
+    let buffer     = winbufnr(a:winnr)
+    let fname      = bufname(buffer)
+    let ftype      = getbufvar(buffer, '&filetype')
 
-    let isactive = winnr() == a:winnr
+    let isactive   = winnr() == a:winnr
     let ismodified = getbufvar(buffer, '&modified')
     let isreadonly = getbufvar(buffer, '&readonly')
     let ishelp     = ftype == 'help'
@@ -404,19 +473,7 @@ function! StatusLine(winnr) " {{{
     endif
 
     " ‼‹›℗←↑→↓◊∫∂↔↕Ω˂˃˄˅§«»±¶¤Ππ‘’“”⌂
-    let bufcomment = getbufvar(buffer, '&commentstring')
-    " Filename
-    if fname =~ '__Gundo'
-        let fname = '∂'
-    elseif fname =~ 'NrrwRgn_'
-        let fname = substitute(fname, 'NrrwRgn_', '↕ ', '')
-    elseif ftype =~ 'netrw'
-        let fname = '⌂'
-    elseif fname == ''
-        let fname = '______'
-    else
-        let fname = '%f'
-    endif
+    " let bufcomment = getbufvar(buffer, '&commentstring')
     " Filetype
     if ftype =~? 'text' || ftype =~? 'm.*d.*' || ftype ==? 'pandoc'
         let filepart = '“ %%<%s ”'
@@ -437,6 +494,16 @@ function! StatusLine(winnr) " {{{
     else
         let filepart = '« %%<%s »'
         let showft   = 1
+    endif
+    " Filename
+    if fname =~ '__Gundo' || ftype =~ 'netrw' || fname == ''
+        let fname  = len(ftype) > 0 ? ftype : '______'
+        let showft = 0
+    " elseif fname == ''
+    "     let fname  = '______'
+    "     let showft = 0
+    else
+        let fname  = '%f'
     endif
 
     if isactive
@@ -461,13 +528,13 @@ function! StatusLine(winnr) " {{{
 
     " Right side ===================================================
     if showft || winwidth(0) > g:tw + &fdc + &nu * &nuw + 4
-        let status .= '[' . ftype . '] '
+        let status .= '[' . ftype . ']'
     else
         let status .= ''
     endif
     if ftype =~? 'text' || ftype =~? 'm.*d.*' || ftype ==? 'pandoc'
                 \|| ftype =~? 'wiki'
-        let status .= '%{WordCount()} '
+        let status .= ' %{WordCount()}'
     endif
     let status .= '%#StatusLine#'
     let status .= Color(!isactive, 'CursorLine', ' %3p%% ')
@@ -488,11 +555,11 @@ endfunction " }}}
 function! TabLine() " {{{
 endfunction " }}}
 " Custom theming
-function! UpdateCursorLineNumber() " {{{
-    if &bg == 'dark'
-        hi CursorLineNr guifg=#6c71c4 gui=bold
-    endif
-endfunction " }}}
+" function! UpdateCursorLineNumber() " {{{
+"     if &bg == 'dark'
+"         hi CursorLineNr guifg=#6c71c4 gui=bold
+"     endif
+" endfunction " }}}
 function! Typewriter(switch) " {{{
     function! s:typewriter_on()
         let s:wrap = &wrap
@@ -567,6 +634,7 @@ function! ListPlus(switch) "{{{
     endfunction
 
     if &ft !~? 'help'
+        " TODO: fix this -- doesn't reenable
         if a:switch ==? 'on'
             let b:listplus_enabled = <SID>listplus_on()
         elseif a:switch ==? 'off'
@@ -576,6 +644,8 @@ function! ListPlus(switch) "{{{
                         \ ? <SID>listplus_off()
                         \ : <SID>listplus_on()
         endif
+    else
+        let b:listplus_enabled = <SID>listplus_off()
     endif
 endfunction "}}}
 function! DoCmds(...) " {{{
@@ -591,16 +661,25 @@ endfunction " }}}
 call plug#begin('~/.vim/plugged')
 
 " GUI
-Plug 'duckwork/vim-buftabline'          " show vim buffers in tabline
-" Plug 'talek/obvious-resize'             " Resive ViM windows obviously
+" Plug 'duckwork/vim-buftabline'          " show vim buffers in tabline
+Plug 'talek/obvious-resize',            " Resive ViM windows obviously
+            \ { 'on': [ 'ObviousResizeUp',
+            \           'ObviousResizeLeft',
+            \           'ObviousResizeRight',
+            \           'ObviousResizeDown',
+            \         ] }
 " Colors
-Plug 'reedes/vim-colors-pencil'
+Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
+Plug 'zenorocha/dracula-theme'
+Plug 'Suave/vim-colors-guardian'
 
 " WRITING
 " Prose
-Plug 'junegunn/goyo.vim', { 'on': 'Goyo' } " distraction-free writing
-Plug 'duckwork/limelight.vim', { 'on': 'Limelight' } " highlight current para
+Plug 'junegunn/goyo.vim',               " distraction-free writing
+            \ { 'on': 'Goyo' }
+Plug 'duckwork/limelight.vim',          " highlight current para
+            \ { 'on': 'Limelight' }
 
 " Code
 Plug 'tpope/vim-commentary'             " Easier commmenting
@@ -620,7 +699,8 @@ Plug 'tpope/vim-repeat'                 " Repeat plugin commands with .
 Plug 'nelstrom/vim-visual-star-search'  " Use * or # from V-Block
 Plug 'tpope/vim-abolish'                " Enhanced search and replace
 " Formatting
-Plug 'godlygeek/tabular'                " Easy aligning of text
+Plug 'godlygeek/tabular',               " Easy aligning of text
+            \ {'on': 'Tabular' }
 " Plug 'junegunn/vim-easy-align'          " Vim alignment plugin
 Plug 'AndrewRadev/splitjoin.vim'        " Easily split and join code
 Plug 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
@@ -632,17 +712,22 @@ Plug 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
 Plug 'tpope/vim-surround'               " Format surroundings easily
 
 " FILETYPES
-Plug 'mattn/emmet-vim', { 'for': 'html' } " Zencoding for HTML
+Plug 'mattn/emmet-vim',                 " Zencoding for HTML
+            \ { 'for': [ 'html', 'xml', ] }
 Plug 'gregsexton/MatchTag'              " Match HTML tags with %
-Plug 'hail2u/vim-css3-syntax'           " syntax file for CSS3
 
 Plug 'vim-pandoc/vim-pandoc'            " Pandoc helpers
-Plug 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
 Plug 'reedes/vim-litecorrect'           " autocorrect w/customization
 
 Plug 'vimwiki/vimwiki'                  " Personal wiki with ViM
+Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt
 
 Plug 'sheerun/vim-polyglot'             " Many syntax defs
+Plug 'hail2u/vim-css3-syntax'           " syntax file for CSS3
+Plug 'dogrover/vim-pentadactyl'         " ftdetect, ftplugin, syntax
+Plug 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
+
+Plug 'vim-scripts/matchit.zip'          " Better matchit plugin (newer ver)
 
 " PLUGINS THAT REQUIRE THINGS
 if executable('git')
@@ -671,6 +756,8 @@ let g:aghighlight = 1 " highlight searches
 let g:buftabline_show = 1 " only show if at least 2 buffers
 let g:buftabline_numbers = 1 " show buffer numbers in list
 let g:buftabline_indicators = 1 " show if buffers are modified
+" Colorscheme Pencil
+let g:pencil_spell_undercurl = 1
 " Ctrl-P
 let g:ctrlp_map = '<C-p>'
 let g:ctrlp_use_caching = 1
@@ -704,7 +791,7 @@ let g:gundo_auto_preview   = 1 " default; toggle to speed up Gundo
 " Pandoc
 let g:pandoc#modules#disabled = [ 'menu' ] " Get rid of Pandoc menu
 let g:pandoc#command#custom_open = "PandocOpen" " function defined below
-let g:pandoc#filetypes#handled = [ 'markdown', 'rst', 'textile', 'extra' ]
+let g:pandoc#filetypes#handled = [ 'markdown', 'rst', 'textile', ]
 let g:pandoc#folding#fdc = &fdc
 let g:pandoc#formatting#mode = 'hA' " hard wrap, autoformat smart
 let g:pandoc#formatting#textwidth = g:tw
@@ -712,6 +799,13 @@ let g:pandoc#keyboard#sections#header_style = 's' " enable setext for h1,2
 let g:pandoc#spell#default_langs = ['en']
 let g:pandoc#toc#position = "left" " Table of contents
 let g:pandoc#toc#close_after_navigating = 0 " <CR> navs, <C-CR> navs + closes
+" Pandoc syntax
+let g:pandoc#syntax#conceal#blacklist = [
+            \ 'titleblock',
+            \ 'definition',
+            \ 'list',
+            \ 'ellipses',
+            \ ]
 " Solarized
 let g:solarized_menu = 0
 " Splitjoin
@@ -742,18 +836,26 @@ vnoremap gS :S/
 " J/K intelligently SplitJoin.vim or fallback to default
 nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin', 'J')<CR>
 nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit', "i\r")<CR>
+
 " remap motion maps !
-" TODO: progressive-enhance these.
-nmap f <Plug>(easymotion-sl)
-nmap t <Plug>(easymotion-bd-tl)
-omap f <Plug>(easymotion-sl)
-omap t <Plug>(easymotion-bd-tl)
-nmap F <Plug>(easymotion-s)
-nmap T <Plug>(easymotion-bd-t)
-omap F <Plug>(easymotion-s)
-omap T <Plug>(easymotion-bd-t)
-nmap <Leader>; <Plug>(easymotion-next)
-nmap <Leader>, <Plug>(easymotion-prev)
+if exists('g:EasyMotion_loaded')
+    nmap f <Plug>(easymotion-sl)
+    nmap t <Plug>(easymotion-bd-tl)
+    omap f <Plug>(easymotion-sl)
+    omap t <Plug>(easymotion-bd-tl)
+    nmap F <Plug>(easymotion-s)
+    nmap T <Plug>(easymotion-bd-t)
+    omap F <Plug>(easymotion-s)
+    omap T <Plug>(easymotion-bd-t)
+    nmap <Leader>; <Plug>(easymotion-next)
+    nmap <Leader>, <Plug>(easymotion-prev)
+endif
+
+" Window resizing with ObviousResize
+nnoremap <C-UP>    :<C-u>call <SID>try('ObviousResizeUp', 'wincmd +')<CR>
+nnoremap <C-DOWN>  :<C-u>call <SID>try('ObviousResizeDown', 'wincmd -')<CR>
+nnoremap <C-LEFT>  :<C-u>call <SID>try('ObviousResizeLeft', 'wincmd <')<CR>
+nnoremap <C-RIGHT> :<C-u>call <SID>try('ObviousResizeRight', 'wincmd >')<CR>
 "}}}
 " Plugin functions {{{
 function! CtrlPStatusLine(...) " {{{
