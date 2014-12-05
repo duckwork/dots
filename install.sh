@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 # duckwork 'dots' install script
 
 # Will move the files where they need to be, and install git for use with github
 
-github_setup() {
+git_setup() {
     echo -n "First name: "; read firstname
     echo -n "Last name:  "; read lastname
     echo -n "Email: "; read email
@@ -17,26 +17,61 @@ github_setup() {
     git config --global push.default matching
 
 }
+aur_install() {
+    d=$HOME/dl/aur
+    mkdir -p $d
+    for p in ${@##-*}; do
+        cd "$d"
+        curl "https://aur.archlinux.org/packages/${p:0:2}/$p/$p.tar.gz" \
+            | tar xz
+        cd "$p"
+        makepkg ${@##[^\-]*}
+    done
+}
 
 if [[ "$1" == "-g" ]]; then # github setup requested
     echo "Will set up git."
     echo "---------------------------------"
-    github_setup || echo "Install git!";
+    git_setup || echo "Install git!";
 fi
 
-echo "Installing Vundle..."
-mkdir -p $HOME/.vim/bundle
-git clone https://github.com/gmarik/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
-vim +PluginInstall +qall
-ln -s ./vimrc $HOME/.vimrc # soft links = best practice
+if [[ -f $HOME/.vimrc ]]; then
+    mkdir -p $HOME/.config/old-configs/
+    mv $HOME/.vimrc $HOME/.config/old-configs/.vimrc
+elif [[ -L $HOME/.vimrc ]]; then
+    rm $HOME/.vimrc
+fi
+ln -s $PWD/vimrc $HOME/.vimrc             # soft links = best practice
+mkdir -p $HOME/.vim/{bundle,swap,backup}/ # make all .vim/ dirs
 
-echo "Installing Oh-My-Zsh..."
-curl -L http://install.ohmyz.sh | sh
-echo "Moving stock zshrc to $HOME/.config/old-configs/"
-mkdir -p .config/old-configs/
-mv $HOME/.zshrc $HOME/.config/old-configs/
-ln -s ./zshrc $HOME/.zshrc
+echo "Configuring ViM..."
+if [[ ! -d $HOME/.vim/bundle ]]; then
+    echo "Installing Vundle..."
+    mkdir -p $HOME/.vim/bundle
+    git clone https://github.com/gmarik/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
+    echo "Vundle installed."
+fi
+vim +PluginInstall +qall
+
+echo "Installing zshrc..."
+if [[ -f $HOME/.zshrc ]]; then
+    mkdir -p $HOME/.config/old-configs/
+    mv $HOME/.zshrc $HOME/.config/old-configs/zshrc
+elif [[ -L $HOME/.zshrc ]]; then
+    rm $HOME/.zshrc
+fi
+echo "Configuring zsh..."
+if [[ ! -d $HOME/.oh-my-zsh ]]; then
+    echo "Installing Oh-My-Zsh..."
+    curl -L http://install.ohmyz.sh | sh
+fi
+ln -s $PWD/zshrc $HOME/.zshrc
 
 echo "Installing color stuff..."
-bash <(curl aur.sh) -si stderred-git
-git clone git://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.oh-my-zsh/custom/plugins/
+if [[ ! -f "/usr/lib/libstderred.so" ]]; then
+    aur_install -si stderred-git
+fi
+if [[ ! -d $HOME/.oh-my-zsh/custom/plugins/ ]]; then
+    git clone git://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.oh-my-zsh/custom/plugins/
+fi
+echo "Finished."
