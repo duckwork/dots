@@ -1,6 +1,6 @@
 " ViMrc ReVised
 " Case Duckworth (mahatman2)
-" vim:tw=0:nowrap:nolinebreak
+" vim:tw=0:nowrap:nolbr:fdm=marker
 
 set nocompatible                    " be iMproved
 
@@ -59,7 +59,7 @@ set shm     +=tT                    " truncate msgs in [c] mode
 set shm     +=I                     " don't give intro msg on vim start
 
 set foldenable                      " Enable folding
-set foldmethod=marker               " {{{ }}} mark folds
+" set foldmethod=marker               " {{{ }}} mark folds
 " set foldlevel=2                     " Start open to second level
 set foldcolumn=0                    " Fold columns in gutter
 set foldtext=FoldLine()             " Define what folded folds look like
@@ -76,7 +76,7 @@ if has('linebreak')
     set breakindent                 " soft-wrapped lines indent to prev line
 endif
 set list                            " show some non-printing characters
-set listchars=tab:»»                " Show these non-printing characters
+set listchars=tab:»\                " Show these non-printing characters
 set lcs     +=trail:·               " TODO: think about indenting chars
 set lcs     +=nbsp:~                "    (spaces or tabs?)
 let &showbreak = '└ '               " when a line wraps, show it with this
@@ -138,6 +138,7 @@ nnoremap H ^
 nnoremap L $
 
 " Better folding
+" TODO: make <Space> page down when not on a fold
 nnoremap <Space> za
 vnoremap <Space> za
 nnoremap <S-Space> zA
@@ -182,8 +183,6 @@ nnoremap <leader>re :source $MYVIMRC<CR>
 nnoremap <leader>cd :cd %:p:h<CR>
 " Explore the current directory
 nnoremap <silent> - :Explore<CR>
-" List open buffers and switch to one
-nnoremap gb :ls<CR>:b<Space>
 
 " Remove search highlight
 nnoremap <silent> <leader>/ :nohlsearch<CR>
@@ -199,10 +198,14 @@ nnoremap <F12> :call CloseBufWin()<CR>
 " Navigate to previous-focused buffer
 nnoremap <silent> Q :b#<CR>
 " Move to next buffer if there's only one tab
-nnoremap gt :<C-U>call ChTabBuf(v:count1)<CR>
-nnoremap gT :<C-U>call ChTabBuf(-v:count1)<CR>
+" nnoremap gt :<C-U>call ChTabBuf(v:count1)<CR>
+" nnoremap gT :<C-U>call ChTabBuf(-v:count1)<CR>
+" List open buffers and switch to one
+nnoremap gb :ls<CR>:b<Space>
 
 " Linux only: because `sudo vim` is easy to forget
+" And because `sudo vim` is apparently quite dangerous
+" `sudoedit` with vim set as $EDITOR is better
 cmap w!! %!sudo tee > /dev/null %
 "}}}
 " AUTOCOMMANDS {{{
@@ -654,11 +657,19 @@ endfunction " }}}
 " }}}
 " PLUGINS {{{
 " Vim-plug {{{
+" Automatic vim-plug installation
+if empty(glob('~/.vim/autoload/plug.vim'))
+    silent !mkdir -p ~/.vim/autoload
+    silent !curl -fLo ~/.vim/autoload/plug.vim
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    au VimEnter * PlugInstall
+endif
 call plug#begin('~/.vim/plugged')
 
 " GUI
 " Plug 'duckwork/vim-buftabline'          " show vim buffers in tabline
-Plug 'talek/obvious-resize',            " Resive ViM windows obviously
+" --- Resive ViM windows obviously
+Plug 'talek/obvious-resize',
             \ { 'on': [ 'ObviousResizeUp',
             \           'ObviousResizeLeft',
             \           'ObviousResizeRight',
@@ -668,13 +679,14 @@ Plug 'talek/obvious-resize',            " Resive ViM windows obviously
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
 Plug 'zenorocha/dracula-theme', { 'rtp': 'vim' }
-Plug 'Suave/vim-colors-guardian'
 
 " WRITING
 " Prose
-Plug 'junegunn/goyo.vim',               " distraction-free writing
+" --- distraction-free writing
+Plug 'junegunn/goyo.vim',
             \ { 'on': 'Goyo' }
-Plug 'duckwork/limelight.vim',          " highlight current para
+" --- highlight current paragraph
+Plug 'duckwork/limelight.vim',
             \ { 'on': 'Limelight' }
 
 " Code
@@ -693,10 +705,11 @@ Plug 'xolox/vim-misc'                   " Required by vim-shell
 Plug 'tpope/vim-repeat'                 " Repeat plugin commands with .
 " Search & Replace
 Plug 'nelstrom/vim-visual-star-search'  " Use * or # from V-Block
-Plug 'tpope/vim-abolish'                " Enhanced search and replace
+" --- Enhanced search and replace
+Plug 'tpope/vim-abolish', { 'on': [ 'Abolish', 'Subvert', 'S' ] }
 " Formatting
-Plug 'godlygeek/tabular',               " Easy aligning of text
-            \ {'on': 'Tabular' }
+" --- Easy aligning of text
+Plug 'godlygeek/tabular', {'on': 'Tabular' }
 " Plug 'junegunn/vim-easy-align'          " Vim alignment plugin
 Plug 'AndrewRadev/splitjoin.vim'        " Easily split and join code
 Plug 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
@@ -708,13 +721,22 @@ Plug 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
 Plug 'tpope/vim-surround'               " Format surroundings easily
 
 " FILETYPES
-Plug 'mattn/emmet-vim',                 " Zencoding for HTML
+" --- Zencoding for HTML
+Plug 'mattn/emmet-vim',
             \ { 'for': [ 'html', 'xml', ] }
-Plug 'gregsexton/MatchTag',             " Match HTML tags with %
+" --- Match HTML tags with %
+Plug 'gregsexton/MatchTag',
             \ { 'for': [ 'html', 'xml', ] }
 
-Plug 'vim-pandoc/vim-pandoc'            " Pandoc helpers
-Plug 'reedes/vim-litecorrect'           " autocorrect w/customization
+" --- Pandoc helpers
+Plug 'vim-pandoc/vim-pandoc',
+            \ { 'for': [ 'pandoc', 'markdown' ] }
+" --- autocorrect w/customization
+Plug 'reedes/vim-litecorrect',
+            \ { 'for': [ 'pandoc', 'markdown', 'text' ] }
+" --- Pandoc section text-objects
+Plug 'gbgar/pandoc-sections.vim',
+            \ { 'for': [ 'pandoc', 'markdown' ] }
 
 Plug 'vimwiki/vimwiki'                  " Personal wiki with ViM
 Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt
@@ -724,27 +746,29 @@ Plug 'hail2u/vim-css3-syntax'           " syntax file for CSS3
 Plug 'dogrover/vim-pentadactyl'         " ftdetect, ftplugin, syntax
 Plug 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
 
-Plug 'vim-scripts/matchit.zip'          " Better matchit plugin (newer ver)
+Plug 'vim-scripts/matchit.zip'          " Better matchit plugin
 
 " PLUGINS THAT REQUIRE THINGS
 if executable('git')
     Plug 'tpope/vim-fugitive'           " Git integration
     Plug 'airblade/vim-gitgutter'       " Git stuff in signs column
 endif
-if executable('ag')
-    Plug 'rking/ag.vim'                 " Ag implementation
-endif
-if executable('diff')
-    Plug 'mbbill/undotree'              " Visualize Vim's undo tree
+if executable('ag')                     " Ag implementation
+    Plug 'rking/ag.vim', { 'on': [ 'Ag', 'AgAdd', 'AgFromSearch',
+                                 \ 'LAg', 'LAgAdd', 'AgFile', 'AgHelp',
+                                 \ 'LAgHelp' ] }
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
+endif
+if executable('diff')                   " Visualize Vim's undo tree
+    Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
     nnoremap <F5> :UndotreeToggle<CR>
 elseif has('python')
-    Plug 'vim-scripts/gundo'            " Visualize Vim's undo tree
+    Plug 'vim-scripts/gundo', { 'on': 'GundoToggle' }
     nnoremap <F5> :GundoToggle<CR>
 endif
 
 " DEVELOPMENT
-Plug '~/my-plugins/concrastinate'       " Disable editing files when working
+" Plug '~/my-plugins/concrastinate'       " Disable editing files when working
 
 call plug#end()                         " req'd
 "}}}
