@@ -45,11 +45,11 @@ ln -s $PWD/vimrc $HOME/.vimrc             # soft links = best practice
 mkdir -p $HOME/.vim/{bundle,swap,backup}/ # make all .vim/ dirs
 
 echo "Configuring ViM..."
-if [[ ! -d $HOME/.vim/bundle ]]; then
-    echo "Installing Vundle..."
-    mkdir -p $HOME/.vim/bundle
-    git clone https://github.com/gmarik/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
-    echo "Vundle installed."
+if [[ ! -f $HOME/.vim/autoload/plug.vim ]]; then
+    echo "Installing Vim-Plug..."
+    mkdir -p $HOME/.vim/{plugged,autoload}
+    curl -fLo $HOME/.vim/autoload/plug.vim \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
 vim +PluginInstall +qall
 
