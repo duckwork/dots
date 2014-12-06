@@ -6,11 +6,20 @@ group user
 set hintkeys=asdfg;lkjhqwertpoiuyzxcmnbv
 set wildmode=list:full
 set autocomplete=
-set defsearch=duckduckgo
+set defsearch=duckduckgo-html
 " Turn smooth scrolling off
 set scrollsteps=1
 set hlfind
 set visualbell
+set guioptions=CMrns
+" Passkeys {{{
+" --- Gmail
+" --- up, down, archive, open; go-inbox
+set passkeys+=mail.google.com:jke<CR>,gi
+" --- Facebook
+" --- up, down, comment
+set passkeys+=facebook.com:jkc
+" }}}
 " }}}
 " Hilight groups {{{
 hi Bell background-color: white !important;
@@ -37,8 +46,6 @@ nmap -builtin <F2> :extdisable Pentadactyl<CR>
 nmap -builtin <F7> :set noscript-sites!=<A-Tab>
 nmap -builtin <S-F7> :set noscript-tempsites!=<A-Tab>
 
-nmap -builtin <F3> :set usermode!<CR>
-                  " \:styletoggle -name=reading<CR>
 " }}}
 " Styles {{{
 " style -name minitabs chrome://* <<EOM

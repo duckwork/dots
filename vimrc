@@ -136,6 +136,8 @@ nnoremap <expr> j v:count > 0 ? 'j' : 'gj'
 nnoremap <expr> k v:count > 0 ? 'k' : 'gk'
 nnoremap H ^
 nnoremap L $
+" nnoremap <CR> <PageDown>
+" nnoremap <BS> <PageUp>
 
 " Better folding
 " TODO: make <Space> page down when not on a fold
@@ -151,8 +153,6 @@ nnoremap Y y$
 " Make S opposite of D (S = cc by default, so useless!)
 nnoremap S d0
 
-" <BS> backspaces in normal mode
-nnoremap <BS> X
 " Make <F1> help better.
 nnoremap <F1> K
 
@@ -175,9 +175,13 @@ nnoremap <S-LEFT>  <C-w>H
 nnoremap <S-RIGHT> <C-w>L
 
 " Edit and source rc easily
-" nnoremap <leader>er :edit $MYVIMRC<CR>
-nnoremap <leader>er :call Concrastinate('edit $MYVIMRC',1030,1700)<CR>
-nnoremap <leader>re :source $MYVIMRC<CR>
+if filereadable(glob("~/dots/vimrc"))
+    let g:myvimrc = "~/dots/vimrc"
+else
+    let g:myvimrc = $MYVIMRC
+endif
+nnoremap <leader>er :edit <C-r>=g:myvimrc<CR><CR>
+nnoremap <leader>re :source <C-r>=g:myvimrc<CR><CR>
 
 " Change current directory to filepath
 nnoremap <leader>cd :cd %:p:h<CR>
