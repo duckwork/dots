@@ -49,9 +49,9 @@ set vi    +=h                       " Disable 'hlsearch' on saved files
 set laststatus=2                    " Always show statusline
 " set showtabline=2                 " Always show tabline
 " set tabline=%!TabLine()           " [see function below]
-set wildmenu                        " Enhanced command-line completion
 set ruler                           " Show where the cursor is in the file
 set showcmd                         " Show command as it's being typed
+set wildmenu                        " Enhanced command-line completion
 
 set shortmess=a                     " same as shm=filmnrwx
 set shm     +=oO                    " overwrite file msgs
@@ -675,7 +675,7 @@ if empty(glob('~/.vim/autoload/plug.vim'))
 endif
 call plug#begin('~/.vim/plugged')
 
-" GUI
+" GUI ==================================
 " Plug 'duckwork/vim-buftabline'          " show vim buffers in tabline
 " --- Resive ViM windows obviously
 Plug 'talek/obvious-resize'
@@ -684,13 +684,12 @@ Plug 'talek/obvious-resize'
             " \           'ObviousResizeRight',
             " \           'ObviousResizeDown',
             " \         ] }
-" Colors
+" Colors -------------------------------
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
-Plug 'zenorocha/dracula-theme', { 'rtp': 'vim' }
 
-" WRITING
-" Prose
+" WRITING ==============================
+" Prose --------------------------------
 " --- distraction-free writing
 Plug 'junegunn/goyo.vim',
             \ { 'on': 'Goyo' }
@@ -698,38 +697,38 @@ Plug 'junegunn/goyo.vim',
 Plug 'duckwork/limelight.vim',
             \ { 'on': 'Limelight' }
 
-" Code
+" Code ---------------------------------
 Plug 'tpope/vim-commentary'             " Easier commmenting
 Plug 'tpope/vim-endwise'                " Auto-add 'end*'s in code
 Plug 'tpope/vim-characterize'           " Modernize `ga` behavior
 
-" NAVIGATING FILESYSTEM
+" NAVIGATING FILESYSTEM ================
 Plug 'kien/ctrlp.vim'                   " A fuzzy file finder
 Plug 'dockyard/vim-easydir'             " Create new dirs on-the-fly
 Plug 'tpope/vim-vinegar'                " Better netrw integration
 Plug 'xolox/vim-shell'                  " Integrate ViM and environment
 Plug 'xolox/vim-misc'                   " Required by vim-shell
 
-" EXTENDING VIM OPERATIONS
+" EXTENDING VIM OPERATIONS =============
 Plug 'tpope/vim-repeat'                 " Repeat plugin commands with .
-" Search & Replace
+" Search & Replace ---------------------
 Plug 'nelstrom/vim-visual-star-search'  " Use * or # from V-Block
 " --- Enhanced search and replace
 Plug 'tpope/vim-abolish'
-" Formatting
+" Formatting ---------------------------
 " --- Easy aligning of text
 Plug 'godlygeek/tabular'
 " Plug 'junegunn/vim-easy-align'          " Vim alignment plugin
 Plug 'AndrewRadev/splitjoin.vim'        " Easily split and join code
 Plug 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
 Plug 'tommcdo/vim-exchange'             " Easy text exchange operator
-" Textobjects
+" Textobjects --------------------------
 Plug 'Lokaltog/vim-easymotion'          " No more counting objects
 Plug 'wellle/targets.vim'               " Lots of new textobjects
 Plug 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
 Plug 'tpope/vim-surround'               " Format surroundings easily
 
-" FILETYPES
+" FILETYPES ============================
 " --- Zencoding for HTML
 Plug 'mattn/emmet-vim',
             \ { 'for': [ 'html', 'xml', ] }
@@ -757,10 +756,11 @@ Plug 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
 
 Plug 'vim-scripts/matchit.zip'          " Better matchit plugin
 
-" PLUGINS THAT REQUIRE THINGS
+" PLUGINS THAT REQUIRE THINGS ==========
 if executable('git')
     Plug 'tpope/vim-fugitive'           " Git integration
     Plug 'airblade/vim-gitgutter'       " Git stuff in signs column
+    set wildignore+=COMMIT_EDITMSG      " Get rid of junk in Tab-completions
 endif
 if executable('ag')                     " Ag implementation
     Plug 'rking/ag.vim'
@@ -774,7 +774,7 @@ elseif has('python')
     nnoremap <F5> :GundoToggle<CR>
 endif
 
-" DEVELOPMENT
+" DEVELOPMENT ==========================
 " Plug '~/my-plugins/concrastinate'       " Disable editing files when working
 
 call plug#end()                         " req'd
