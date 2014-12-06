@@ -43,11 +43,40 @@ map , <Leader>
 nmap -builtin <Leader>re :source $MY_PENTADACTYLRC<CR>
 nmap -builtin <F2> :extdisable Pentadactyl<CR>
 
-nmap -builtin <F7> :set noscript-sites!=<A-Tab>
-nmap -builtin <S-F7> :set noscript-tempsites!=<A-Tab>
+nmap -builtin <S-F7> :set noscript-sites!=<A-Tab>
+nmap -builtin <F7> :set noscript-tempsites!=<A-Tab>
 
+nmap -builtin <F3> :set usermode!<CR>:styletoggle -name=Readable<CR>
+au LocationChange,PageLoad styledisable -name=Readable
 " }}}
 " Styles {{{
+style -name Readable * <<EOM
+    body {
+        max-width: 30em;
+        margin: auto !important;
+        font-size: 18pt;
+        background-color: #333 !important;
+        color: #eee !important;
+    }
+    p,ul,ol,li,table {
+        line-height: 1.5em;
+        font-family: Garamond,Georgia,serif;
+        text-align: left;
+        margin: 1.75em auto;
+    }
+    h1,h2,h3,h4,h5,h6 {
+        font-family: Tahoma,Arial,sans-serif;
+    }
+    img {
+        max-width: 100%;
+    }
+    a:link {
+        text-underline: none;
+        color: #3ee;
+    }
+EOM
+
+styledisable -name=Readable
 " style -name minitabs chrome://* <<EOM
 "     #TabsToolbar toolbarbutton {
 "         display: none !important;

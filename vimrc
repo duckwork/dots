@@ -200,7 +200,7 @@ nnoremap <silent> <leader>bg :call ToggleBG()<CR>
 " Close buffer, or if last buf, quit vim
 nnoremap <F12> :call CloseBufWin()<CR>
 " Navigate to previous-focused buffer
-nnoremap <silent> Q :b#<CR>
+nnoremap <silent> <BS> :b#<CR>
 " Move to next buffer if there's only one tab
 " nnoremap gt :<C-U>call ChTabBuf(v:count1)<CR>
 " nnoremap gT :<C-U>call ChTabBuf(-v:count1)<CR>
@@ -262,6 +262,11 @@ augroup ft_Text
     au!
     au BufNewFile,BufRead *.txt setf pandoc
     au FileType *wiki,markdown,pandoc setlocal spell
+augroup END
+
+augroup ft_netrw
+    au!
+    au FileType netrw nnoremap <buffer> <Esc> :bd!<CR>
 augroup END
 
 " augroup Status_ft
@@ -673,12 +678,12 @@ call plug#begin('~/.vim/plugged')
 " GUI
 " Plug 'duckwork/vim-buftabline'          " show vim buffers in tabline
 " --- Resive ViM windows obviously
-Plug 'talek/obvious-resize',
-            \ { 'on': [ 'ObviousResizeUp',
-            \           'ObviousResizeLeft',
-            \           'ObviousResizeRight',
-            \           'ObviousResizeDown',
-            \         ] }
+Plug 'talek/obvious-resize'
+            " \ { 'on': [ 'ObviousResizeUp',
+            " \           'ObviousResizeLeft',
+            " \           'ObviousResizeRight',
+            " \           'ObviousResizeDown',
+            " \         ] }
 " Colors
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
@@ -710,10 +715,10 @@ Plug 'tpope/vim-repeat'                 " Repeat plugin commands with .
 " Search & Replace
 Plug 'nelstrom/vim-visual-star-search'  " Use * or # from V-Block
 " --- Enhanced search and replace
-Plug 'tpope/vim-abolish', { 'on': [ 'Abolish', 'Subvert', 'S' ] }
+Plug 'tpope/vim-abolish'
 " Formatting
 " --- Easy aligning of text
-Plug 'godlygeek/tabular', {'on': 'Tabular' }
+Plug 'godlygeek/tabular'
 " Plug 'junegunn/vim-easy-align'          " Vim alignment plugin
 Plug 'AndrewRadev/splitjoin.vim'        " Easily split and join code
 Plug 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
@@ -758,9 +763,7 @@ if executable('git')
     Plug 'airblade/vim-gitgutter'       " Git stuff in signs column
 endif
 if executable('ag')                     " Ag implementation
-    Plug 'rking/ag.vim', { 'on': [ 'Ag', 'AgAdd', 'AgFromSearch',
-                                 \ 'LAg', 'LAgAdd', 'AgFile', 'AgHelp',
-                                 \ 'LAgHelp' ] }
+    Plug 'rking/ag.vim'
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
 endif
 if executable('diff')                   " Visualize Vim's undo tree
@@ -886,10 +889,10 @@ endif
 nnoremap <F3> :call pandoc#formatting#DisableAutoformat()<CR>
 
 " Window resizing with ObviousResize
-nnoremap <C-UP>    :<C-u>call <SID>try('ObviousResizeUp', 'wincmd +')<CR>
-nnoremap <C-DOWN>  :<C-u>call <SID>try('ObviousResizeDown', 'wincmd -')<CR>
-nnoremap <C-LEFT>  :<C-u>call <SID>try('ObviousResizeLeft', 'wincmd <')<CR>
-nnoremap <C-RIGHT> :<C-u>call <SID>try('ObviousResizeRight', 'wincmd >')<CR>
+nnoremap <C-UP> :ObviousResizeUp<CR>
+nnoremap <C-DOWN> :ObviousResizeDown<CR>
+nnoremap <C-LEFT> :ObviousResizeLeft<CR>
+nnoremap <C-RIGHT> :ObviousResizeRight<CR>
 "}}}
 " Plugin functions {{{
 function! CtrlPStatusLine(...) " {{{
