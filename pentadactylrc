@@ -25,9 +25,9 @@ set passkeys+=facebook.com:jkc
 hi Bell background-color: white !important;
 
 hi -a FontFixed font-family: Consolas,monospace !important;
-              \ font-size: 11pt !important;
+              \ font-size: 9pt !important;
 hi -a FontProportional font-family: Garamond,Georgia,serif !important;
-                     \ font-size: 11pt !important;
+                     \ font-size: 9pt !important;
 
 hi Hint font: 12px Consolas,monospace !important;
       \ background-color: rgba(0, 255, 255, 1) !important;

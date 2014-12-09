@@ -23,6 +23,7 @@ set splitright                      " new splits appear to right of current
 
 set formatoptions-=ro               " disable autocomments in Insert mode
 set backspace=indent,eol,start      " backspace across these things
+set cpoptions+=J                    " sentences use two spaces after punc.
 
 " Which keys move between lines
 set whichwrap=b,s                   " <BS> and <Space>
@@ -86,7 +87,7 @@ set nostartofline                   " stay in column with gg, G, etc.
 set virtualedit=insert              " allow cursor past EOL in Insert mode
 set ve        +=block               " allow cursor past EOL in V-block
 
-let &colorcolumn = g:tw             " highlight this column
+let &colorcolumn = g:tw + 1         " highlight this column
 set cursorline                      " highlight the line being edited
 
 set expandtab                       " use spaces instead of tabs
@@ -134,8 +135,8 @@ let mapleader = ','
 " Better movement
 nnoremap <expr> j v:count > 0 ? 'j' : 'gj'
 nnoremap <expr> k v:count > 0 ? 'k' : 'gk'
-nnoremap H ^
-nnoremap L $
+noremap H ^
+noremap L $
 " nnoremap <CR> <PageDown>
 " nnoremap <BS> <PageUp>
 
@@ -204,8 +205,8 @@ nnoremap <silent> <BS> :b#<CR>
 " Move to next buffer if there's only one tab
 " nnoremap gt :<C-U>call ChTabBuf(v:count1)<CR>
 " nnoremap gT :<C-U>call ChTabBuf(-v:count1)<CR>
-" List open buffers and switch to one
-nnoremap gb :ls<CR>:b<Space>
+" List open buffers and switch to one - taken care of w/CTRL-P
+" nnoremap gb :ls<CR>:b<Space>
 
 " Linux only: because `sudo vim` is easy to forget
 " And because `sudo vim` is apparently quite dangerous
@@ -260,8 +261,11 @@ augroup END
 
 augroup ft_Text
     au!
-    au BufNewFile,BufRead *.txt setf pandoc
+    au BufNewFile,BufRead,BufWrite *.txt setf pandoc
+    au BufNewFile,BufRead,BufWrite *.md  setf markdown
     au FileType *wiki,markdown,pandoc setlocal spell
+    au CursorHold *.{txt,m*d*}
+                \ if &modifiable && &modified | write | endif
 augroup END
 
 augroup ft_netrw
@@ -315,9 +319,8 @@ if has('gui_running') " {{{
     elseif has('x11')
         "set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
-        set guifont=Consolas:h11:cANSI
-        " set guifont=Fantasque_Sans_Mono:h11:cANSI
-        " set guifont=PT_Mono:h11:cANSI
+        set guifont=Consolas:h9:cANSI
+        " set guifont=PT_Mono:h9:cANSI
     endif
 
     " Start at this size
@@ -441,8 +444,10 @@ endfunction " }}}
 function! FoldLine() " {{{
     let line = getline(v:foldstart)
     let foldedlinecount = printf('%3d', v:foldend - v:foldstart)
-    let foldmarks = substitute(&fmr, ',.*', '', '')
-    let line = substitute(line, foldmarks, '', '')
+    if &foldmethod == 'marker'
+        let foldmarks = substitute(&fmr, ',.*', '', '')
+        let line = substitute(line, foldmarks . '\d*', '', '')
+    endif
     " Get rid of commentstring
     let commentstr = substitute(&cms, '^\(.*\)%s\(.*\)', '\1\|\2', '')
     let commentstr = substitute(commentstr, '|$', '', '')
@@ -656,12 +661,13 @@ function! ListPlus(switch) "{{{
                     \ : <SID>listplus_on()
     endif
 endfunction "}}}
-function! DoCmds(...) " {{{
-    for cmd in a:000
-        if exists(":".cmd) == 2 " full match with command
-            exe "normal! ".cmd
-        endif
-    endfor
+" Other fun stuff!
+function! RealScrollToTop() " {{{
+    let s:scroff = &scrolloff
+    set scrolloff=0
+    exe "normal! zt" . s:scroff . "j"
+    let &scrolloff = s:scroff
+    unlet s:scroff
 endfunction " }}}
 " }}}
 " PLUGINS {{{
@@ -808,7 +814,7 @@ let g:EasyMotion_do_mapping       = 0 " disable default mappings
 let g:EasyMotion_prompt           = '{n}/>> ' " prompt
 let g:EasyMotion_keys             = 'asdfghjkl;qwertyuiopzxcvbnm' " hints
 let g:EasyMotion_smartcase        = 1 " case-insensitive searches
-let g:EasyMotion_use_smartsign_us = 1 " 'case'-insensitive number row
+let g:EasyMotion_use_smartsign_us = 1 " shift-insensitive number row
 let g:EasyMotion_enter_jump_first = 1 " <CR> jumps to first hint
 " Emmet
 let g:user_emmet_leader_key = '<C-e>'
@@ -863,6 +869,7 @@ nnoremap <S-F11> :Fullscreen<CR>
 vnoremap \| :Tabularize /
 
 nnoremap <C-o> :CtrlPMRU<CR>
+nnoremap gb :CtrlPBuffer<CR>
 " see non-plugin mapping gs :s/
 nnoremap gS :%S/
 vnoremap gS :S/
@@ -871,22 +878,23 @@ nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin', 'J')<CR>
 nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit', "i\r")<CR>
 
 " remap motion maps !
-if exists('g:EasyMotion_loaded')
-    nmap f <Plug>(easymotion-sl)
-    nmap t <Plug>(easymotion-bd-tl)
-    omap f <Plug>(easymotion-sl)
-    omap t <Plug>(easymotion-bd-tl)
-    nmap F <Plug>(easymotion-s)
-    nmap T <Plug>(easymotion-bd-t)
-    omap F <Plug>(easymotion-s)
-    omap T <Plug>(easymotion-bd-t)
-    nmap <Leader>; <Plug>(easymotion-next)
-    nmap <Leader>, <Plug>(easymotion-prev)
-endif
+nmap f <Plug>(easymotion-sl)
+nmap t <Plug>(easymotion-bd-tl)
+omap f <Plug>(easymotion-sl)
+omap t <Plug>(easymotion-bd-tl)
+nmap F <Plug>(easymotion-s)
+nmap T <Plug>(easymotion-bd-t)
+omap F <Plug>(easymotion-s)
+omap T <Plug>(easymotion-bd-t)
+nmap <Leader>; <Plug>(easymotion-next)
+nmap <Leader>, <Plug>(easymotion-prev)
 
 " Disable pandoc#formatting#autoformat
 " TODO: toggle?
-nnoremap <F3> :call pandoc#formatting#DisableAutoformat()<CR>
+nnoremap <F3> :call pandoc#formatting#ToggleAutoformat()<CR>
+             \:echo b:pandoc_autoformat_enabled ?
+             \ "Autoformat enabled" :
+             \ "Autoformat disabled"<CR>
 
 " Window resizing with ObviousResize
 nnoremap <C-UP> :ObviousResizeUp<CR>
