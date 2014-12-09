@@ -819,7 +819,7 @@ let g:EasyMotion_enter_jump_first = 1 " <CR> jumps to first hint
 " Emmet
 let g:user_emmet_leader_key = '<C-e>'
 " Goyo
-let g:goyo_width         = g:tw
+let g:goyo_width         = g:tw + 1
 let g:goyo_margin_top    = 2
 let g:goyo_margin_bottom = g:goyo_margin_top
 " Gundo
@@ -837,12 +837,19 @@ let g:pandoc#spell#default_langs = ['en']
 let g:pandoc#toc#position = "left" " Table of contents
 let g:pandoc#toc#close_after_navigating = 0 " <CR> navs, <C-CR> navs + closes
 " Pandoc syntax
+let g:pandoc#syntax#conceal#use = 0 " don't use conceal to hide any characters
+" --- but if you do, *don't* use them on these:
 let g:pandoc#syntax#conceal#blacklist = [
             \ 'titleblock',
             \ 'definition',
             \ 'list',
             \ 'ellipses',
+            \ 'quotes',
             \ ]
+" --- And override the characters that are used thusly:
+let g:pandoc#syntax#conceal#cchar_overrides = {
+            \ 'newline': '¬',
+            \ }
 " Solarized
 let g:solarized_menu = 0
 " Splitjoin
@@ -868,7 +875,7 @@ nnoremap <S-F11> :Fullscreen<CR>
 
 vnoremap \| :Tabularize /
 
-nnoremap <C-o> :CtrlPMRU<CR>
+nnoremap go :CtrlPMRU<CR>
 nnoremap gb :CtrlPBuffer<CR>
 " see non-plugin mapping gs :s/
 nnoremap gS :%S/
