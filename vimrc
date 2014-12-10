@@ -137,8 +137,9 @@ nnoremap <expr> j v:count > 0 ? 'j' : 'gj'
 nnoremap <expr> k v:count > 0 ? 'k' : 'gk'
 noremap H ^
 noremap L $
-" nnoremap <CR> <PageDown>
-" nnoremap <BS> <PageUp>
+
+nnoremap zT :call RealScrollTo('top')<CR>
+nnoremap zB :call RealScrollTo('bot')<CR>
 
 " Better folding
 " TODO: make <Space> page down when not on a fold
@@ -240,6 +241,10 @@ augroup Windowstuff "{{{
     " Remove annoying shit when in insert mode
     au InsertEnter * call ListPlus('off')
     au InsertLeave * call ListPlus('on')
+
+    " Easy-to-see line numbers on non-focused windows
+    au BufWinLeave * set norelativenumber
+    au BufWinEnter * set relativenumber
 
     " Save and restore windowviews
     au BufWinLeave * silent! mkview
@@ -662,10 +667,16 @@ function! ListPlus(switch) "{{{
     endif
 endfunction "}}}
 " Other fun stuff!
-function! RealScrollToTop() " {{{
+function! RealScrollTo(direction) " {{{
     let s:scroff = &scrolloff
     set scrolloff=0
-    exe "normal! zt" . s:scroff . "j"
+
+    if a:direction =~ 't'
+        exe "normal! zt" . s:scroff . "j"
+    elseif a:direction =~ 'b'
+        exe "normal! zb" . s:scroff . "k"
+    endif
+
     let &scrolloff = s:scroff
     unlet s:scroff
 endfunction " }}}
@@ -693,6 +704,7 @@ Plug 'talek/obvious-resize'
 " Colors -------------------------------
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
+Plug 'Junza/Spink'
 
 " WRITING ==============================
 " Prose --------------------------------
@@ -707,6 +719,7 @@ Plug 'duckwork/limelight.vim',
 Plug 'tpope/vim-commentary'             " Easier commmenting
 Plug 'tpope/vim-endwise'                " Auto-add 'end*'s in code
 Plug 'tpope/vim-characterize'           " Modernize `ga` behavior
+Plug 'Yggdroot/indentLine'              " Show | at tab-stops
 
 " NAVIGATING FILESYSTEM ================
 Plug 'kien/ctrlp.vim'                   " A fuzzy file finder
@@ -837,7 +850,7 @@ let g:pandoc#spell#default_langs = ['en']
 let g:pandoc#toc#position = "left" " Table of contents
 let g:pandoc#toc#close_after_navigating = 0 " <CR> navs, <C-CR> navs + closes
 " Pandoc syntax
-let g:pandoc#syntax#conceal#use = 0 " don't use conceal to hide any characters
+" let g:pandoc#syntax#conceal#use = 0 " don't use conceal to hide any chars
 " --- but if you do, *don't* use them on these:
 let g:pandoc#syntax#conceal#blacklist = [
             \ 'titleblock',
@@ -848,7 +861,7 @@ let g:pandoc#syntax#conceal#blacklist = [
             \ ]
 " --- And override the characters that are used thusly:
 let g:pandoc#syntax#conceal#cchar_overrides = {
-            \ 'newline': '¬',
+            \ 'newline': ' ',
             \ }
 " Solarized
 let g:solarized_menu = 0
@@ -952,22 +965,26 @@ endfunction
 " }}}
 " }}}
 " Plugin autocommands {{{
-augroup GoyoEvents
+augroup GoyoEvents " {{{
     au!
     au User GoyoEnter Limelight
     au User GoyoEnter set nocursorline
     au User GoyoEnter call <SID>RefreshStatus(1)
-    au User GoyoEnter call setwinvar(winnr(), '&statusline',
-                       \ '%=%#Comment# [ %{WordCount()} ] ')
+    " au User GoyoEnter call setwinvar(winnr(), '&statusline',
+    "                    \ '%=%#Comment# [ %{WordCount()} ] ')
 
     au User GoyoLeave Limelight!
     au User GoyoLeave set cursorline
     au User GoyoLeave call <SID>RefreshStatus()
-augroup END
-augroup Litecorrect
+augroup END " }}}
+augroup Litecorrect " {{{
     au!
-    au FileType markdown,mkd call litecorrect#init()
+    au FileType markdown,mkd,pandoc call litecorrect#init()
     au FileType textile call litecorrect#init()
+augroup END " }}}
+augroup VimPandoc
+    au!
+    " TODO: add nnoremaps to common :Pandoc output formats
 augroup END
 "}}}
 " Plugin can I has(?) {{{
