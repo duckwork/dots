@@ -519,20 +519,20 @@ function! StatusLine(winnr) " {{{
 
     " ‼‹›℗←↑→↓◊∫∂↔↕Ω˂˃˄˅§«»±¶¤Ππ‘’“”⌂
     " Filetype
-    if ftype =~? 'text' || ftype =~? 'm.*d.*' || ftype ==? 'pandoc'
-        let filepart = '“ %%<%s: %s ”'
-    elseif ftype =~? 'htm' || ftype =~? 'css' || ftype =~? 'j.*s.*'
-                \ || ftype =~? 'php'
-        let filepart = '< %%<%s: %s >'
-    elseif ftype =~? '*wiki'
-        let filepart = '= %%<%s: %s ='
-    elseif ishelp
-        let filepart = '( %%<%s: %s )'
-    elseif ftype =~? 'sh$'
-        let filepart = '[ %%<%s: %s ]'
-    else
-        let filepart = '« %%<%s: %s »'
-    endif
+    " if ftype =~? 'text' || ftype =~? 'm.*d.*' || ftype ==? 'pandoc'
+    "     let filepart = '“ %%<%s: %s ”'
+    " elseif ftype =~? 'htm' || ftype =~? 'css' || ftype =~? 'j.*s.*'
+    "             \ || ftype =~? 'php'
+    "     let filepart = '< %%<%s: %s >'
+    " elseif ftype =~? '*wiki'
+    "     let filepart = '= %%<%s: %s ='
+    " elseif ishelp
+    "     let filepart = '( %%<%s: %s )'
+    " elseif ftype =~? 'sh$'
+    "     let filepart = '[ %%<%s: %s ]'
+    " else
+    "     let filepart = '« %%<%s: %s »'
+    " endif
     let filepart = '“ %%<%s: %s ”'
     " Filename
     if fname =~ '__Gundo' || ftype =~ 'netrw' || fname == ''
