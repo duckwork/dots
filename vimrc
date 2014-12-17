@@ -268,7 +268,10 @@ augroup ft_Text
     au!
     au BufNewFile,BufRead,BufWrite *.txt setf pandoc
     au BufNewFile,BufRead,BufWrite *.md  setf markdown
+
     au FileType *wiki,markdown,pandoc setlocal spell
+    au FileType *wiki,markdown,pandoc 2match Search /[.!?]"\? [^ ]/
+
     au CursorHold *.{txt,m*d*}
                 \ if &modifiable && &modified | write | endif
 augroup END
@@ -300,8 +303,6 @@ if has('win32') " {{{
     set viminfo+=rA:,rB:
 
     nnoremap <silent> <F10> :simalt ~n<CR>
-
-    let g:ctrlp_cmd = 'CtrlP D:\Dropbox'
 endif " }}}
 if has('mouse') " {{{
     set mouse=a
@@ -331,7 +332,7 @@ if has('gui_running') " {{{
     " Start at this size
     augroup CustomSizeVim
         au!
-        au VimEnter * let &columns = g:tw + &fdc + &nu * &nuw
+        au VimEnter * let &columns = g:tw + &fdc + &nu * &nuw + 1
         au VimEnter * set lines=36
     augroup END
 
@@ -487,7 +488,6 @@ function! StatusLine(winnr) " {{{
         endif
     endfunction
 
-    " Left side ===================================================
     " Column indicator
     if isactive
         let status .= '%#CursorLineNr#'.'%3v '.'%#StatusLine#'
@@ -495,48 +495,19 @@ function! StatusLine(winnr) " {{{
         let status .= '%#CursorLine#'.'>%n. '
     endif
 
-    " ‼‹›℗←↑→↓◊∫∂↔↕Ω˂˃˄˅§«»±¶¤Ππ‘’“”⌂
-    " let bufcomment = getbufvar(buffer, '&commentstring')
-    " Filetype
+    " Left side ====================================================
     if ftype =~? 'text' || ftype =~? 'm.*d.*' || ftype ==? 'pandoc'
-        let filepart = '“ %%<%s ”'
-        let showft   = 0
-    elseif ftype =~? 'htm' || ftype =~? 'css' || ftype =~? 'j.*s.*'
-                \ || ftype =~? 'php'
-        let filepart = '< %%<%s >'
-        let showft   = 0
-    elseif ftype =~? 'wiki'
-        let filepart = '= %%<%s ='
-        let showft   = 0
-    elseif ishelp
-        let filepart = '%%<%s'
-        let showft   = 0
-    elseif ftype =~? 'sh$'
-        let filepart = '[ %%<%s ]'
-        let showft   = 0
-    else
-        let filepart = '« %%<%s »'
-        let showft   = 1
+                \|| ftype =~? 'wiki'
+        let status .= '| %{WordCount()} '
     endif
-    " Filename
-    if fname =~ '__Gundo' || ftype =~ 'netrw' || fname == ''
-        let fname  = len(ftype) > 0 ? ftype : '______'
-        let showft = 0
-    " elseif fname == ''
-    "     let fname  = '______'
-    "     let showft = 0
-    else
-        let fname  = '%f'
-    endif
+    let status .= '%#StatusLine#'
+    let status .= Color(!isactive, 'CursorLine', ' | %3p%% ')
+    " let status .= '%{noscrollbar#statusline()}'
 
-    if isactive
-        let status .= '%#StatusLine# '
-        let status .= printf(filepart, fname)
-        let status .= ' %#CursorLine#'
-    else
-        let status .= fname
-    endif
+    let status .= '%#CursorLine#'
+    let status .= '%=' " Gutter ====================================
 
+    " Right side ===================================================
     " File status indicators
     let status .= Color(isactive, 'DiffAdd', ismodified ? ' + ' : '')
     let status .= Color(isactive, 'DiffDelete', isreadonly ?
@@ -546,21 +517,38 @@ function! StatusLine(winnr) " {{{
         let status .= Color(1, 'DiffChange', ' P ')
     endif
 
-    let status .= '%#CursorLine#'
-    let status .= '%=' " Gutter ====================================
-
-    " Right side ===================================================
-    if showft || winwidth(0) > g:tw + &fdc + &nu * &nuw + 4
-        let status .= '[' . ftype . ']'
-    else
-        let status .= ''
-    endif
+    " ‼‹›℗←↑→↓◊∫∂↔↕Ω˂˃˄˅§«»±¶¤Ππ‘’“”⌂
+    " Filetype
     if ftype =~? 'text' || ftype =~? 'm.*d.*' || ftype ==? 'pandoc'
-                \|| ftype =~? 'wiki'
-        let status .= ' %{WordCount()}'
+        let filepart = '“ %%<%s: %s ”'
+    elseif ftype =~? 'htm' || ftype =~? 'css' || ftype =~? 'j.*s.*'
+                \ || ftype =~? 'php'
+        let filepart = '< %%<%s: %s >'
+    elseif ftype =~? '*wiki'
+        let filepart = '= %%<%s: %s ='
+    elseif ishelp
+        let filepart = '( %%<%s: %s )'
+    elseif ftype =~? 'sh$'
+        let filepart = '[ %%<%s: %s ]'
+    else
+        let filepart = '« %%<%s: %s »'
     endif
-    let status .= '%#StatusLine#'
-    let status .= Color(!isactive, 'CursorLine', ' %3p%% ')
+    let filepart = '“ %%<%s: %s ”'
+    " Filename
+    if fname =~ '__Gundo' || ftype =~ 'netrw' || fname == ''
+        let filepart = '{ %%<%s: %s }'
+        let fname  = len(ftype) > 0 ? ftype : ''
+    else
+        let fname  = '%f'
+    endif
+
+    if isactive
+        let status .= '%#StatusLine# '
+        let status .= printf(filepart, fname, ftype)
+        let status .= ' %#CursorLine#'
+    else
+        let status .= fname . ': ' . ftype
+    endif
 
     return status
 endfunction " }}}
@@ -701,6 +689,7 @@ Plug 'talek/obvious-resize'
             " \           'ObviousResizeRight',
             " \           'ObviousResizeDown',
             " \         ] }
+Plug 'gcavallanti/vim-noscrollbar'     " Graphical scrollbar in stl
 " Colors -------------------------------
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
@@ -722,7 +711,7 @@ Plug 'tpope/vim-characterize'           " Modernize `ga` behavior
 Plug 'Yggdroot/indentLine'              " Show | at tab-stops
 
 " NAVIGATING FILESYSTEM ================
-Plug 'kien/ctrlp.vim'                   " A fuzzy file finder
+Plug 'ctrlpvim/ctrlp.vim'               " A fuzzy file finder
 Plug 'dockyard/vim-easydir'             " Create new dirs on-the-fly
 Plug 'tpope/vim-vinegar'                " Better netrw integration
 Plug 'xolox/vim-shell'                  " Integrate ViM and environment
@@ -809,7 +798,7 @@ let g:buftabline_indicators = 1 " show if buffers are modified
 " Colorscheme Pencil
 let g:pencil_spell_undercurl = 1
 " Ctrl-P
-let g:ctrlp_map = '<C-p>'
+let g:ctrlp_map = 'gf'
 let g:ctrlp_use_caching = 1
 let g:ctrlp_clear_cache_on_exit = 0
 let g:ctrlp_cache_dir = $HOME . '/.vim/cache/ctrlp'
@@ -888,6 +877,7 @@ nnoremap <S-F11> :Fullscreen<CR>
 
 vnoremap \| :Tabularize /
 
+nnoremap gf :CtrlP<CR>
 nnoremap go :CtrlPMRU<CR>
 nnoremap gb :CtrlPBuffer<CR>
 " see non-plugin mapping gs :s/
@@ -993,7 +983,10 @@ if !isdirectory(expand(g:ctrlp_cache_dir))
     call mkdir(expand(g:ctrlp_cache_dir), 'p')
 endif
 
-let g:ctrlp_mruf_case_sensitive = has('win32') ? 0 : 1
+if has('win32')
+    let g:ctrlp_mruf_case_sensitive = 0
+    let g:ctrlp_cmd = 'CtrlP D:\Dropbox'
+endif
 " }}}
 "}}}
 
