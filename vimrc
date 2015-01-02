@@ -144,9 +144,9 @@ nnoremap zB :call RealScrollTo('bot')<CR>
 " Better folding
 " TODO: make <Space> page down when not on a fold
 nnoremap <Space> za
-vnoremap <Space> za
+xnoremap <Space> za
 nnoremap <S-Space> zA
-vnoremap <S-Space> zA
+xnoremap <S-Space> zA
 nnoremap <C-Space> zM
 nnoremap <C-S-Space> zR
 
@@ -159,8 +159,8 @@ nnoremap S d0
 nnoremap <F1> K
 
 " Keep selection after indenting
-vnoremap <leader>> >gv
-vnoremap <leader>< <gv
+xnoremap <leader>> >gv
+xnoremap <leader>< <gv
 
 " Easier searching
 nnoremap gs :%s/
@@ -875,14 +875,14 @@ let maplocalleader = ',' " same as leader for now.
 nnoremap <F11> :Goyo<CR>
 nnoremap <S-F11> :Fullscreen<CR>
 
-vnoremap \| :Tabularize /
+xnoremap \| :Tabularize /
 
 nnoremap gf :CtrlP<CR>
 nnoremap go :CtrlPMRU<CR>
 nnoremap gb :CtrlPBuffer<CR>
 " see non-plugin mapping gs :s/
 nnoremap gS :%S/
-vnoremap gS :S/
+xnoremap gS :S/
 " J/K intelligently SplitJoin.vim or fallback to default
 nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin', 'J')<CR>
 nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit', "i\r")<CR>
