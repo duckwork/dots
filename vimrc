@@ -251,6 +251,7 @@ augroup Windowstuff "{{{
     au BufWinEnter * silent! loadview
 augroup END "}}}
 " Filetypes {{{
+" TODO: move to after/ftplugin
 augroup ft_Help
     au!
     au FileType help setlocal nospell
@@ -356,7 +357,7 @@ endfor
 " }}}
 "}}}
 " FUNCTIONS {{{
-" Tools
+" Tools ======================================================================
 function! WordCount() " {{{
     let s:oldstat = v:statusmsg
     let position = getpos('.')
@@ -402,27 +403,27 @@ endfunction
 command! -bar RangerChooser call RangeChooser()
 nnoremap <leader>f :<C-u>RangerChooser<CR>
 endif " }}}
-function! Concrastinate(cmd, ...) " {{{
-    " TODO: work with a file list
-    " keep from vimrc hacking during work
-    " timestart, timeend must be fmt %H%M
-    " cmd is a exe command
-    let current_time = strftime("%H%M")
-    let s:timestart = exists("a:1") ? a:1 : 0800
-    let s:timeend  = exists("a:2") ? a:2 : 1800
+" function! Concrastinate(cmd, ...) " {{{
+"     " TODO: work with a file list
+"     " keep from vimrc hacking during work
+"     " timestart, timeend must be fmt %H%M
+"     " cmd is a exe command
+"     let current_time = strftime("%H%M")
+"     let s:timestart = exists("a:1") ? a:1 : 0800
+"     let s:timeend  = exists("a:2") ? a:2 : 1800
 
-    if current_time >= s:timestart && current_time <= s:timeend
-        echohl WarningMsg
-        echom "Sorry, can't " a:cmd ", it's b/w "
-                    \ s:timestart " and " s:timeend "."
-        echohl None
-    else
-        " TODO: fnameescape() it
-        " TODO: add option to add TODO: to end of file
-        exe a:cmd
-    endif
-endfunction " }}}
-" Managing buffers, tabs, windows
+"     if current_time >= s:timestart && current_time <= s:timeend
+"         echohl WarningMsg
+"         echom "Sorry, can't " a:cmd ", it's b/w "
+"                     \ s:timestart " and " s:timeend "."
+"         echohl None
+"     else
+"         " TODO: fnameescape() it
+"         " TODO: add option to add TODO: to end of file
+"         exe a:cmd
+"     endif
+" endfunction " }}}
+" Managing buffers, tabs, windows ============================================
 function! ChTabBuf(motion) " {{{
     if tabpagenr('$') == 1
         " there is only 1 tab; switch buffers
@@ -446,7 +447,7 @@ function! CloseBufWin() " {{{
         quit
     endif
 endfunction " }}}
-" Custom interface lines
+" Custom interface lines =====================================================
 function! FoldLine() " {{{
     let line = getline(v:foldstart)
     let foldedlinecount = printf('%3d', v:foldend - v:foldstart)
@@ -488,6 +489,7 @@ function! StatusLine(winnr) " {{{
         endif
     endfunction
 
+    " Left side ----------------------------------------------------
     " Column indicator
     if isactive
         let status .= '%#CursorLineNr#'.'%3v '.'%#StatusLine#'
@@ -495,19 +497,20 @@ function! StatusLine(winnr) " {{{
         let status .= '%#CursorLine#'.'>%n. '
     endif
 
-    " Left side ====================================================
+    " Scroll
+    let status .= '%#StatusLine#'
+    let status .= Color(!isactive, 'CursorLine', '| %3p%% ')
+    "let status .= '%{noscrollbar#statusline()}'
+    " Wordcount
     if ftype =~? 'text' || ftype =~? 'm.*d.*' || ftype ==? 'pandoc'
                 \|| ftype =~? 'wiki'
         let status .= '| %{WordCount()} '
     endif
-    let status .= '%#StatusLine#'
-    let status .= Color(!isactive, 'CursorLine', ' | %3p%% ')
-    " let status .= '%{noscrollbar#statusline()}'
 
     let status .= '%#CursorLine#'
-    let status .= '%=' " Gutter ====================================
+    let status .= '%=' " Gutter ------------------------------------
 
-    " Right side ===================================================
+    " Right side ---------------------------------------------------
     " File status indicators
     let status .= Color(isactive, 'DiffAdd', ismodified ? ' + ' : '')
     let status .= Color(isactive, 'DiffDelete', isreadonly ?
@@ -565,7 +568,7 @@ function! s:RefreshStatus(...) " {{{
 endfunction " }}}
 function! TabLine() " {{{
 endfunction " }}}
-" Custom theming
+" Custom theming =============================================================
 " function! UpdateCursorLineNumber() " {{{
 "     if &bg == 'dark'
 "         hi CursorLineNr guifg=#6c71c4 gui=bold
@@ -654,7 +657,7 @@ function! ListPlus(switch) "{{{
                     \ : <SID>listplus_on()
     endif
 endfunction "}}}
-" Other fun stuff!
+" Other fun stuff! ===========================================================
 function! RealScrollTo(direction) " {{{
     let s:scroff = &scrolloff
     set scrolloff=0
@@ -671,13 +674,13 @@ endfunction " }}}
 " }}}
 " PLUGINS {{{
 " Vim-plug {{{
-" Automatic vim-plug installation
+" Automatic vim-plug installation {{{
 if empty(glob('~/.vim/autoload/plug.vim'))
     silent !mkdir -p ~/.vim/autoload
     silent !curl -fLo ~/.vim/autoload/plug.vim
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     au VimEnter * PlugInstall
-endif
+endif " }}}
 call plug#begin('~/.vim/plugged')
 
 " GUI ==================================
@@ -689,7 +692,7 @@ Plug 'talek/obvious-resize'
             " \           'ObviousResizeRight',
             " \           'ObviousResizeDown',
             " \         ] }
-Plug 'gcavallanti/vim-noscrollbar'     " Graphical scrollbar in stl
+" Plug 'gcavallanti/vim-noscrollbar'     " Graphical scrollbar in stl
 " Colors -------------------------------
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
@@ -712,6 +715,9 @@ Plug 'Yggdroot/indentLine'              " Show | at tab-stops
 
 " NAVIGATING FILESYSTEM ================
 Plug 'ctrlpvim/ctrlp.vim'               " A fuzzy file finder
+if has('python') && v:version >= 704
+    Plug 'FelikZ/ctrlp-py-matcher'      " Fuzzy searches faster with Python
+endif
 Plug 'dockyard/vim-easydir'             " Create new dirs on-the-fly
 Plug 'tpope/vim-vinegar'                " Better netrw integration
 Plug 'xolox/vim-shell'                  " Integrate ViM and environment
