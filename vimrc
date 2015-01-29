@@ -268,10 +268,10 @@ augroup END
 augroup ft_Text
     au!
     au BufNewFile,BufRead,BufWrite *.txt setf pandoc
-    au BufNewFile,BufRead,BufWrite *.md  setf markdown
+    au BufNewFile,BufRead,BufWrite *.md  setf pandoc
 
     au FileType *wiki,markdown,pandoc setlocal spell
-    au FileType *wiki,markdown,pandoc 2match Search /[.!?]"\? [^ ]/
+    " au FileType *wiki,markdown,pandoc 2match Search /[.!?]"\? [^ ]/
 
     au CursorHold *.{txt,m*d*}
                 \ if &modifiable && &modified | write | endif
@@ -845,7 +845,7 @@ let g:pandoc#spell#default_langs = ['en']
 let g:pandoc#toc#position = "left" " Table of contents
 let g:pandoc#toc#close_after_navigating = 0 " <CR> navs, <C-CR> navs + closes
 " Pandoc syntax
-" let g:pandoc#syntax#conceal#use = 0 " don't use conceal to hide any chars
+let g:pandoc#syntax#conceal#use = 0 " don't use conceal to hide any chars
 " --- but if you do, *don't* use them on these:
 let g:pandoc#syntax#conceal#blacklist = [
             \ 'titleblock',
@@ -906,7 +906,6 @@ nmap <Leader>; <Plug>(easymotion-next)
 nmap <Leader>, <Plug>(easymotion-prev)
 
 " Disable pandoc#formatting#autoformat
-" TODO: toggle?
 nnoremap <F3> :call pandoc#formatting#ToggleAutoformat()<CR>
              \:echo b:pandoc_autoformat_enabled ?
              \ "Autoformat enabled" :
