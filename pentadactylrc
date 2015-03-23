@@ -47,7 +47,6 @@ nmap -builtin <S-F7> :set noscript-sites!=<A-Tab>
 nmap -builtin <F7> :set noscript-tempsites!=<A-Tab>
 
 nmap -builtin <F3> :set usermode!<CR>:styletoggle -name=Readable<CR>
-au LocationChange,PageLoad styledisable -name=Readable
 " }}}
 " Styles {{{
 style -name Readable * <<EOM
@@ -71,12 +70,18 @@ style -name Readable * <<EOM
         max-width: 100%;
     }
     a:link {
-        text-underline: none;
-        color: #3ee;
+        text-underline: none !important;
+        text-decoration: none !important;
+        color: #3ee !important;
     }
 EOM
 
 styledisable -name=Readable
+
+javascript <<EOF
+function Reader() {
+}
+
 " style -name minitabs chrome://* <<EOM
 "     #TabsToolbar toolbarbutton {
 "         display: none !important;

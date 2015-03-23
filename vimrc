@@ -84,8 +84,8 @@ let &showbreak = '└ '               " when a line wraps, show it with this
 match Error /\s\+$/                 " match trailing whitespace to error
 
 set nostartofline                   " stay in column with gg, G, etc.
-set virtualedit=insert              " allow cursor past EOL in Insert mode
-set ve        +=block               " allow cursor past EOL in V-block
+set virtualedit=block               " allow cursor past EOL in V-block
+" set ve        +=insert              " allow cursor past EOL in Insert mode
 
 let &colorcolumn = g:tw + 1         " highlight this column
 set cursorline                      " highlight the line being edited
@@ -213,6 +213,10 @@ nnoremap <silent> <BS> :b#<CR>
 " And because `sudo vim` is apparently quite dangerous
 " `sudoedit` with vim set as $EDITOR is better
 cmap w!! %!sudo tee > /dev/null %
+
+" Fix line endings to Unix b/c why not
+nnoremap <F9> :update<CR>:e ++ff=dos<CR>:setlocal ff=unix<CR>:w<CR>
+nnoremap <F8> :call Typewriter('tog')<CR>
 "}}}
 " AUTOCOMMANDS {{{
 augroup Filestuff "{{{
@@ -576,30 +580,42 @@ endfunction " }}}
 " endfunction " }}}
 function! Typewriter(switch) " {{{
     function! s:typewriter_on()
-        let s:wrap = &wrap
-        let s:linebreak = &linebreak
-        let s:tw = &textwidth
-        let s:list = &list
-        let s:cursorline = &cursorline
-        let s:cursorcolumn = &cursorcolumn
+        " let s:wrap = &wrap
+        " let s:linebreak = &linebreak
+        " let s:tw = &textwidth
+        " let s:list = &list
+        " let s:cursorline = &cursorline
+        " let s:cursorcolumn = &cursorcolumn
 
-        setlocal wrap
-        setlocal linebreak
-        let &l:textwidth = get(g:, 'tw', 78)
-        setlocal nolist
-        setlocal nocursorline
-        setlocal nocursorcolumn
+        " setlocal wrap
+        " setlocal linebreak
+        " let &l:textwidth = get(g:, 'tw', 78)
+        " setlocal nolist
+        " setlocal nocursorline
+        " setlocal nocursorcolumn
+
+        let s:guifont = &guifont
+        let s:colorscheme = g:colors_name
+        let s:bg = &background
+
+        set guifont=Courier_Prime:h10:cANSI
+        colorscheme pencil
+        set background=light
 
         return 1
     endfunction
 
     function! s:typewriter_off()
-        let &l:wrap = get(s:, 'wrap', &wrap)
-        let &l:linebreak = get(s:, 'linebreak', &linebreak)
-        let &l:textwidth = get(s:, 'textwidth', &textwidth)
-        let &l:list = get(s:, 'list', &list)
-        let &l:cursorline = get(s:, 'cursorline', &cursorline)
-        let &l:cursorcolumn = get(s:, 'cursorcolumn', &cursorcolumn)
+        " let &l:wrap = get(s:, 'wrap', &wrap)
+        " let &l:linebreak = get(s:, 'linebreak', &linebreak)
+        " let &l:textwidth = get(s:, 'textwidth', &textwidth)
+        " let &l:list = get(s:, 'list', &list)
+        " let &l:cursorline = get(s:, 'cursorline', &cursorline)
+        " let &l:cursorcolumn = get(s:, 'cursorcolumn', &cursorcolumn)
+
+        let &guifont = s:guifont
+        let g:colors_name = s:colorscheme
+        let &background = s:bg
 
         return 0
     endfunction
@@ -697,6 +713,7 @@ Plug 'talek/obvious-resize'
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
 Plug 'Junza/Spink'
+Plug 'duythinht/inori'
 
 " WRITING ==============================
 " Prose --------------------------------
@@ -774,6 +791,7 @@ Plug 'vim-scripts/matchit.zip'          " Better matchit plugin
 if executable('git')
     Plug 'tpope/vim-fugitive'           " Git integration
     Plug 'airblade/vim-gitgutter'       " Git stuff in signs column
+    Plug 'tpope/vim-git'                " Vim Git runtime files
     set wildignore+=COMMIT_EDITMSG      " Get rid of junk in Tab-completions
 endif
 if executable('ag')                     " Ag implementation
@@ -838,7 +856,7 @@ let g:pandoc#modules#disabled = [ 'menu' ] " Get rid of Pandoc menu
 let g:pandoc#command#custom_open = "PandocOpen" " function defined below
 let g:pandoc#filetypes#handled = [ 'markdown', 'rst', 'textile', ]
 let g:pandoc#folding#fdc = &fdc
-let g:pandoc#formatting#mode = 'h' " hard wrap, autoformat smart
+" let g:pandoc#formatting#mode = 'h' " hard wrap, autoformat smart
 let g:pandoc#formatting#textwidth = g:tw
 let g:pandoc#keyboard#sections#header_style = 's' " enable setext for h1,2
 let g:pandoc#spell#default_langs = ['en']
@@ -846,13 +864,26 @@ let g:pandoc#toc#position = "left" " Table of contents
 let g:pandoc#toc#close_after_navigating = 0 " <CR> navs, <C-CR> navs + closes
 " Pandoc syntax
 let g:pandoc#syntax#conceal#use = 0 " don't use conceal to hide any chars
+let g:pandoc#syntax#conceal#urls = 0
 " --- but if you do, *don't* use them on these:
+" --- (these are all of them)
 let g:pandoc#syntax#conceal#blacklist = [
-            \ 'titleblock',
-            \ 'definition',
-            \ 'list',
-            \ 'ellipses',
-            \ 'quotes',
+                    \ 'titleblock ',
+                    \ 'image',
+                    \ 'block',
+                    \ 'subscript',
+                    \ 'superscript',
+                    \ 'strikeout',
+                    \ 'atx',
+                    \ 'codeblock_start',
+                    \ 'codeblock_delim',
+                    \ 'footnote',
+                    \ 'definition',
+                    \ 'list',
+                    \ 'newline',
+                    \ 'dashes',
+                    \ 'ellipses',
+                    \ 'quotes',
             \ ]
 " --- And override the characters that are used thusly:
 let g:pandoc#syntax#conceal#cchar_overrides = {
@@ -904,6 +935,16 @@ omap F <Plug>(easymotion-s)
 omap T <Plug>(easymotion-bd-t)
 nmap <Leader>; <Plug>(easymotion-next)
 nmap <Leader>, <Plug>(easymotion-prev)
+
+" map default motion maps to <Leader>map, for use in macros, etc.
+nnoremap <Leader>f f
+nnoremap <Leader>t t
+onoremap <Leader>f f
+onoremap <Leader>t t
+nnoremap <Leader>F F
+nnoremap <Leader>T T
+onoremap <Leader>F F
+onoremap <Leader>T T
 
 " Disable pandoc#formatting#autoformat
 nnoremap <F3> :call pandoc#formatting#ToggleAutoformat()<CR>
