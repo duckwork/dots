@@ -54,6 +54,8 @@ set ruler                           " Show where the cursor is in the file
 set showcmd                         " Show command as it's being typed
 set wildmenu                        " Enhanced command-line completion
 
+set conceallevel=0
+
 set shortmess=a                     " same as shm=filmnrwx
 set shm     +=oO                    " overwrite file msgs
 set shm     +=tT                    " truncate msgs in [c] mode
@@ -122,6 +124,8 @@ set vop       +=unix                " Unix EOL fmt even when on Windows
 set confirm                         " Confirm before quit, instead of error
 
 set undolevels=10000                " Max changes that can be undone
+
+let g:is_bash = 1                   " I almost always program in bash
 "}}}
 " KEYMAPS {{{
 
@@ -218,6 +222,8 @@ cmap w!! %!sudo tee > /dev/null %
 nnoremap <F9> :update<CR>:e ++ff=dos<CR>:setlocal ff=unix<CR>:w<CR>
 nnoremap <F8> :call Typewriter('tog')<CR>
 "}}}
+" COMMANDS {{{
+" }}}
 " AUTOCOMMANDS {{{
 augroup Filestuff "{{{
     au!
@@ -330,7 +336,7 @@ if has('gui_running') " {{{
     elseif has('x11')
         "set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
-        set guifont=Consolas:h9:cANSI
+        set guifont=InputMono:h8:cANSI
         " set guifont=PT_Mono:h9:cANSI
     endif
 
@@ -496,9 +502,9 @@ function! StatusLine(winnr) " {{{
     " Left side ----------------------------------------------------
     " Column indicator
     if isactive
-        let status .= '%#CursorLineNr#'.'%3v '.'%#StatusLine#'
+        let status .= '%3v '
     else
-        let status .= '%#CursorLine#'.'>%n. '
+        let status .= '>%n. '
     endif
 
     " Scroll
@@ -712,8 +718,7 @@ Plug 'talek/obvious-resize'
 " Colors -------------------------------
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
-Plug 'Junza/Spink'
-Plug 'duythinht/inori'
+Plug 'chriskempson/base16-vim'
 
 " WRITING ==============================
 " Prose --------------------------------
@@ -721,7 +726,7 @@ Plug 'duythinht/inori'
 Plug 'junegunn/goyo.vim',
             \ { 'on': 'Goyo' }
 " --- highlight current paragraph
-Plug 'duckwork/limelight.vim',
+Plug 'junegunn/limelight.vim',
             \ { 'on': 'Limelight' }
 
 " Code ---------------------------------
@@ -754,7 +759,8 @@ Plug 'AndrewRadev/splitjoin.vim'        " Easily split and join code
 Plug 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
 Plug 'tommcdo/vim-exchange'             " Easy text exchange operator
 " Textobjects --------------------------
-Plug 'Lokaltog/vim-easymotion'          " No more counting objects
+" Plug 'Lokaltog/vim-easymotion'          " No more counting objects
+Plug 'rhysd/clever-f.vim'               " repeat fs with f
 Plug 'wellle/targets.vim'               " Lots of new textobjects
 Plug 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
 Plug 'tpope/vim-surround'               " Format surroundings easily
@@ -821,6 +827,9 @@ let g:buftabline_numbers = 1 " show buffer numbers in list
 let g:buftabline_indicators = 1 " show if buffers are modified
 " Colorscheme Pencil
 let g:pencil_spell_undercurl = 1
+" Clever-f
+let g:clever_f_smart_case = 1
+let g:clever_f_chars_match_any_signs = ';'
 " Ctrl-P
 let g:ctrlp_map = 'gf'
 let g:ctrlp_use_caching = 1
@@ -830,18 +839,18 @@ let g:ctrlp_max_depth = 100
 let g:ctrlp_max_files = 0
 let g:ctrlp_match_window = 'bottom,order:ttb'
 let g:ctrlp_lazy_update = 1
-let g:ctrlp_extensions = [ 'dir', 'line', 'mixed', ]
+let g:ctrlp_extensions = [ 'dir', 'line', 'mixed' ]
 let g:ctrlp_status_func = {
             \ 'main': 'CtrlPStatusLine',
             \ 'prog': 'CtrlPProgressLine'
             \ }
 " EasyMotion
-let g:EasyMotion_do_mapping       = 0 " disable default mappings
-let g:EasyMotion_prompt           = '{n}/>> ' " prompt
-let g:EasyMotion_keys             = 'asdfghjkl;qwertyuiopzxcvbnm' " hints
-let g:EasyMotion_smartcase        = 1 " case-insensitive searches
-let g:EasyMotion_use_smartsign_us = 1 " shift-insensitive number row
-let g:EasyMotion_enter_jump_first = 1 " <CR> jumps to first hint
+" let g:EasyMotion_do_mapping       = 0 " disable default mappings
+" let g:EasyMotion_prompt           = '{n}/>> ' " prompt
+" let g:EasyMotion_keys             = 'asdfghjkl;qwertyuiopzxcvbnm' " hints
+" let g:EasyMotion_smartcase        = 1 " case-insensitive searches
+" let g:EasyMotion_use_smartsign_us = 1 " shift-insensitive number row
+" let g:EasyMotion_enter_jump_first = 1 " <CR> jumps to first hint
 " Emmet
 let g:user_emmet_leader_key = '<C-e>'
 " Goyo
@@ -867,28 +876,25 @@ let g:pandoc#syntax#conceal#use = 0 " don't use conceal to hide any chars
 let g:pandoc#syntax#conceal#urls = 0
 " --- but if you do, *don't* use them on these:
 " --- (these are all of them)
-let g:pandoc#syntax#conceal#blacklist = [
-                    \ 'titleblock ',
-                    \ 'image',
-                    \ 'block',
-                    \ 'subscript',
-                    \ 'superscript',
-                    \ 'strikeout',
-                    \ 'atx',
-                    \ 'codeblock_start',
-                    \ 'codeblock_delim',
-                    \ 'footnote',
-                    \ 'definition',
-                    \ 'list',
-                    \ 'newline',
-                    \ 'dashes',
-                    \ 'ellipses',
-                    \ 'quotes',
-            \ ]
+" let g:pandoc#syntax#conceal#blacklist = [
+"                     \ 'titleblock ',
+"                     \ 'image',
+"                     \ 'block',
+"                     \ 'subscript',
+"                     \ 'superscript',
+"                     \ 'strikeout',
+"                     \ 'atx',
+"                     \ 'codeblock_start',
+"                     \ 'codeblock_delim',
+"                     \ 'footnote',
+"                     \ 'definition',
+"                     \ 'list',
+"                     \ 'newline',
+"                     \ 'dashes',
+"                     \ 'ellipses',
+"                     \ 'quotes',
+"             \ ]
 " --- And override the characters that are used thusly:
-let g:pandoc#syntax#conceal#cchar_overrides = {
-            \ 'newline': ' ',
-            \ }
 " Solarized
 let g:solarized_menu = 0
 " Splitjoin
@@ -925,26 +931,26 @@ nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin', 'J')<CR>
 nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit', "i\r")<CR>
 
 " remap motion maps !
-nmap f <Plug>(easymotion-sl)
-nmap t <Plug>(easymotion-bd-tl)
-omap f <Plug>(easymotion-sl)
-omap t <Plug>(easymotion-bd-tl)
-nmap F <Plug>(easymotion-s)
-nmap T <Plug>(easymotion-bd-t)
-omap F <Plug>(easymotion-s)
-omap T <Plug>(easymotion-bd-t)
-nmap <Leader>; <Plug>(easymotion-next)
-nmap <Leader>, <Plug>(easymotion-prev)
+" nmap f <Plug>(easymotion-sl)
+" nmap t <Plug>(easymotion-bd-tl)
+" omap f <Plug>(easymotion-sl)
+" omap t <Plug>(easymotion-bd-tl)
+" nmap F <Plug>(easymotion-s)
+" nmap T <Plug>(easymotion-bd-t)
+" omap F <Plug>(easymotion-s)
+" omap T <Plug>(easymotion-bd-t)
+" nmap <Leader>; <Plug>(easymotion-next)
+" nmap <Leader>, <Plug>(easymotion-prev)
 
 " map default motion maps to <Leader>map, for use in macros, etc.
-nnoremap <Leader>f f
-nnoremap <Leader>t t
-onoremap <Leader>f f
-onoremap <Leader>t t
-nnoremap <Leader>F F
-nnoremap <Leader>T T
-onoremap <Leader>F F
-onoremap <Leader>T T
+" nnoremap <Leader>f f
+" nnoremap <Leader>t t
+" onoremap <Leader>f f
+" onoremap <Leader>t t
+" nnoremap <Leader>F F
+" nnoremap <Leader>T T
+" onoremap <Leader>F F
+" onoremap <Leader>T T
 
 " Disable pandoc#formatting#autoformat
 nnoremap <F3> :call pandoc#formatting#ToggleAutoformat()<CR>
@@ -1037,4 +1043,5 @@ endif
 "}}}
 
 " colorscheme solarized
-colorscheme pencil
+" colorscheme pencil
+colorscheme base16-atelierforest
