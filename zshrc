@@ -1,6 +1,9 @@
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
+# Do this, like, first.
+sh $HOME/dots/base16-atelierforest.dark.sh
+
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
@@ -46,7 +49,7 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git archlinux colored-man colorize command-not-found compleat extract github history-substring-search history sudo systemd tmux vim-interaction zsh-syntax-highlighting)
+plugins=(git archlinux colored-man colorize command-not-found compleat extract github history-substring-search history sudo systemd vim-interaction zsh-syntax-highlighting tmux)
 
 # tmux plugin config
 export ZSH_TMUX_AUTOSTART=true
