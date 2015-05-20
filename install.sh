@@ -51,7 +51,12 @@ if [[ ! -f $HOME/.vim/autoload/plug.vim ]]; then
     curl -fLo $HOME/.vim/autoload/plug.vim \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
-vim +PluginInstall +qall
+vim +PlugInstall +qall
+
+echo "Installing zsh & tmux..."
+sudo pacman -S zsh tmux
+echo "Setting zsh as default shell..."
+chsh -s $(which zsh) "$(whoami)"
 
 echo "Installing zshrc..."
 if [[ -f $HOME/.zshrc ]]; then
