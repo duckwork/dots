@@ -87,6 +87,10 @@ alias zshconfig="vim ~/.zshrc"
 alias xyzzy="echo \"Nothing happens.\""
 alias ohmyzsh="vim ~/.oh-my-zsh"
 
+alias reboot="sudo reboot"
+alias shutdown="sudo poweroff"
+alias poweroff="sudo poweroff"
+
 # Stderred library (stderr is red)
 if [ -f "/usr/lib/libstderred.so" ]; then
     export LD_PRELOAD="/usr/lib/libstderred.so"
