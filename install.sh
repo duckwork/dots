@@ -53,6 +53,9 @@ if [[ ! -f $HOME/.vim/autoload/plug.vim ]]; then
 fi
 vim +PlugInstall +qall
 
+echo "Setting console font to Lat2-Terminus16..."
+sudo echo "FONT=Lat2-Terminus16" > /etc/vconsole.conf
+
 echo "Installing zsh & tmux..."
 sudo pacman -S zsh tmux
 echo "Setting zsh as default shell..."
@@ -79,4 +82,8 @@ fi
 if [[ ! -d $HOME/.oh-my-zsh/custom/plugins/ ]]; then
     git clone git://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.oh-my-zsh/custom/plugins/
 fi
+
+echo "Installing ranger & dependeds..."
+pacman -S ranger libcaca atool highlight mediainfo
+
 echo "Finished."
