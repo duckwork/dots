@@ -1,6 +1,9 @@
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
+export PATH="$HOME/bin:$PATH"
+export EDITOR="vim"
+
 # Do this, like, first.
 sh $HOME/dots/base16-atelierforest.dark.sh
 
@@ -49,7 +52,7 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git archlinux colored-man colorize command-not-found compleat extract github history-substring-search history sudo systemd vim-interaction zsh-syntax-highlighting tmux)
+plugins=(git archlinux colored-man colorize command-not-found compleat extract github history-substring-search history sudo systemd vim-interaction zsh-syntax-highlighting )
 
 # tmux plugin config
 export ZSH_TMUX_AUTOSTART=true
