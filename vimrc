@@ -719,6 +719,7 @@ Plug 'talek/obvious-resize'
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
 Plug 'chriskempson/base16-vim'
+Plug 'NLKNguyen/papercolor-theme'
 
 " WRITING ==============================
 " Prose --------------------------------
@@ -782,6 +783,9 @@ Plug 'reedes/vim-litecorrect',
 " --- Pandoc section text-objects
 Plug 'gbgar/pandoc-sections.vim',
             \ { 'for': [ 'pandoc', 'markdown' ] }
+
+" --- Haskell
+Plug 'raichoo/haskell-vim'
 
 Plug 'vimwiki/vimwiki'                  " Personal wiki with ViM
 Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt
