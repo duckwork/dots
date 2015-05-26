@@ -709,17 +709,13 @@ call plug#begin('~/.vim/plugged')
 " Plug 'duckwork/vim-buftabline'          " show vim buffers in tabline
 " --- Resive ViM windows obviously
 Plug 'talek/obvious-resize'
-            " \ { 'on': [ 'ObviousResizeUp',
-            " \           'ObviousResizeLeft',
-            " \           'ObviousResizeRight',
-            " \           'ObviousResizeDown',
-            " \         ] }
 " Plug 'gcavallanti/vim-noscrollbar'     " Graphical scrollbar in stl
 " Colors -------------------------------
 Plug 'duckwork/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
 Plug 'chriskempson/base16-vim'
 Plug 'NLKNguyen/papercolor-theme'
+Plug 'tomasr/molokai'
 
 " WRITING ==============================
 " Prose --------------------------------
@@ -787,6 +783,7 @@ Plug 'gbgar/pandoc-sections.vim',
 " --- Haskell
 Plug 'raichoo/haskell-vim'
 
+" --- Et cetera
 Plug 'vimwiki/vimwiki'                  " Personal wiki with ViM
 Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt
 
@@ -1048,4 +1045,4 @@ endif
 
 " colorscheme solarized
 " colorscheme pencil
-colorscheme base16-atelierforest
+colorscheme molokai
