@@ -1045,4 +1045,5 @@ endif
 
 " colorscheme solarized
 " colorscheme pencil
-colorscheme molokai
+" colorscheme molokai
+colorscheme base16-atelierforest
