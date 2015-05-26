@@ -1,6 +1,11 @@
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
+export EDITOR="vim"
+
+# Do this, like, first.
+sh $HOME/dots/base16-atelierforest.dark.sh
+
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
@@ -46,7 +51,7 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git archlinux colored-man colorize command-not-found compleat extract github history-substring-search history sudo systemd tmux vim-interaction zsh-syntax-highlighting)
+plugins=(git archlinux colored-man colorize command-not-found compleat extract github history-substring-search history sudo systemd vim-interaction zsh-syntax-highlighting )
 
 # tmux plugin config
 export ZSH_TMUX_AUTOSTART=true
@@ -56,6 +61,7 @@ source $ZSH/oh-my-zsh.sh
 # User configuration
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
+export PATH="$HOME/bin:$PATH"
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
@@ -83,6 +89,10 @@ export ARCHFLAGS="-arch x86_64"
 alias zshconfig="vim ~/.zshrc"
 alias xyzzy="echo \"Nothing happens.\""
 alias ohmyzsh="vim ~/.oh-my-zsh"
+
+alias reboot="sudo reboot"
+alias shutdown="sudo poweroff"
+alias poweroff="sudo poweroff"
 
 # Stderred library (stderr is red)
 if [ -f "/usr/lib/libstderred.so" ]; then
