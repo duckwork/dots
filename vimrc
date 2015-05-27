@@ -309,6 +309,7 @@ augroup END
 "}}}
 " CAN I HAS(?) {{{
 if has('win32') " {{{
+    colorscheme molokai
     let &runtimepath .= ',$HOME\.vim'
     let &clipboard = has('unnamedplus') ? 'unnamedplus' : 'unnamed'
     set viminfo+=rA:,rB:
@@ -1045,5 +1046,4 @@ endif
 
 " colorscheme solarized
 " colorscheme pencil
-" colorscheme molokai
 colorscheme base16-atelierforest
