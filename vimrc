@@ -186,7 +186,7 @@ if filereadable(glob("~/dots/vimrc"))
 else
     let g:myvimrc = $MYVIMRC
 endif
-nnoremap <leader>er :edit <C-r>=g:myvimrc<CR><CR>
+nnoremap <leader>er :call PopOpen(g:myvimrc)<CR>
 nnoremap <leader>re :source <C-r>=g:myvimrc<CR><CR>
 
 " Change current directory to filepath
@@ -281,6 +281,7 @@ augroup ft_Text
     au BufNewFile,BufRead,BufWrite *.md  setf pandoc
 
     au FileType *wiki,markdown,pandoc setlocal spell
+    au FileType *wiki,markdown,pandoc setlocal complete+=kspell
     " au FileType *wiki,markdown,pandoc 2match Search /[.!?]"\? [^ ]/
 
     au CursorHold *.{txt,m*d*}
@@ -413,26 +414,6 @@ endfunction
 command! -bar RangerChooser call RangeChooser()
 nnoremap <leader>f :<C-u>RangerChooser<CR>
 endif " }}}
-" function! Concrastinate(cmd, ...) " {{{
-"     " TODO: work with a file list
-"     " keep from vimrc hacking during work
-"     " timestart, timeend must be fmt %H%M
-"     " cmd is a exe command
-"     let current_time = strftime("%H%M")
-"     let s:timestart = exists("a:1") ? a:1 : 0800
-"     let s:timeend  = exists("a:2") ? a:2 : 1800
-
-"     if current_time >= s:timestart && current_time <= s:timeend
-"         echohl WarningMsg
-"         echom "Sorry, can't " a:cmd ", it's b/w "
-"                     \ s:timestart " and " s:timeend "."
-"         echohl None
-"     else
-"         " TODO: fnameescape() it
-"         " TODO: add option to add TODO: to end of file
-"         exe a:cmd
-"     endif
-" endfunction " }}}
 " Managing buffers, tabs, windows ============================================
 function! ChTabBuf(motion) " {{{
     if tabpagenr('$') == 1
@@ -455,6 +436,16 @@ function! CloseBufWin() " {{{
         bdelete
     else
         quit
+    endif
+endfunction " }}}
+function! PopOpen(file) " {{{
+    " Opens the file in a new tab, or current buffer if empty
+    " TODO: add option for where to open file
+    let s:fpath = fnameescape(a:file)
+    if bufname("%") == ""
+        execute "edit" s:fpath
+    else
+        execute "tabe" s:fpath
     endif
 endfunction " }}}
 " Custom interface lines =====================================================
@@ -519,6 +510,8 @@ function! StatusLine(winnr) " {{{
 
     let status .= '%#CursorLine#'
     let status .= '%=' " Gutter ------------------------------------
+
+    let status .= '%{fugitive#head(6)} '
 
     " Right side ---------------------------------------------------
     " File status indicators
@@ -707,30 +700,32 @@ call plug#begin('~/.vim/plugged')
 
 " GUI ==================================
 " Plug 'duckwork/vim-buftabline'          " show vim buffers in tabline
-" --- Resive ViM windows obviously
-Plug 'talek/obvious-resize'
-" Plug 'gcavallanti/vim-noscrollbar'     " Graphical scrollbar in stl
+"      " upstream: ap/vim-buftabline
+" Plug 'talek/obvious-resize'             " Resize windows 'obviously'
+" Plug 'gcavallanti/vim-noscrollbar'      " Graphical scrollbar in stl
 " Colors -------------------------------
-Plug 'duckwork/vim-colors-pencil'
-Plug 'altercation/vim-colors-solarized'
+" Plug 'duckwork/vim-colors-pencil'
+     " upstream: reedes/vim-colors-pencil
+" Plug 'altercation/vim-colors-solarized'
 Plug 'chriskempson/base16-vim'
-Plug 'NLKNguyen/papercolor-theme'
+" Plug 'NLKNguyen/papercolor-theme'
 Plug 'tomasr/molokai'
+Plug 'zenorocha/dracula-theme', { 'rtp': 'vim/' }
 
 " WRITING ==============================
 " Prose --------------------------------
-" --- distraction-free writing
-Plug 'junegunn/goyo.vim',
+Plug 'junegunn/goyo.vim',               " like writeroom or something
             \ { 'on': 'Goyo' }
-" --- highlight current paragraph
-Plug 'junegunn/limelight.vim',
+Plug 'junegunn/limelight.vim',          " highlight current paragraph
             \ { 'on': 'Limelight' }
+Plug 'xolox/vim-shell'                  " Fullscreen capability
+Plug 'xolox/vim-misc'                   " Required by vim-shell
 
 " Code ---------------------------------
 Plug 'tpope/vim-commentary'             " Easier commmenting
 Plug 'tpope/vim-endwise'                " Auto-add 'end*'s in code
-Plug 'tpope/vim-characterize'           " Modernize `ga` behavior
-Plug 'Yggdroot/indentLine'              " Show | at tab-stops
+" Plug 'tpope/vim-characterize'           " Modernize `ga` behavior
+" Plug 'Yggdroot/indentLine'              " Show | at tab-stops
 
 " NAVIGATING FILESYSTEM ================
 Plug 'ctrlpvim/ctrlp.vim'               " A fuzzy file finder
@@ -739,8 +734,7 @@ if has('python') && v:version >= 704
 endif
 Plug 'dockyard/vim-easydir'             " Create new dirs on-the-fly
 Plug 'tpope/vim-vinegar'                " Better netrw integration
-Plug 'xolox/vim-shell'                  " Integrate ViM and environment
-Plug 'xolox/vim-misc'                   " Required by vim-shell
+Plug 'vim-scripts/gitignore'            " Set 'wildignore' from .gitignore
 
 " EXTENDING VIM OPERATIONS =============
 Plug 'tpope/vim-repeat'                 " Repeat plugin commands with .
@@ -763,31 +757,25 @@ Plug 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
 Plug 'tpope/vim-surround'               " Format surroundings easily
 
 " FILETYPES ============================
-" --- Zencoding for HTML
-Plug 'mattn/emmet-vim',
-            \ { 'for': [ 'html', 'xml', ] }
-" --- Match HTML tags with %
-Plug 'gregsexton/MatchTag',
+" Plug 'mattn/emmet-vim',                " Zencoding for ViM
+"             \ { 'for': [ 'html', 'xml', ] }
+Plug 'gregsexton/MatchTag',             " Match HTML tags with %
             \ { 'for': [ 'html', 'xml', ] }
 
-" --- Pandoc helpers
-Plug 'vim-pandoc/vim-pandoc',
+Plug 'vim-pandoc/vim-pandoc',           " pandoc runtime
             \ { 'for': [ 'pandoc', 'markdown' ] }
-" --- autocorrect w/customization
-Plug 'reedes/vim-litecorrect',
+Plug 'reedes/vim-litecorrect',          " autocorret w/ iabbrev
             \ { 'for': [ 'pandoc', 'markdown', 'text' ] }
-" --- Pandoc section text-objects
-Plug 'gbgar/pandoc-sections.vim',
+Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
             \ { 'for': [ 'pandoc', 'markdown' ] }
-
-" --- Haskell
-Plug 'raichoo/haskell-vim'
-
-" --- Et cetera
-Plug 'vimwiki/vimwiki'                  " Personal wiki with ViM
+" --------------------------------------
+Plug 'duckwork/haskell-vim'             " Haskell runtime
+     " upstream: raichoo/haskell-vim
+" --------------------------------------
+" Plug 'vimwiki/vimwiki'                  " Personal wiki with ViM
 Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt
 
-Plug 'sheerun/vim-polyglot'             " Many syntax defs
+" Plug 'sheerun/vim-polyglot'             " Many syntax defs
 Plug 'hail2u/vim-css3-syntax'           " syntax file for CSS3
 Plug 'dogrover/vim-pentadactyl'         " ftdetect, ftplugin, syntax
 Plug 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
@@ -805,13 +793,13 @@ if executable('ag')                     " Ag implementation
     Plug 'rking/ag.vim'
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
 endif
-if executable('diff')                   " Visualize Vim's undo tree
-    Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
-    nnoremap <F5> :UndotreeToggle<CR>
-elseif has('python')
-    Plug 'vim-scripts/gundo', { 'on': 'GundoToggle' }
-    nnoremap <F5> :GundoToggle<CR>
-endif
+" if executable('diff')                   " Visualize Vim's undo tree
+"     Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
+"     nnoremap <F5> :UndotreeToggle<CR>
+" elseif has('python')
+"     Plug 'vim-scripts/gundo', { 'on': 'GundoToggle' }
+"     nnoremap <F5> :GundoToggle<CR>
+" endif
 
 " DEVELOPMENT ==========================
 " Plug '~/my-plugins/concrastinate'       " Disable editing files when working
@@ -819,19 +807,19 @@ endif
 call plug#end()                         " req'd
 "}}}
 " Plugin settings {{{
-" Ag
+" Ag ------------------------------------------------------
 let g:agprg = 'ag --column --smart-case'
 let g:aghighlight = 1 " highlight searches
 " Buftabline
-let g:buftabline_show = 1 " only show if at least 2 buffers
-let g:buftabline_numbers = 1 " show buffer numbers in list
-let g:buftabline_indicators = 1 " show if buffers are modified
+" let g:buftabline_show = 1 " only show if at least 2 buffers
+" let g:buftabline_numbers = 1 " show buffer numbers in list
+" let g:buftabline_indicators = 1 " show if buffers are modified
 " Colorscheme Pencil
-let g:pencil_spell_undercurl = 1
-" Clever-f
+" let g:pencil_spell_undercurl = 1
+" Clever-f ------------------------------------------------
 let g:clever_f_smart_case = 1
 let g:clever_f_chars_match_any_signs = ';'
-" Ctrl-P
+" Ctrl-P --------------------------------------------------
 let g:ctrlp_map = 'gf'
 let g:ctrlp_use_caching = 1
 let g:ctrlp_clear_cache_on_exit = 0
@@ -845,23 +833,23 @@ let g:ctrlp_status_func = {
             \ 'main': 'CtrlPStatusLine',
             \ 'prog': 'CtrlPProgressLine'
             \ }
-" EasyMotion
+" EasyMotion ----------------------------------------------
 " let g:EasyMotion_do_mapping       = 0 " disable default mappings
 " let g:EasyMotion_prompt           = '{n}/>> ' " prompt
 " let g:EasyMotion_keys             = 'asdfghjkl;qwertyuiopzxcvbnm' " hints
 " let g:EasyMotion_smartcase        = 1 " case-insensitive searches
 " let g:EasyMotion_use_smartsign_us = 1 " shift-insensitive number row
 " let g:EasyMotion_enter_jump_first = 1 " <CR> jumps to first hint
-" Emmet
-let g:user_emmet_leader_key = '<C-e>'
-" Goyo
+" Emmet ---------------------------------------------------
+" let g:user_emmet_leader_key = '<C-e>'
+" Goyo ----------------------------------------------------
 let g:goyo_width         = g:tw + 1
 let g:goyo_margin_top    = 2
 let g:goyo_margin_bottom = g:goyo_margin_top
-" Gundo
-let g:gundo_preview_bottom = 1 " show preview below all windows
-let g:gundo_auto_preview   = 1 " default; toggle to speed up Gundo
-" Pandoc
+" Gundo ---------------------------------------------------
+" let g:gundo_preview_bottom = 1 " show preview below all windows
+" let g:gundo_auto_preview   = 1 " default; toggle to speed up Gundo
+" Pandoc --------------------------------------------------
 let g:pandoc#modules#disabled = [ 'menu' ] " Get rid of Pandoc menu
 let g:pandoc#command#custom_open = "PandocOpen" " function defined below
 let g:pandoc#filetypes#handled = [ 'markdown', 'rst', 'textile', ]
@@ -896,22 +884,22 @@ let g:pandoc#syntax#conceal#urls = 0
 "                     \ 'quotes',
 "             \ ]
 " --- And override the characters that are used thusly:
-" Solarized
-let g:solarized_menu = 0
-" Splitjoin
+" Solarized -----------------------------------------------
+" let g:solarized_menu = 0
+" Splitjoin -----------------------------------------------
 let g:splitjoin_split_mapping = 'gK'
-" Undotree
-let g:undotree_WindowLayout = 2
-let g:undotree_DiffAutoOpen = 1
-let g:undotree_SetFocusWhenToggle = 1
+" Undotree ------------------------------------------------
+" let g:undotree_WindowLayout = 2
+" let g:undotree_DiffAutoOpen = 1
+" let g:undotree_SetFocusWhenToggle = 1
 " Vim-Plug
-" let g:plug_url_format = 'https://github.com/%s.git'
+let g:plug_url_format = 'https://github.com/%s.git'
 " Vim-shell
 let g:shell_mappings_enabled   = 0 " disable default mappings
 let g:shell_fullscreen_message = 0 " don't help me to get out of fullscreen
 " Vimwiki
-let g:vimwiki_hl_headers = 0 " enable different colored headers
-let g:vimwiki_hl_cb_checked = 1 " hilight [X] with Comment
+" let g:vimwiki_hl_headers = 0 " enable different colored headers
+" let g:vimwiki_hl_cb_checked = 1 " hilight [X] with Comment
 " }}}
 " Plugin keymaps {{{
 let maplocalleader = ',' " same as leader for now.
@@ -954,7 +942,7 @@ nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit', "i\r")<CR>
 " onoremap <Leader>T T
 
 " Disable pandoc#formatting#autoformat
-nnoremap <F3> :call pandoc#formatting#ToggleAutoformat()<CR>
+nnoremap <F4> :call pandoc#formatting#ToggleAutoformat()<CR>
              \:echo b:pandoc_autoformat_enabled ?
              \ "Autoformat enabled" :
              \ "Autoformat disabled"<CR>
@@ -964,6 +952,9 @@ nnoremap <C-UP> :ObviousResizeUp<CR>
 nnoremap <C-DOWN> :ObviousResizeDown<CR>
 nnoremap <C-LEFT> :ObviousResizeLeft<CR>
 nnoremap <C-RIGHT> :ObviousResizeRight<CR>
+
+" fugitive mappings
+nnoremap <F3> :Gstatus<CR>
 "}}}
 " Plugin functions {{{
 function! CtrlPStatusLine(...) " {{{
@@ -1038,7 +1029,7 @@ endif
 
 if has('win32')
     let g:ctrlp_mruf_case_sensitive = 0
-    let g:ctrlp_cmd = 'CtrlP D:\Dropbox'
+    let g:ctrlp_cmd = 'CtrlP D:\Copy'
 endif
 " }}}
 "}}}
@@ -1046,7 +1037,8 @@ endif
 " colorscheme solarized
 " colorscheme pencil
 if has('win32')
-    colorscheme molokai
+    " colorscheme molokai
+    colorscheme Dracula
 else
     colorscheme base16-atelierforest
 endif
