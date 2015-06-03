@@ -71,6 +71,7 @@ set sidescroll=1                    " Scroll one column at a time sideways
 
 let g:tw = 78                       " Set textwidth without really setting tw
 " let &textwidth = g:tw             " Set textwidth
+let &winwidth = g:tw + 1           " Set width of focused window
 set wrap                            " Soft wrap lines to window
 if has('linebreak')
     set linebreak                   " Wrap at words (def by 'breakat')
@@ -678,6 +679,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'chriskempson/base16-vim'
 Plug 'tomasr/molokai'
 Plug 'zenorocha/dracula-theme', { 'rtp': 'vim/' }
+Plug 'romainl/Apprentice'
 
 " WRITING ==============================
 " Prose --------------------------------
@@ -856,7 +858,7 @@ nnoremap <C-LEFT> :ObviousResizeLeft<CR>
 nnoremap <C-RIGHT> :ObviousResizeRight<CR>
 
 " fugitive mappings
-nnoremap <F3> :Gstatus<CR>
+nnoremap <F3> :w<CR>:Gstatus<CR>
 "}}}
 " Plugin functions {{{
 function! CtrlPStatusLine(...) " {{{
@@ -938,7 +940,8 @@ endif
 
 if has('win32')
     " colorscheme molokai
-    colorscheme Dracula
+    " colorscheme Dracula
+    colorscheme apprentice
 else
     colorscheme base16-atelierforest
 endif
