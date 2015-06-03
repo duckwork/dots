@@ -62,8 +62,6 @@ set shm     +=tT                    " truncate msgs in [c] mode
 set shm     +=I                     " don't give intro msg on vim start
 
 set foldenable                      " Enable folding
-" set foldmethod=marker               " {{{ }}} mark folds
-" set foldlevel=2                     " Start open to second level
 set foldcolumn=0                    " Fold columns in gutter
 set foldtext=FoldLine()             " Define what folded folds look like
 
@@ -133,8 +131,7 @@ let g:is_bash = 1                   " I almost always program in bash
 noremap ; :
 inoremap jj <Esc>
 inoremap kk <Esc>
-" Better leader
-let mapleader = ','
+let mapleader = ','                 " Better leader
 
 " Better movement
 nnoremap <expr> j v:count > 0 ? 'j' : 'gj'
@@ -146,7 +143,6 @@ nnoremap zT :call RealScrollTo('top')<CR>
 nnoremap zB :call RealScrollTo('bot')<CR>
 
 " Better folding
-" TODO: make <Space> page down when not on a fold
 nnoremap <Space> za
 xnoremap <Space> za
 nnoremap <S-Space> zA
@@ -171,10 +167,10 @@ nnoremap gs :%s/
 xnoremap gs :s/
 
 " Window management
-nnoremap <C-k> <C-w>k
-nnoremap <C-j> <C-w>j
-nnoremap <C-h> <C-w>h
-nnoremap <C-l> <C-w>l
+nnoremap <C-k>     <C-w>k
+nnoremap <C-j>     <C-w>j
+nnoremap <C-h>     <C-w>h
+nnoremap <C-l>     <C-w>l
 nnoremap <S-UP>    <C-w>K
 nnoremap <S-DOWN>  <C-w>J
 nnoremap <S-LEFT>  <C-w>H
@@ -220,7 +216,6 @@ cmap w!! %!sudo tee > /dev/null %
 
 " Fix line endings to Unix b/c why not
 nnoremap <F9> :update<CR>:e ++ff=dos<CR>:setlocal ff=unix<CR>:w<CR>
-nnoremap <F8> :call Typewriter('tog')<CR>
 "}}}
 " COMMANDS {{{
 " }}}
@@ -292,20 +287,6 @@ augroup ft_netrw
     au!
     au FileType netrw nnoremap <buffer> <Esc> :bd!<CR>
 augroup END
-
-" augroup Status_ft
-"     au!
-"     au FileType text,markdown,pandoc    let w:ftpart = '“ %%<%s ”' |
-"                 \                       let w:ftshow = 0
-"     au FileType html,css,javascript,php let w:ftpart = '< %%<%s >' |
-"                 \                       let w:ftshow = 0
-"     au FileType *wiki                   let w:ftpart = '= %%<%s =' |
-"                 \                       let w:ftshow = 0
-"     au FileType help                    let w:ftpart = '| %%<%s |' |
-"                 \                       let w:ftshow = 0
-"     au FileType *sh                     let w:ftpart = '[ %%<%s ]' |
-"                 \                       let w:ftshow = 0
-" augroup END
 " }}}
 "}}}
 " CAN I HAS(?) {{{
@@ -572,11 +553,6 @@ endfunction " }}}
 function! TabLine() " {{{
 endfunction " }}}
 " Custom theming =============================================================
-" function! UpdateCursorLineNumber() " {{{
-"     if &bg == 'dark'
-"         hi CursorLineNr guifg=#6c71c4 gui=bold
-"     endif
-" endfunction " }}}
 function! Typewriter(switch) " {{{
     function! s:typewriter_on()
         " let s:wrap = &wrap
@@ -699,16 +675,7 @@ endif " }}}
 call plug#begin('~/.vim/plugged')
 
 " GUI ==================================
-" Plug 'duckwork/vim-buftabline'          " show vim buffers in tabline
-"      " upstream: ap/vim-buftabline
-" Plug 'talek/obvious-resize'             " Resize windows 'obviously'
-" Plug 'gcavallanti/vim-noscrollbar'      " Graphical scrollbar in stl
-" Colors -------------------------------
-" Plug 'duckwork/vim-colors-pencil'
-     " upstream: reedes/vim-colors-pencil
-" Plug 'altercation/vim-colors-solarized'
 Plug 'chriskempson/base16-vim'
-" Plug 'NLKNguyen/papercolor-theme'
 Plug 'tomasr/molokai'
 Plug 'zenorocha/dracula-theme', { 'rtp': 'vim/' }
 
@@ -724,8 +691,6 @@ Plug 'xolox/vim-misc'                   " Required by vim-shell
 " Code ---------------------------------
 Plug 'tpope/vim-commentary'             " Easier commmenting
 Plug 'tpope/vim-endwise'                " Auto-add 'end*'s in code
-" Plug 'tpope/vim-characterize'           " Modernize `ga` behavior
-" Plug 'Yggdroot/indentLine'              " Show | at tab-stops
 
 " NAVIGATING FILESYSTEM ================
 Plug 'ctrlpvim/ctrlp.vim'               " A fuzzy file finder
@@ -744,21 +709,17 @@ Plug 'nelstrom/vim-visual-star-search'  " Use * or # from V-Block
 Plug 'tpope/vim-abolish'
 " Formatting ---------------------------
 " --- Easy aligning of text
-Plug 'godlygeek/tabular'
-" Plug 'junegunn/vim-easy-align'          " Vim alignment plugin
+Plug 'godlygeek/tabular'                " Align lines on regexes
 Plug 'AndrewRadev/splitjoin.vim'        " Easily split and join code
 Plug 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
 Plug 'tommcdo/vim-exchange'             " Easy text exchange operator
 " Textobjects --------------------------
-" Plug 'Lokaltog/vim-easymotion'          " No more counting objects
 Plug 'rhysd/clever-f.vim'               " repeat fs with f
 Plug 'wellle/targets.vim'               " Lots of new textobjects
 Plug 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
 Plug 'tpope/vim-surround'               " Format surroundings easily
 
 " FILETYPES ============================
-" Plug 'mattn/emmet-vim',                " Zencoding for ViM
-"             \ { 'for': [ 'html', 'xml', ] }
 Plug 'gregsexton/MatchTag',             " Match HTML tags with %
             \ { 'for': [ 'html', 'xml', ] }
 
@@ -772,10 +733,8 @@ Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
 Plug 'duckwork/haskell-vim'             " Haskell runtime
      " upstream: raichoo/haskell-vim
 " --------------------------------------
-" Plug 'vimwiki/vimwiki'                  " Personal wiki with ViM
 Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt
 
-" Plug 'sheerun/vim-polyglot'             " Many syntax defs
 Plug 'hail2u/vim-css3-syntax'           " syntax file for CSS3
 Plug 'dogrover/vim-pentadactyl'         " ftdetect, ftplugin, syntax
 Plug 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
@@ -793,16 +752,8 @@ if executable('ag')                     " Ag implementation
     Plug 'rking/ag.vim'
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
 endif
-" if executable('diff')                   " Visualize Vim's undo tree
-"     Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
-"     nnoremap <F5> :UndotreeToggle<CR>
-" elseif has('python')
-"     Plug 'vim-scripts/gundo', { 'on': 'GundoToggle' }
-"     nnoremap <F5> :GundoToggle<CR>
-" endif
 
 " DEVELOPMENT ==========================
-" Plug '~/my-plugins/concrastinate'       " Disable editing files when working
 
 call plug#end()                         " req'd
 "}}}
@@ -810,12 +761,6 @@ call plug#end()                         " req'd
 " Ag ------------------------------------------------------
 let g:agprg = 'ag --column --smart-case'
 let g:aghighlight = 1 " highlight searches
-" Buftabline
-" let g:buftabline_show = 1 " only show if at least 2 buffers
-" let g:buftabline_numbers = 1 " show buffer numbers in list
-" let g:buftabline_indicators = 1 " show if buffers are modified
-" Colorscheme Pencil
-" let g:pencil_spell_undercurl = 1
 " Clever-f ------------------------------------------------
 let g:clever_f_smart_case = 1
 let g:clever_f_chars_match_any_signs = ';'
@@ -833,22 +778,10 @@ let g:ctrlp_status_func = {
             \ 'main': 'CtrlPStatusLine',
             \ 'prog': 'CtrlPProgressLine'
             \ }
-" EasyMotion ----------------------------------------------
-" let g:EasyMotion_do_mapping       = 0 " disable default mappings
-" let g:EasyMotion_prompt           = '{n}/>> ' " prompt
-" let g:EasyMotion_keys             = 'asdfghjkl;qwertyuiopzxcvbnm' " hints
-" let g:EasyMotion_smartcase        = 1 " case-insensitive searches
-" let g:EasyMotion_use_smartsign_us = 1 " shift-insensitive number row
-" let g:EasyMotion_enter_jump_first = 1 " <CR> jumps to first hint
-" Emmet ---------------------------------------------------
-" let g:user_emmet_leader_key = '<C-e>'
 " Goyo ----------------------------------------------------
 let g:goyo_width         = g:tw + 1
 let g:goyo_margin_top    = 2
 let g:goyo_margin_bottom = g:goyo_margin_top
-" Gundo ---------------------------------------------------
-" let g:gundo_preview_bottom = 1 " show preview below all windows
-" let g:gundo_auto_preview   = 1 " default; toggle to speed up Gundo
 " Pandoc --------------------------------------------------
 let g:pandoc#modules#disabled = [ 'menu' ] " Get rid of Pandoc menu
 let g:pandoc#command#custom_open = "PandocOpen" " function defined below
@@ -884,22 +817,13 @@ let g:pandoc#syntax#conceal#urls = 0
 "                     \ 'quotes',
 "             \ ]
 " --- And override the characters that are used thusly:
-" Solarized -----------------------------------------------
-" let g:solarized_menu = 0
 " Splitjoin -----------------------------------------------
 let g:splitjoin_split_mapping = 'gK'
-" Undotree ------------------------------------------------
-" let g:undotree_WindowLayout = 2
-" let g:undotree_DiffAutoOpen = 1
-" let g:undotree_SetFocusWhenToggle = 1
 " Vim-Plug
 let g:plug_url_format = 'https://github.com/%s.git'
 " Vim-shell
 let g:shell_mappings_enabled   = 0 " disable default mappings
 let g:shell_fullscreen_message = 0 " don't help me to get out of fullscreen
-" Vimwiki
-" let g:vimwiki_hl_headers = 0 " enable different colored headers
-" let g:vimwiki_hl_cb_checked = 1 " hilight [X] with Comment
 " }}}
 " Plugin keymaps {{{
 let maplocalleader = ',' " same as leader for now.
@@ -918,28 +842,6 @@ xnoremap gS :S/
 " J/K intelligently SplitJoin.vim or fallback to default
 nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin', 'J')<CR>
 nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit', "i\r")<CR>
-
-" remap motion maps !
-" nmap f <Plug>(easymotion-sl)
-" nmap t <Plug>(easymotion-bd-tl)
-" omap f <Plug>(easymotion-sl)
-" omap t <Plug>(easymotion-bd-tl)
-" nmap F <Plug>(easymotion-s)
-" nmap T <Plug>(easymotion-bd-t)
-" omap F <Plug>(easymotion-s)
-" omap T <Plug>(easymotion-bd-t)
-" nmap <Leader>; <Plug>(easymotion-next)
-" nmap <Leader>, <Plug>(easymotion-prev)
-
-" map default motion maps to <Leader>map, for use in macros, etc.
-" nnoremap <Leader>f f
-" nnoremap <Leader>t t
-" onoremap <Leader>f f
-" onoremap <Leader>t t
-" nnoremap <Leader>F F
-" nnoremap <Leader>T T
-" onoremap <Leader>F F
-" onoremap <Leader>T T
 
 " Disable pandoc#formatting#autoformat
 nnoremap <F4> :call pandoc#formatting#ToggleAutoformat()<CR>
@@ -1034,8 +936,6 @@ endif
 " }}}
 "}}}
 
-" colorscheme solarized
-" colorscheme pencil
 if has('win32')
     " colorscheme molokai
     colorscheme Dracula
