@@ -680,6 +680,7 @@ Plug 'chriskempson/base16-vim'
 Plug 'tomasr/molokai'
 Plug 'zenorocha/dracula-theme', { 'rtp': 'vim/' }
 Plug 'romainl/Apprentice'
+Plug 'NLKNguyen/papercolor-theme'
 
 " WRITING ==============================
 " Prose --------------------------------
@@ -711,7 +712,8 @@ Plug 'nelstrom/vim-visual-star-search'  " Use * or # from V-Block
 Plug 'tpope/vim-abolish'
 " Formatting ---------------------------
 " --- Easy aligning of text
-Plug 'godlygeek/tabular'                " Align lines on regexes
+" Plug 'godlygeek/tabular'                " Align lines on regexes
+Plug 'junegunn/vim-easy-align'
 Plug 'AndrewRadev/splitjoin.vim'        " Easily split and join code
 Plug 'tpope/vim-speeddating'            " <C-a>,<C-x> on dates and times
 Plug 'tommcdo/vim-exchange'             " Easy text exchange operator
@@ -734,11 +736,14 @@ Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
 " --------------------------------------
 Plug 'duckwork/haskell-vim'             " Haskell runtime
      " upstream: raichoo/haskell-vim
+Plug 'Twinside/vim-hoogle'              " Search Hoogle from Vim
 " --------------------------------------
 Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt
 
 Plug 'hail2u/vim-css3-syntax'           " syntax file for CSS3
+Plug 'othree/html5.vim'                 " Omnicomplete + syntax
 Plug 'dogrover/vim-pentadactyl'         " ftdetect, ftplugin, syntax
+
 Plug 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
 
 Plug 'vim-scripts/matchit.zip'          " Better matchit plugin
@@ -833,7 +838,9 @@ let maplocalleader = ',' " same as leader for now.
 nnoremap <F11> :Goyo<CR>
 nnoremap <S-F11> :Fullscreen<CR>
 
-xnoremap \| :Tabularize /
+" xnoremap \| :Tabularize /
+vmap <Enter> <Plug>(EasyAlign)
+nmap ga <Plug>(EasyAlign)
 
 nnoremap gf :CtrlP<CR>
 nnoremap go :CtrlPMRU<CR>
