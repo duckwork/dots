@@ -740,6 +740,7 @@ Plug 'dogrover/vim-pentadactyl'         " ftdetect, ftplugin, syntax
 Plug 'vim-pandoc/vim-pandoc-syntax'     " Pandoc syntax
 
 Plug 'vim-scripts/matchit.zip'          " Better matchit plugin
+Plug 'LnL7/vim-nix'                     " Nix expression syntax
 
 " PLUGINS THAT REQUIRE THINGS ==========
 if executable('git')
@@ -752,8 +753,6 @@ if executable('ag')                     " Ag implementation
     Plug 'rking/ag.vim'
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
 endif
-
-" DEVELOPMENT ==========================
 
 call plug#end()                         " req'd
 "}}}
