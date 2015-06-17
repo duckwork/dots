@@ -949,5 +949,6 @@ if has('win32')
     " colorscheme Dracula
     colorscheme apprentice
 else
-    colorscheme base16-twilight
+    colorscheme apprentice
+    set bg=dark
 endif
