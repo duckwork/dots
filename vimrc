@@ -944,11 +944,5 @@ endif
 " }}}
 "}}}
 
-if has('win32')
-    " colorscheme molokai
-    " colorscheme Dracula
-    colorscheme apprentice
-else
-    colorscheme apprentice
-    set bg=dark
-endif
+colorscheme apprentice
+set bg=dark
