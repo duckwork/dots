@@ -1,9 +1,9 @@
 import XMonad
 import XMonad.Actions.WindowBringer
 import XMonad.Actions.DwmPromote
--- import XMonad.Actions.Search
 -- import XMonad.Actions.UpdatePointer
 -- import XMonad.Actions.WindowGo
+-- import XMonad.Actions.Search
 
 -- import XMonad.Layout.WindowArranger
 -- import XMonad.Layout.WindowNavigation
@@ -13,6 +13,11 @@ import XMonad.Layout.Grid
 -- import XMonad.Layout.MouseResizableTile
 
 import XMonad.Hooks.DynamicLog
+
+-- import XMonad.Prompt
+-- import XMonad.Prompt.AppendFile
+-- import XMonad.Prompt.RunOrRaise
+-- import XMonad.Prompt.Window
 
 import Data.Monoid
 import System.Exit
@@ -32,6 +37,7 @@ main = xmonad =<< xmobar myConfig
        , focusedBorderColor = "#ff8700"
        , keys               = myKeys
        , layoutHook         = myLayout
+       , manageHook         = myManageHook
        }
 
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
@@ -75,3 +81,9 @@ myLayout = tiled ||| Mirror tiled ||| simpleTabbed ||| Accordion ||| Grid
       nmaster = 1
       ratio   = 0.61
       delta   = 1/50
+
+myManageHook = composeAll
+    [ className =? "MPlayer"    --> doFloat
+    , className =? "Gimp"       --> doFloat
+    , resource  =? "desktop_window" --> doIgnore
+    ]
