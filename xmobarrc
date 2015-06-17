@@ -1,0 +1,17 @@
+-- vim: ft=haskell
+Config {
+       -- appearance
+         bgColor = "#272727"
+       , fgColor = "#ffffff"
+       , position = Top
+       , border = BottomB
+       , borderColor = "#646464"
+       -- layout
+       , sepChar = "%"
+       , alignSep = "}{"
+       , template = "%StdinReader%}%date%{"
+          commands = [
+                      Run StdinReader
+                    , Run Date "%H:%M" "date" 30
+                    ]
+       }

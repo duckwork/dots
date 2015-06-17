@@ -1,8 +1,17 @@
 import XMonad
 import XMonad.Actions.WindowBringer
 import XMonad.Actions.DwmPromote
+-- import XMonad.Actions.Search
+-- import XMonad.Actions.UpdatePointer
+-- import XMonad.Actions.WindowGo
+
+-- import XMonad.Layout.WindowArranger
+-- import XMonad.Layout.WindowNavigation
 import XMonad.Layout.Tabbed
 import XMonad.Layout.Accordion
+import XMonad.Layout.Grid
+-- import XMonad.Layout.MouseResizableTile
+
 import XMonad.Hooks.DynamicLog
 
 import Data.Monoid
@@ -60,9 +69,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
         , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]
     ]
 
-myLayout = tiled ||| Mirror tiled ||| simpleTabbed ||| Accordion
+myLayout = tiled ||| Mirror tiled ||| simpleTabbed ||| Accordion ||| Grid
   where
       tiled = Tall nmaster delta ratio
       nmaster = 1
-      ratio   = 2/3
+      ratio   = 0.61
       delta   = 1/50
