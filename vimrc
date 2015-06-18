@@ -124,6 +124,8 @@ set confirm                         " Confirm before quit, instead of error
 
 set undolevels=10000                " Max changes that can be undone
 
+set wildignore+=*/.git/*,*/.hg/*,*/.svn/*
+
 let g:is_bash = 1                   " I almost always program in bash
 "}}}
 " KEYMAPS {{{
@@ -764,7 +766,7 @@ if executable('stylish-haskell')
     Plug 'nbouscal/vim-stylish-haskell'
 endif
 if executable('ghc-mod') && ! has('win32')
-    Plug 'Shougo/vimproc.vim'
+    Plug 'Shougo/vimproc.vim', { 'do': 'make' }
     Plug 'eagletmt/ghcmod-vim'
 endif
 
@@ -790,6 +792,9 @@ let g:ctrlp_extensions = [ 'dir', 'line', 'mixed' ]
 let g:ctrlp_status_func = {
             \ 'main': 'CtrlPStatusLine',
             \ 'prog': 'CtrlPProgressLine'
+            \ }
+let g:ctrlp_customignore = {
+            \ 'dir': '\/var\/tmp$',
             \ }
 " Goyo ----------------------------------------------------
 let g:goyo_width         = g:tw + 1
