@@ -760,6 +760,13 @@ if executable('ag')                     " Ag implementation
     Plug 'rking/ag.vim'
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
 endif
+if executable('stylish-haskell')
+    Plug 'nbouscal/vim-stylish-haskell'
+endif
+if executable('ghc-mod') && ! has('win32')
+    Plug 'Shougo/vimproc.vim'
+    Plug 'eagletmt/ghcmod-vim'
+endif
 
 call plug#end()                         " req'd
 "}}}
