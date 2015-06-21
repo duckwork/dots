@@ -9,9 +9,10 @@ Config {
        -- layout
        , sepChar = "%"
        , alignSep = "}{"
-       , template = "%StdinReader%}%date%{"
-          commands = [
-                      Run StdinReader
-                    , Run Date "%H:%M" "date" 30
-                    ]
+       , template = "%StdinReader%}%date%{%KFLG%"
+          commands = [ Run Date "%H:%M" "date" 30
+                     , Run Weather "KFLG" [] 3600
+                     -- ^ TODO : fix formatting, dog
+                     , Run StdinReader
+                     ]
        }
