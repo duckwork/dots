@@ -35,5 +35,7 @@ vim +PlugInstall +qall
 doLink "tmux.conf" "$HOME/.tmux.conf";
 
 doLink "xmonad.hs" "$HOME/.xmonad/xmonad.hs";
+doLink "xmobarrc"  "$HOME/.xmobarrc";
+doLink "ghci"      "$HOME/.ghci";
 
 # TODO: /etc/nixos/configuration.nix
