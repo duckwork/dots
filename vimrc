@@ -739,7 +739,7 @@ Plug 'reedes/vim-litecorrect',          " autocorret w/ iabbrev
 Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
             \ { 'for': [ 'pandoc', 'markdown' ] }
 " --------------------------------------
-Plug 'duckwork/haskell-vim'             " Haskell runtime
+Plug 'duckwork/haskell-vim'             " Haskell syntax files
      " upstream: raichoo/haskell-vim
 Plug 'Twinside/vim-hoogle'              " Search Hoogle from Vim
 " --------------------------------------
@@ -766,11 +766,15 @@ if executable('ag')                     " Ag implementation
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
 endif
 if executable('stylish-haskell')
-    Plug 'nbouscal/vim-stylish-haskell'
+    Plug 'nbouscal/vim-stylish-haskell' " Autoformatting for prettiness
 endif
 if executable('ghc-mod') && ! has('win32')
-    Plug 'Shougo/vimproc.vim', { 'do': 'make' }
-    Plug 'eagletmt/ghcmod-vim'
+    Plug 'Shougo/vimproc.vim',          " Run outside process asynchronously
+                \ { 'do': 'make' }
+    Plug 'eagletmt/ghcmod-vim'          " Inline GHC-mod capabilities
+endif
+if ! has('win32')
+    Plug 'tpope/vim-eunuch'             " Vim sugar for Unix shell commands
 endif
 
 call plug#end()                         " req'd
