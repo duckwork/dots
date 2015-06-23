@@ -3,7 +3,6 @@
 " vim:tw=0:nowrap:nolbr:fdm=marker
 
 set nocompatible                    " be iMproved
-set term=xterm-256color
 
 " SETTINGS {{{
 syntax on                           " syntax highlighting
@@ -298,7 +297,6 @@ if has('win32') " {{{
     let &runtimepath .= ',$HOME\.vim'
     let &clipboard = has('unnamedplus') ? 'unnamedplus' : 'unnamed'
     set viminfo+=rA:,rB:
-    set term=win32
 
     nnoremap <silent> <F10> :simalt ~n<CR>
 endif " }}}
@@ -316,7 +314,6 @@ if has('gui_running') " {{{
 
     " Set colors to 256
     set t_Co=256
-    set term=builtin_gui
 
     " Change font based on system
     if has('gui_gtk2')
@@ -341,6 +338,9 @@ if has('persistent_undo') "{{{
     set undofile
     set undoreload=10000
 endif "}}}
+if ! has('win32') && ! has('gui_running') " {{{
+    set term=xterm-256color
+endif " }}}
 " Create .vim/* directories if they don't exist {{{
 for directory in [
             \ &directory,
