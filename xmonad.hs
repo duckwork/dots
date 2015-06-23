@@ -171,11 +171,11 @@ myPP = defaultPP
            , ppTitle           = xmobarColor green' myBg . shorten 40
              -- ^ add `. ('}':)` when you figure out the xmobar escaping thing
            , ppLayout          = \s -> xmobarColor yellow "" $
-                                 case x of -- TODO; use regexes?
-                                   "SmartSpacing 2 Tall"          -> "Ã"
-                                   "Mirror SmartSpacing 2 Tall"   -> "Â"
-                                   "SmartSpacing 2 Grid"          -> "Å"
-                                   "Mirror SmartSpacing 2 Grid"   -> "º"
+                                 case s of -- TODO; use regexes?
+                                   "SmartSpacing 2 Tall"          -> "|"
+                                   "Mirror SmartSpacing 2 Tall"   -> "-,"
+                                   "SmartSpacing 2 Grid"          -> "+"
+                                   "Mirror SmartSpacing 2 Grid"   -> "="
                                    "SmartSpacing 2 Spiral"        -> "@"
                                    "Mirror SmartSpacing 2 Spiral" -> "e"
                                    "Tabbed Simplest"              -> "t"
