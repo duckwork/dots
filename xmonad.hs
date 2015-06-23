@@ -46,8 +46,7 @@ myConfig = defaultConfig {
        , manageHook         = myManageHook
        }
 
-toggleStrutsKey XConfig {XMonad.modMask = modm}
-    = (modm, xK_b)
+toggleStrutsKey XConfig {XMonad.modMask = modm} = (modm, xK_b)
 
 ezKeys = \c -> mkKeymap c $
     [ ("M-<Return>",   spawn $ terminal c)
@@ -94,16 +93,18 @@ myLayout = id
          . windowNavigation
          $
          (mkToggle (single MIRROR) . smartSpacing 2)
-            ( tiled ||| Grid ||| spiral (6/7) )
+            ( myTall ||| Grid ||| mySpiral )
          ||| tabbed shrinkText myTabConfig
-  where tiled = Tall nmaster delta ratio
+  where myTall = Tall nmaster delta ratio
         nmaster = 1
         ratio   = 1/2
         delta   = 1/50
+        mySpiral = spiral (6/7)
 
 myManageHook = composeAll
-    [ className =? "MPlayer"    --> doFloat
-    , className =? "Gimp"       --> doFloat
+    [
+      className =? "MPlayer"        --> doFloat
+    , className =? "Gimp"           --> doFloat
     , resource  =? "desktop_window" --> doIgnore
     ]
 
@@ -130,57 +131,57 @@ white'   = "#ffffff"
 
 myXPConfig = defaultXPConfig
            {
-             position    = Top
-           , bgColor     = myBg
-           , fgColor     = myFg
-           , borderColor = myBg
-           , fgHLight    = black
-           , bgHLight    = green'
+             position        = Top
+           , bgColor         = myBg
+           , fgColor         = myFg
+           , borderColor     = myBg
+           , fgHLight        = black
+           , bgHLight        = green'
            , alwaysHighlight = True
-           , historySize = 10000
-           , height      = 12
+           , historySize     = 10000
+           , height          = 12
            , searchPredicate = isInfixOf
            }
 
 myTabConfig = defaultTheme
             {
-              activeColor = myBg
-            , inactiveColor = black
-            , activeBorderColor = myBg
+              activeColor         = myBg
+            , inactiveColor       = black
+            , activeBorderColor   = myBg
             , inactiveBorderColor = black'
-            , activeTextColor = red'
-            , inactiveTextColor = black'
-            , urgentColor = red
-            , urgentBorderColor = red'
-            , urgentTextColor = white'
-            , decoHeight = 14
+            , activeTextColor     = red'
+            , inactiveTextColor   = black'
+            , urgentColor         = red
+            , urgentBorderColor   = red'
+            , urgentTextColor     = white'
+            , decoHeight          = 14
             }
 
 myBar = "xmobar"
 
 myPP = defaultPP
            {
-             ppCurrent = xmobarColor red' myBg
-           , ppVisible = xmobarColor cyan myBg
-           , ppHidden  = id
+             ppCurrent         = xmobarColor red' myBg
+           , ppVisible         = xmobarColor cyan myBg
+           , ppHidden          = id
            , ppHiddenNoWindows = const "_"
-           , ppUrgent = xmobarColor "red" "yellow" . wrap "!" "!"
-           , ppSep = " | "
-           , ppWsSep = ""
-           , ppTitle = xmobarColor green' myBg . shorten 40
+           , ppUrgent          = xmobarColor "red" "yellow" . wrap "!" "!"
+           , ppSep             = " | "
+           , ppWsSep           = ""
+           , ppTitle           = xmobarColor green' myBg . shorten 40
              -- ^ add `. ('}':)` when you figure out the xmobar escaping thing
-           , ppLayout = xmobarColor yellow "" .
-                (\x -> case x of -- TODO; use regexes?
-                        "SmartSpacing 2 Tall" -> "â”œ"
-                        "Mirror SmartSpacing 2 Tall" -> "â”¬"
-                        "SmartSpacing 2 Grid" -> "â”¼"
-                        "Mirror SmartSpacing 2 Grid" -> "â•‘"
-                        "SmartSpacing 2 Spiral" -> "@"
-                        "Mirror SmartSpacing 2 Spiral" -> "e"
-                        "Tabbed Simplest" -> "t"
-                        "Full" -> "_"
-                )
-           , ppOrder  = id
-           , ppExtras = []
+           , ppLayout          = \s -> xmobarColor yellow "" $
+                                 case x of -- TODO; use regexes?
+                                   "SmartSpacing 2 Tall"          -> "Ã"
+                                   "Mirror SmartSpacing 2 Tall"   -> "Â"
+                                   "SmartSpacing 2 Grid"          -> "Å"
+                                   "Mirror SmartSpacing 2 Grid"   -> "º"
+                                   "SmartSpacing 2 Spiral"        -> "@"
+                                   "Mirror SmartSpacing 2 Spiral" -> "e"
+                                   "Tabbed Simplest"              -> "t"
+                                   "Full"                         -> "_"
+                                   _                              -> s
+           , ppOrder           = id
+           , ppExtras          = []
            -- , ppOutput = hPutStrLn h
            }
