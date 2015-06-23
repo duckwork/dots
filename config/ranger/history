@@ -1,0 +1,9 @@
+rename wallpaper.jpg
+
+delete
+ext
+open_with 
+open_with tar -xvf
+rename config
+rename .config
+delete 
