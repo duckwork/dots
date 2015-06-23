@@ -1,0 +1,15 @@
+[Dd]ownloads/*
+dl/*
+AppData/*
+*.gz
+*.dll
+*.zip
+*.exe
+[Tt]humbs.db
+[Pp]ictures/*
+img/*
+.thumbnails/*
+[Mm]usic/*
+[Vv]ideos/*
+VirtualBox\ VMs/*
+COMMIT_EDITMSG

@@ -21,6 +21,14 @@ doLink() {
     fi
     ln -s $myCopy $sysCopy;
 }
+msgInstall() {
+    if [[ -z $(which $1) ]]; then
+        echo "Be sure to install `$1`!"
+        return 1
+    else
+        return 0
+    fi
+}
 
 # vimrc
 doLink "vimrc" "$HOME/.vimrc";
@@ -30,12 +38,19 @@ if [[ ! -f $HOME/.vim/autoload/plug.vim ]]; then
     curl -fLo $HOME/.vim/autoload/plug.vim \
         "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim";
 fi
-vim +PlugInstall +qall
+msgInstall "vim" && vim +PlugInstall +qall
 
 doLink "tmux.conf" "$HOME/.tmux.conf";
+msgInstall "tmux"
 
 doLink "xmonad.hs" "$HOME/.xmonad/xmonad.hs";
 doLink "xmobarrc"  "$HOME/.xmobarrc";
 doLink "ghci"      "$HOME/.ghci";
+msgInstall "xmonad"
+msgInstall "xmobar"
+msgInstall "ghc"
+
+doLink "agignore"  "$HOME/.agignore";
+msgInstall "ag"
 
 # TODO: /etc/nixos/configuration.nix
