@@ -856,7 +856,7 @@ let maplocalleader = ',' " same as leader for now.
 nnoremap <F11> :Goyo<CR>
 nnoremap <S-F11> :Fullscreen<CR>
 
-xnoremap \| :EasyAlign /
+xnoremap \| :EasyAlign //<Left>
 vmap <Enter> <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 

@@ -1,18 +1,14 @@
 -- vim: ft=haskell
 Config {
-       -- appearance
-         bgColor = "#272727"
-       , fgColor = "#ffffff"
-       , position = Top
-       , border = BottomB
+       -- appearance. all other options are in xmonad.hs
+         border = BottomB
        , borderColor = "#646464"
        -- layout
-       , sepChar = "%"
-       , alignSep = "}{"
-       , template = " %StdinReader%}%date%{%KFLG% "
+       , template = " %StdinReader% } %date% { %KFLG% "
           commands = [ Run Date "%H:%M" "date" 30
-                     , Run Weather "KFLG" [] 3600
-                     -- ^ TODO : fix formatting, dog
+                     , Run Weather "KFLG" [ "-t"
+                                          , "<tempF>F @ <rh>% rh: <skyCondition>"
+                                          ] 3600
                      , Run StdinReader
                      ]
        }

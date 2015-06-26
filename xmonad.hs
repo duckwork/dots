@@ -3,11 +3,16 @@ import qualified Data.Map                            as M
 import           Data.Monoid
 import           System.Exit
 import           XMonad
+import           XMonad.Actions.Commands
+import           XMonad.Actions.CycleWS
 import           XMonad.Actions.Promote
 import           XMonad.Actions.Submap
 import           XMonad.Actions.WindowBringer
 import           XMonad.Hooks.DynamicLog
+import           XMonad.Hooks.FadeInactive
+import           XMonad.Layout.Accordion
 import           XMonad.Layout.Grid
+import           XMonad.Layout.LimitWindows
 import           XMonad.Layout.MultiToggle
 import           XMonad.Layout.MultiToggle.Instances
 import           XMonad.Layout.NoBorders
@@ -16,13 +21,13 @@ import           XMonad.Layout.Spacing
 import           XMonad.Layout.Spiral
 import           XMonad.Layout.Tabbed
 import           XMonad.Layout.WindowNavigation
--- import           XMonad.Layout.ZoomRow
 import           XMonad.Prompt
 import           XMonad.Prompt.RunOrRaise
 import           XMonad.Prompt.Window
 import qualified XMonad.StackSet                     as W
 import           XMonad.Util.EZConfig
 import           XMonad.Util.Run
+-- import           XMonad.Layout.ZoomRow
 -- import XMonad.Actions.CopyWindow
 -- import XMonad.Actions.UpdatePointer
 -- import XMonad.Actions.WindowGo
@@ -41,7 +46,7 @@ myConfig = defaultConfig {
        , normalBorderColor  = myBg
        , focusedBorderColor = red'
        , keys               = ezKeys
-       -- , logHook            = dynamicLogWithPP $ myXmobarPP
+       , logHook = fadeInactiveLogHook 0.8
        , layoutHook         = myLayout
        , manageHook         = myManageHook
        }
@@ -52,6 +57,7 @@ ezKeys = \c -> mkKeymap c $
     [ ("M-<Return>",   spawn $ terminal c)
     -- , ("M-;",          spawn "exe=`yeganesh -x` && eval \"exec $exe\"")
     , ("M-;",          runOrRaisePrompt myXPConfig)
+    , ("M-C-y",        myCommands >>= runCommand) -- TODO: change binding
     , ("M-q",          kill)
     , ("M-.",          sendMessage NextLayout)
     , ("M-,",          sendMessage FirstLayout)
@@ -65,6 +71,11 @@ ezKeys = \c -> mkKeymap c $
     , ("M-S-h",        sendMessage $ Swap L)
     , ("M-l",          sendMessage $ Go R)
     , ("M-S-l",        sendMessage $ Swap L)
+    , ("M-<Down>",     nextWS)
+    , ("M-<Up>",       prevWS)
+    , ("M-S-<Down>",   shiftToNext >> nextWS)
+    , ("M-S-<Up>",     shiftToPrev >> prevWS)
+    , ("M-z",          toggleWS)
     , ("M-m",          windows W.focusMaster)
     , ("M-S-m",        promote) -- swapMaster
     , ("M-x",          sendMessage $ Toggle MIRROR)
@@ -92,13 +103,17 @@ myLayout = id
          . mkToggle (single FULL)
          . windowNavigation
          $
-         (mkToggle (single MIRROR) . smartSpacing 2)
-            ( myTall ||| Grid ||| mySpiral )
-         ||| tabbed shrinkText myTabConfig
-  where myTall = Tall nmaster delta ratio
-        nmaster = 1
-        ratio   = 1/2
-        delta   = 1/50
+         ( mkToggle (single MIRROR)
+           . smartSpacing 2
+           $ myTall |||
+             limitSlice 4 (Mirror Accordion) |||
+             mySpiral
+         ) |||
+           tabbed shrinkText myTabConfig
+  where myTall   = Tall nmaster delta ratio
+        nmaster  = 1
+        ratio    = 1/2
+        delta    = 1/50
         mySpiral = spiral (6/7)
 
 myManageHook = composeAll
@@ -128,18 +143,30 @@ cyan     = "#5f8787"
 cyan'    = "#5fafaf"
 white    = "#6c6c6c"
 white'   = "#ffffff"
+myFont   = "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*"
+
+myBar = "xmobar" ++ concat myXmobargs
+  where myXmobargs = [
+                       " -B ", "'" ++ myBg ++ "'"
+                     , " -F ", "'" ++ myFg ++ "'"
+                     , " -f ", "'" ++ myFont ++ "'"
+                     , " -a ", "'}{'"   -- chars to sep sections
+                     , " -s ", "'%'"    -- char to sep text from commands
+                     , " -o"            -- place at top, others = "-b"
+                     ]
 
 myXPConfig = defaultXPConfig
            {
              position        = Top
            , bgColor         = myBg
            , fgColor         = myFg
-           , borderColor     = myBg
+           , borderColor     = "#646464"
            , fgHLight        = black
            , bgHLight        = green'
+           , font            = myFont
            , alwaysHighlight = True
            , historySize     = 10000
-           , height          = 12
+           , height          = 16
            , searchPredicate = isInfixOf
            }
 
@@ -155,9 +182,8 @@ myTabConfig = defaultTheme
             , urgentBorderColor   = red'
             , urgentTextColor     = white'
             , decoHeight          = 14
+            , fontName            = myFont
             }
-
-myBar = "xmobar"
 
 myPP = defaultPP
            {
@@ -166,22 +192,25 @@ myPP = defaultPP
            , ppHidden          = id
            , ppHiddenNoWindows = const "_"
            , ppUrgent          = xmobarColor "red" "yellow" . wrap "!" "!"
-           , ppSep             = " | "
+           , ppSep             = "  "
            , ppWsSep           = ""
            , ppTitle           = xmobarColor green' myBg . shorten 40
              -- ^ add `. ('}':)` when you figure out the xmobar escaping thing
            , ppLayout          = \s -> xmobarColor yellow "" $
                                  case s of -- TODO; use regexes?
-                                   "SmartSpacing 2 Tall"          -> "|"
-                                   "Mirror SmartSpacing 2 Tall"   -> "-,"
-                                   "SmartSpacing 2 Grid"          -> "+"
-                                   "Mirror SmartSpacing 2 Grid"   -> "="
-                                   "SmartSpacing 2 Spiral"        -> "@"
-                                   "Mirror SmartSpacing 2 Spiral" -> "e"
-                                   "Tabbed Simplest"              -> "t"
-                                   "Full"                         -> "_"
-                                   _                              -> s
-           , ppOrder           = id
+                                   "SmartSpacing 2 Tall"             -> "|"
+                                   "Mirror SmartSpacing 2 Tall"      -> "-"
+                                   "SmartSpacing 2 Mirror Accordion" -> "N"
+                                   "Mirror SmartSpacing 2 Mirror Accordion"
+                                                                     -> "Z"
+                                   "SmartSpacing 2 Spiral"           -> "@"
+                                   "Mirror SmartSpacing 2 Spiral"    -> "e"
+                                   "Tabbed Simplest"                 -> "t"
+                                   "Full"                            -> "_"
+                                   _                                 -> s
+           , ppOrder           = \(ws:l:t:_) -> [ws, l, t]
            , ppExtras          = []
            -- , ppOutput = hPutStrLn h
            }
+
+myCommands = defaultCommands
