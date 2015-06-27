@@ -215,11 +215,10 @@ myBar = "xmobar" ++ concat myXmobargs
 myPP = defaultPP
            {
              ppCurrent         = xmobarColor (red' myCS) ""
-           -- , ppVisible         = xmobarColor (cyan myCS) ""
            , ppHidden          = xmobarColor (yellow myCS) ""
            , ppHiddenNoWindows = const ""
-           , ppUrgent          = xmobarColor "red" "yellow" . wrap "!" "!"
-           , ppSep             = xmobarColor (black' myCS) "" "<>"
+           , ppUrgent          = xmobarColor (white myCS) (red' myCS)
+           , ppSep             = xmobarColor (black' myCS) "" "//"
            , ppWsSep           = xmobarColor (black' myCS) "" ","
            , ppTitle           = xmobarColor (green' myCS) "" . shorten 40
              -- ^ add `. ('}':)` when you figure out the xmobar escaping thing
