@@ -46,7 +46,7 @@ msgInstall "vim" && vim +PlugInstall +qall
 doLink "tmux.conf" "$HOME/.tmux.conf";
 msgInstall "tmux"
 
-doLink "xmonad.hs" "$HOME/.xmonad/xmonad.hs";
+doLink "xmonad" "$HOME/.xmonad"
 doLink "xmobarrc"  "$HOME/.xmobarrc";
 doLink "ghci"      "$HOME/.ghci";
 msgInstall "xmonad"
