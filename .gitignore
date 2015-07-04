@@ -222,3 +222,8 @@ pip-log.txt
 Session.vim
 .netrwhist
 *~
+
+# Haskell
+*.errors
+*.hi
+*.o
