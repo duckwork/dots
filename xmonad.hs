@@ -1,4 +1,3 @@
--- vim:fdm=marker
 -- Imports {{{
 import           Data.List
 import qualified Data.Map                            as M
@@ -24,6 +23,7 @@ import           XMonad.Layout.MultiToggle.Instances
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.PerWorkspace
 import           XMonad.Layout.PerWorkspace
+import           XMonad.Layout.Renamed
 import           XMonad.Layout.Spacing
 import           XMonad.Layout.Spiral
 import           XMonad.Layout.Tabbed
@@ -87,6 +87,21 @@ myWS = [ "web" -- web browser
        , "dir" -- file manager
        ] ++ map show [6..9]
 
+-- {{{ Layout
+myMRTile    = renamed [Replace "+"] $
+                      mouseResizableTile { nmaster       = 1
+                                         , masterFrac    = 1/2
+                                         , fracIncrement = 1/50
+                                         }
+myTabbed    = renamed [Replace "T"] $
+                      tabbed shrinkText myTabConfig
+myAccordion = renamed [Replace "Z"] $
+                      limitSlice 4 (Mirror Accordion)
+mySpiral    = renamed [Replace "@"] $
+                      spiral (6/7)
+myMosaic    = renamed [Replace "m"] $
+                      mosaic 2 [3,2]
+
 myLayoutHook = avoidStruts
              . smartBorders
              . mkToggle (single FULL)
@@ -96,15 +111,30 @@ myLayoutHook = avoidStruts
                . mkToggle (single REFLECTX)
                . mkToggle (single REFLECTY)
                  $ -- ^ These ONLY modify the layouts here:
-                     mouseResizableTile { nmaster = 1
-                                        , masterFrac = 1/2
-                                        , fracIncrement = 1/50
-                                        }
-                 ||| limitSlice 4 (Mirror Accordion)
-                 ||| spiral (6/7)
-                 ||| mosaic 2 [3,2]
+                     myMRTile
+                 ||| myAccordion
+                 ||| mySpiral
+                 ||| myMosaic
              ) |||
-               tabbed shrinkText myTabConfig
+               myTabbed
+
+-- myLayoutHook = let modsForAll  = ( avoidStruts -- DOESN'T WORK
+--                                  . smartBorders
+--                                  . mkToggle (single FULL)
+--                                  . windowNavigation )
+--                    webLayout   = myTabbed
+--                                  ||| myMRTile
+--                    vidLayout   = myAccordion
+--                                  ||| myTabbed
+--                                  ||| myMRTile
+--                    otherLayout = myMRTile
+--                                  ||| myAccordion
+--                                  ||| mosaic 2 [3,2]
+--                 in modWorkspaces myWS modsForAll $
+--                    onWorkspace "web" webLayout $
+--                    onWorkspace "vid" vidLayout $
+--                    otherLayout
+-- }}}
 
 myLogHook h = do
     fadeInactiveLogHook 0.7
@@ -131,12 +161,11 @@ myModMask = mod1Mask        -- Alt
 myKeymap = \c -> mkKeymap c $
     [ ("M-<Return>",   spawn $ terminal c)
     -- , ("M-;",          spawn "exe=`yeganesh -x` && eval \"exec $exe\"")
-    , ("M-;",          runOrRaisePrompt myPrompt)
+    , ("M-;",          runOrRaisePrompt myPrompt) -- TODO: Combine this + bringer & fuzzy
     , ("M-S-r",        myCommands >>= runCommand) -- TODO: change binding
     , ("M-q",          kill1)
     , ("M-b",          sendMessage ToggleStruts)
-    , ("M-.",          sendMessage NextLayout)
-    , ("M-,",          sendMessage FirstLayout)
+    , ("M-/",          sendMessage NextLayout)
     , ("M-<Tab>",      windows W.focusDown)
     , ("M-S-<Tab>",    windows W.focusUp)
     , ("M-j",          sendMessage $ Go D)
@@ -222,17 +251,14 @@ myPP = defaultPP
            , ppWsSep           = xmobarColor (black' myCS) "" ","
            , ppTitle           = xmobarColor (green' myCS) "" . shorten 40
              -- ^ add `. ('}':)` when you figure out the xmobar escaping thing
-           , ppLayout          = \s -> xmobarColor (magenta myCS) "" $
-                                 case s of -- TODO; use regexes?
-                                   "SmartSpacing 2 Tall"             -> "|"
-                                   "Mirror SmartSpacing 2 Tall"      -> "-"
-                                   "SmartSpacing 2 Mirror Accordion" -> "N"
-                                   "Mirror SmartSpacing 2 Mirror Accordion"
-                                                                     -> "Z"
-                                   "SmartSpacing 2 Spiral"           -> "@"
-                                   "Mirror SmartSpacing 2 Spiral"    -> "e"
-                                   "Tabbed Simplest"                 -> "t"
+           , ppLayout          = \s -> xmobarColor (magenta' myCS) "" $
+                                 case s of
                                    "Full"                            -> "_"
+                                   ('M':'i':'r':'r':'o':'r':l)       -> '~':l
+                                   ('R':'e':'f':'l':'e':'c':'t':'X':l)
+                                                                     -> 'x':l
+                                   ('R':'e':'f':'l':'e':'c':'t':'Y':l)
+                                                                     -> 'y':l
                                    _                                 -> s
            , ppOrder           = \(ws:l:t:_) -> [ws, l, t]
            , ppExtras          = []
@@ -273,3 +299,4 @@ myTabConfig = defaultTheme
 -- {{{ XMonad.Actions.Commands config
 myCommands = defaultCommands
 -- }}}
+-- vim:fdm=marker
