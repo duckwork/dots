@@ -739,8 +739,7 @@ Plug 'reedes/vim-litecorrect',          " autocorret w/ iabbrev
 Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
             \ { 'for': [ 'pandoc', 'markdown' ] }
 " --------------------------------------
-Plug 'duckwork/haskell-vim'             " Haskell syntax files
-     " upstream: raichoo/haskell-vim
+Plug 'raichoo/haskell-vim'              " Haskell syntax files
 Plug 'Twinside/vim-hoogle'              " Search Hoogle from Vim
 " --------------------------------------
 Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt
