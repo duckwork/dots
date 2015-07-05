@@ -1,5 +1,6 @@
 -- Imports {{{
 import           Colorschemes
+import           Control.Monad                       (liftM2)
 import           Data.List
 import qualified Data.Map                            as M
 import           Data.Monoid
@@ -17,21 +18,17 @@ import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.FadeInactive
 import           XMonad.Hooks.InsertPosition
 import           XMonad.Hooks.ManageDocks
+import           XMonad.Hooks.ManageHelpers
 import           XMonad.Layout.Accordion
 import           XMonad.Layout.DragPane
-import           XMonad.Layout.Grid
 import           XMonad.Layout.LayoutCombinators
 import           XMonad.Layout.LimitWindows
-import           XMonad.Layout.Mosaic
 import           XMonad.Layout.MouseResizableTile
 import           XMonad.Layout.MultiToggle
 import           XMonad.Layout.MultiToggle.Instances
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.PerWorkspace
-import           XMonad.Layout.PerWorkspace
 import           XMonad.Layout.Renamed
-import           XMonad.Layout.Spacing
-import           XMonad.Layout.Spiral
 import           XMonad.Layout.Tabbed
 import           XMonad.Layout.WindowNavigation
 import           XMonad.Prompt
@@ -71,7 +68,7 @@ myFont = "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*"
 -- }}}
 -- TODO: use `env <- M.fromList `fmap` getEnvironment` for env vars
 myTerm        = "termite"
-myBrowser  = "surf"
+myBrowser  = "uzbl-browser"
 duckduckgo = searchEngine "duckduckgo" "https://duckduckgo.com/?q="
 mySearch = duckduckgo
 -- }}}
@@ -94,12 +91,14 @@ main = do
                          }
 -- }}}
 -- {{{ Hooks = [ Layout, Log, Manage, HandleEvents, Startup ]
-myWS = [ "¹web" -- web browser & media
-       , "²yak" -- communication (irc, email)
-       , "³txt" -- coding + writing & files
-       ] ++ map show [4..9]
-
-myLayoutHook = avoidStruts
+myWS = -- {{{
+    [ "1web" -- web browser & media
+    , "2txt" -- coding + writing & files
+    , "3yak" -- communication (irc, email)
+    ] ++ map show [4..9]
+-- }}}
+myLayoutHook = -- {{{
+               avoidStruts
              . smartBorders
              . mkToggle (single FULL)
              . windowNavigation
@@ -118,12 +117,8 @@ myLayoutHook = avoidStruts
                               tabbed shrinkText myTabConfig
           myAccordion = renamed [Replace "Z"] $
                               limitSlice 4 (Mirror Accordion)
-          -- mySpiral    = renamed [Replace "@"] $
-          --                     spiral (6/7)
-          -- myMosaic    = renamed [Replace "m"] $
-          --                     mosaic 2 [3,2]
-
-myLogHook h = do
+-- }}}
+myLogHook h = do -- {{{
     fadeInactiveLogHook 0.7
     copies <- wsContainingCopies
     let check ws | ws `elem` copies = xmobarColor (red myCS) "" $ ws
@@ -131,19 +126,57 @@ myLogHook h = do
      in dynamicLogWithPP myPP { ppHidden = check
                               , ppOutput = hPutStrLn h
                               }
-
-myManageHook =
+-- }}}
+myManageHook = -- {{{
         insertPosition Below Newer -- Xmonad default = Above Newer
-    <+> composeAll
-        [
-        className =? "MPlayer"        --> doFloat
-        , className =? "Gimp"           --> doFloat
-        , resource  =? "desktop_window" --> doIgnore
-        ]
     <+> manageDocks
-
+    <+> (composeAll . concat $ -- {{{
+        [ [isDialog --> doFloat]
+        , [className =? c --> doFloat | c <- myFloats]
+        , [resource  =? i --> doIgnore | i <- myIgnores]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "1web" | x <- my1Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "2txt" | x <- my2Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "3yak" | x <- my3Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "4" | x <- my4Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "5" | x <- my5Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "6" | x <- my6Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "7" | x <- my7Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "8" | x <- my8Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "9" | x <- my9Shifts]
+        ]) -- }}}
+        where
+            doShiftAndGo = doF . liftM2 (.) W.greedyView W.shift
+            myFloats = ["MPlayer"]
+            myIgnores = ["desktop_window", "kdesktop"]
+            my1Shifts = [ -- web browsers
+                          ".uzbl-core-wrapped"
+                        , "Navigator" , "Firefox"
+                        , "surf", "Surf"
+                        , "Chromium"
+                        ]
+            my2Shifts = [ -- coding + writing + files
+                          "vim"
+                        , "ranger"
+                        , "Termite"
+                        ]
+            my3Shifts = []
+            my4Shifts = []
+            my5Shifts = []
+            my6Shifts = []
+            my7Shifts = []
+            my8Shifts = []
+            my9Shifts = []
+-- }}}
 myHandleEventHook = docksEventHook
-
 myStartupHook = return ()
 -- }}}
 -- {{{ Key & Mouse bindings
@@ -170,16 +203,14 @@ myKeymap = \c -> mkKeymap c $
     , ("M-C-l",        sendMessage Expand)
     , ("M-]",          sendMessage (IncMasterN 1))
     , ("M-[",          sendMessage (IncMasterN (-1)))
-    , ("M-S-]",        sendMessage Taller)
-    , ("M-S-[",        sendMessage Wider)
     , ("M-b",          sendMessage ToggleStruts)
     , ("M-/",          sendMessage NextLayout)
     , ("M-\\",         sendMessage $ Toggle MIRROR)
     , ("M-=",          sendMessage $ Toggle FULL)
     ] ++ -- }}}
     [ -- Workspaces {{{
-      ("M-.",          nextWS)
-    , ("M-,",          prevWS)
+      ("M-.",          moveTo Next NonEmptyWS)
+    , ("M-,",          moveTo Prev NonEmptyWS)
     , ("M-S-.",        shiftToNext >> nextWS)
     , ("M-S-,",        shiftToPrev >> prevWS)
     ] ++
@@ -195,7 +226,8 @@ myKeymap = \c -> mkKeymap c $
       ("M-<Return>",   spawn $ terminal c)
     -- , ("M-;",          spawn "exe=`yeganesh -x` && eval \"exec $exe\"")
     , ("M-e",          launchAppInTerm myPrompt "vim")
-    , ("M-w",          promptSearchBrowser myPrompt "uzbl-browser" (intelligent duckduckgo))
+    , ("M-S-e",        spawn (myTerm ++ "-t vim -e vim"))
+    , ("M-w",          promptSearchBrowser myPrompt myBrowser mySearch)
     , ("M-;",          runOrRaisePrompt myPrompt)  -- TODO: Combine
     , ("M-<Space>",    windowPromptGoto myPrompt)  --       all of these
     , ("M-S-<Space>",  windowPromptBring myPrompt) --       & do fuzzy search

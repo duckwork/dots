@@ -29,7 +29,7 @@ tSpawn t ta x = xfork (executeFile t
                       ) >> return ()
 
 tLaunch :: MonadIO m => TermApp -> Parameters -> m ()
-tLaunch app params = tSpawn "termite" ["-t", app] (app ++ " " ++ params)
+tLaunch app params = tSpawn "termite" ["--name="++app] (app ++ " " ++ params)
 
 launchAppInTerm :: XPConfig -> TermApp -> X ()
 launchAppInTerm conf app = mkXPrompt (TAPrompt app) conf (getShellCompl [])
