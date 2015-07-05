@@ -758,6 +758,7 @@ if executable('git')
     Plug 'tpope/vim-fugitive'           " Git integration
     Plug 'airblade/vim-gitgutter'       " Git stuff in signs column
     Plug 'tpope/vim-git'                " Vim Git runtime files
+    Plug 'esneider/YUNOcommit.vim'      " Because I forget
     set wildignore+=COMMIT_EDITMSG      " Get rid of junk in Tab-completions
 endif
 if executable('ag')                     " Ag implementation
@@ -848,6 +849,8 @@ let g:plug_url_format = 'https://github.com/%s.git'
 " Vim-shell
 let g:shell_mappings_enabled   = 0 " disable default mappings
 let g:shell_fullscreen_message = 0 " don't help me to get out of fullscreen
+" Y U NO commit ???
+let g:YUNOcommit_after = 15
 " }}}
 " Plugin keymaps {{{
 let maplocalleader = ',' " same as leader for now.

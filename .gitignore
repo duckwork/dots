@@ -24,5 +24,6 @@ Session.vim
 xmonad/xmonad
 xmonad/xmonad-x86_64-linux
 
-# Ranger stuff
+# History files
 config/ranger/history
+xmonad/history
