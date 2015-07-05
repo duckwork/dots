@@ -1,20 +1,26 @@
 -- Imports {{{
+import           Colorschemes
 import           Data.List
 import qualified Data.Map                            as M
 import           Data.Monoid
 import           System.Exit
-import           XMonad
+import           TermAppLauncher
+import           XMonad                              hiding ((|||))
 import           XMonad.Actions.Commands
 import           XMonad.Actions.CopyWindow
 import           XMonad.Actions.CycleWS
 import           XMonad.Actions.Promote
+import           XMonad.Actions.Search
 import           XMonad.Actions.Submap
 import           XMonad.Actions.WindowBringer
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.FadeInactive
+import           XMonad.Hooks.InsertPosition
 import           XMonad.Hooks.ManageDocks
 import           XMonad.Layout.Accordion
+import           XMonad.Layout.DragPane
 import           XMonad.Layout.Grid
+import           XMonad.Layout.LayoutCombinators
 import           XMonad.Layout.LimitWindows
 import           XMonad.Layout.Mosaic
 import           XMonad.Layout.MouseResizableTile
@@ -29,183 +35,16 @@ import           XMonad.Layout.Spiral
 import           XMonad.Layout.Tabbed
 import           XMonad.Layout.WindowNavigation
 import           XMonad.Prompt
+import           XMonad.Prompt.AppLauncher
 import           XMonad.Prompt.RunOrRaise
+import           XMonad.Prompt.Shell
 import           XMonad.Prompt.Window
 import qualified XMonad.StackSet                     as W
 import           XMonad.Util.EZConfig
 import           XMonad.Util.Run
 -- import XMonad.Actions.WindowGo
--- import XMonad.Actions.Search
-import           XMonad.Layout.Reflect
 -- }}}
--- My types, functions, etc. {{{
-data Colorscheme = -- {{{
-     Colorscheme { fg       :: String
-                 , bg       :: String
-                 , black    :: String
-                 , red      :: String
-                 , green    :: String
-                 , yellow   :: String
-                 , blue     :: String
-                 , magenta  :: String
-                 , cyan     :: String
-                 , white    :: String
-                 , black'   :: String
-                 , red'     :: String
-                 , green'   :: String
-                 , yellow'  :: String
-                 , blue'    :: String
-                 , magenta' :: String
-                 , cyan'    :: String
-                 , white'   :: String
-                 }
--- }}}
--- }}}
--- Main {{{
-main = do
-    h <- spawnPipe myBar
-    xmonad defaultConfig { modMask            = myModMask
-                         , focusFollowsMouse  = True
-                         , terminal           = "termite"
-                         , workspaces         = myWS
-                         , borderWidth        = 2
-                         , normalBorderColor  = bg myCS
-                         , focusedBorderColor = red' myCS
-                         , keys               = myKeymap
-                         , logHook            = myLogHook h
-                         , layoutHook         = myLayoutHook
-                         , manageHook         = myManageHook
-                         , handleEventHook    = myHandleEventHook
-                         , startupHook        = myStartupHook
-                         }
--- }}}
--- {{{ Hooks = [ Layout, Log, Manage, HandleEvents, Startup ]
-myWS = [ "web" -- web browser
-       , "yak" -- communication (irc, email)
-       , "txt" -- coding + writing
-       , "vid" -- media ('vid' > 'med')
-       , "dir" -- file manager
-       ] ++ map show [6..9]
-
--- {{{ Layout
-myMRTile    = renamed [Replace "+"] $
-                      mouseResizableTile { nmaster       = 1
-                                         , masterFrac    = 1/2
-                                         , fracIncrement = 1/50
-                                         }
-myTabbed    = renamed [Replace "T"] $
-                      tabbed shrinkText myTabConfig
-myAccordion = renamed [Replace "Z"] $
-                      limitSlice 4 (Mirror Accordion)
-mySpiral    = renamed [Replace "@"] $
-                      spiral (6/7)
-myMosaic    = renamed [Replace "m"] $
-                      mosaic 2 [3,2]
-
-myLayoutHook = avoidStruts
-             . smartBorders
-             . mkToggle (single FULL)
-             . windowNavigation
-             $ ( -- ^ These modify every layout listed
-                 mkToggle (single MIRROR)
-               . mkToggle (single REFLECTX)
-               . mkToggle (single REFLECTY)
-                 $ -- ^ These ONLY modify the layouts here:
-                     myMRTile
-                 ||| myAccordion
-                 ||| mySpiral
-                 ||| myMosaic
-             ) |||
-               myTabbed
-
--- myLayoutHook = let modsForAll  = ( avoidStruts -- DOESN'T WORK
---                                  . smartBorders
---                                  . mkToggle (single FULL)
---                                  . windowNavigation )
---                    webLayout   = myTabbed
---                                  ||| myMRTile
---                    vidLayout   = myAccordion
---                                  ||| myTabbed
---                                  ||| myMRTile
---                    otherLayout = myMRTile
---                                  ||| myAccordion
---                                  ||| mosaic 2 [3,2]
---                 in modWorkspaces myWS modsForAll $
---                    onWorkspace "web" webLayout $
---                    onWorkspace "vid" vidLayout $
---                    otherLayout
--- }}}
-
-myLogHook h = do
-    fadeInactiveLogHook 0.7
-    copies <- wsContainingCopies
-    let check ws | ws `elem` copies = xmobarColor (red myCS) "" $ ws
-                 | otherwise = ws
-     in dynamicLogWithPP myPP { ppHidden = check, ppOutput = hPutStrLn h }
-
-myManageHook = composeAll
-    [
-      className =? "MPlayer"        --> doFloat
-    , className =? "Gimp"           --> doFloat
-    , resource  =? "desktop_window" --> doIgnore
-    ]
-    <+> manageDocks
-
-myHandleEventHook = docksEventHook
-
-myStartupHook = return ()
--- }}}
--- {{{ Key & Mouse bindings
-myModMask = mod1Mask        -- Alt
--- myModMask = mod4Mask        -- Windows key
-myKeymap = \c -> mkKeymap c $
-    [ ("M-<Return>",   spawn $ terminal c)
-    -- , ("M-;",          spawn "exe=`yeganesh -x` && eval \"exec $exe\"")
-    , ("M-;",          runOrRaisePrompt myPrompt) -- TODO: Combine this + bringer & fuzzy
-    , ("M-S-r",        myCommands >>= runCommand) -- TODO: change binding
-    , ("M-q",          kill1)
-    , ("M-b",          sendMessage ToggleStruts)
-    , ("M-/",          sendMessage NextLayout)
-    , ("M-<Tab>",      windows W.focusDown)
-    , ("M-S-<Tab>",    windows W.focusUp)
-    , ("M-j",          sendMessage $ Go D)
-    , ("M-S-j",        sendMessage $ Swap D)
-    , ("M-k",          sendMessage $ Go U)
-    , ("M-S-k",        sendMessage $ Swap U)
-    , ("M-h",          sendMessage $ Go L)
-    , ("M-S-h",        sendMessage $ Swap L)
-    , ("M-l",          sendMessage $ Go R)
-    , ("M-S-l",        sendMessage $ Swap L)
-    , ("M-C-j",        sendMessage ExpandSlave)
-    , ("M-C-k",        sendMessage ShrinkSlave)
-    , ("M-C-h",        sendMessage Shrink)
-    , ("M-C-l",        sendMessage Expand)
-    , ("M-<Down>",     nextWS)
-    , ("M-<Up>",       prevWS)
-    , ("M-S-<Down>",   shiftToNext >> nextWS)
-    , ("M-S-<Up>",     shiftToPrev >> prevWS)
-    , ("M-z",          toggleWS)
-    , ("M-m",          windows W.focusMaster)
-    , ("M-S-m",        promote) -- swapMaster
-    , ("M-C-r",        sendMessage $ Toggle MIRROR)
-    , ("M-C-x",        sendMessage $ Toggle REFLECTX)
-    , ("M-C-y",        sendMessage $ Toggle REFLECTY)
-    , ("M-f",          sendMessage $ Toggle FULL)
-    , ("M-<Space>",    windowPromptGoto myPrompt)
-    , ("M-S-<Space>",  windowPromptBring myPrompt)
-    , ("M-`",          setLayout $ XMonad.layoutHook c)
-    , ("M-t",          withFocused $ windows . W.sink)
-    , ("M-=",          sendMessage (IncMasterN 1))
-    , ("M--",          sendMessage (IncMasterN (-1)))
-    , ("M-S-=",        sendMessage Taller)
-    , ("M-S--",        sendMessage Wider)
-    , ("M-S-<Esc>",    io (exitWith ExitSuccess))
-    , ("M-<Esc>",      spawn "xmonad --recompile && xmonad-restart")
-    ] ++
-    [(m ++ (show k), windows $ f i)
-        | (i, k) <- zip (XMonad.workspaces c) [1..9]
-        , (f, m) <- [(W.greedyView, "M-"), (W.shift, "M-S-"), (copy, "M-C-")]]
--- }}}
+-- {{{ Default programs, etc.
 -- {{{ Theming
 -- Apprentice colorscheme: https://github.com/romainl/Apprentice
 apprentice = Colorscheme { bg       = "#262626"
@@ -230,6 +69,142 @@ apprentice = Colorscheme { bg       = "#262626"
 myCS   = apprentice
 myFont = "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*"
 -- }}}
+-- TODO: use `env <- M.fromList `fmap` getEnvironment` for env vars
+myTerm        = "termite"
+myBrowser  = "surf"
+duckduckgo = searchEngine "duckduckgo" "https://duckduckgo.com/?q="
+mySearch = duckduckgo
+-- }}}
+-- Main {{{
+main = do
+    h <- spawnPipe myBar
+    xmonad defaultConfig { modMask            = myModMask
+                         , focusFollowsMouse  = True
+                         , terminal           = "termite"
+                         , workspaces         = myWS
+                         , borderWidth        = 2
+                         , normalBorderColor  = bg myCS
+                         , focusedBorderColor = red' myCS
+                         , keys               = myKeymap
+                         , logHook            = myLogHook h
+                         , layoutHook         = myLayoutHook
+                         , manageHook         = myManageHook
+                         , handleEventHook    = myHandleEventHook
+                         , startupHook        = myStartupHook
+                         }
+-- }}}
+-- {{{ Hooks = [ Layout, Log, Manage, HandleEvents, Startup ]
+myWS = [ "¹web" -- web browser & media
+       , "²yak" -- communication (irc, email)
+       , "³txt" -- coding + writing & files
+       ] ++ map show [4..9]
+
+myLayoutHook = avoidStruts
+             . smartBorders
+             . mkToggle (single FULL)
+             . windowNavigation
+             $ onWorkspace "¹web" (myTabbed ||| myMRTile)
+             $ -- On the rest of the workspaces:
+                   myMRTile
+                   ||| (mkToggle (single MIRROR) myAccordion )
+               ||| myTabbed
+    where
+          myMRTile    = renamed [Replace "#"] $
+                              mouseResizableTile { nmaster       = 1
+                                                  , masterFrac    = 1/2
+                                                  , fracIncrement = 1/50
+                                                  }
+          myTabbed    = renamed [Replace "T"] $
+                              tabbed shrinkText myTabConfig
+          myAccordion = renamed [Replace "Z"] $
+                              limitSlice 4 (Mirror Accordion)
+          -- mySpiral    = renamed [Replace "@"] $
+          --                     spiral (6/7)
+          -- myMosaic    = renamed [Replace "m"] $
+          --                     mosaic 2 [3,2]
+
+myLogHook h = do
+    fadeInactiveLogHook 0.7
+    copies <- wsContainingCopies
+    let check ws | ws `elem` copies = xmobarColor (red myCS) "" $ ws
+                 | otherwise = ws
+     in dynamicLogWithPP myPP { ppHidden = check
+                              , ppOutput = hPutStrLn h
+                              }
+
+myManageHook =
+        insertPosition Below Newer -- Xmonad default = Above Newer
+    <+> composeAll
+        [
+        className =? "MPlayer"        --> doFloat
+        , className =? "Gimp"           --> doFloat
+        , resource  =? "desktop_window" --> doIgnore
+        ]
+    <+> manageDocks
+
+myHandleEventHook = docksEventHook
+
+myStartupHook = return ()
+-- }}}
+-- {{{ Key & Mouse bindings
+myModMask = mod1Mask        -- Alt
+-- myModMask = mod4Mask        -- Windows key
+myKeymap = \c -> mkKeymap c $
+    [ -- Manipulate windows & layouts {{{
+      ("M-<Tab>",      windows W.focusDown)
+    , ("M-S-<Tab>",    windows W.focusUp)
+    , ("M-m",          windows W.focusMaster)
+    , ("M-S-m",        windows W.swapMaster)
+    , ("M-t",          withFocused $ windows . W.sink)
+    , ("M-j",          sendMessage $ Go D)
+    , ("M-S-j",        sendMessage $ Swap D)
+    , ("M-k",          sendMessage $ Go U)
+    , ("M-S-k",        sendMessage $ Swap U)
+    , ("M-h",          sendMessage $ Go L)
+    , ("M-S-h",        sendMessage $ Swap L)
+    , ("M-l",          sendMessage $ Go R)
+    , ("M-S-l",        sendMessage $ Swap L)
+    , ("M-C-j",        sendMessage ExpandSlave)
+    , ("M-C-k",        sendMessage ShrinkSlave)
+    , ("M-C-h",        sendMessage Shrink)
+    , ("M-C-l",        sendMessage Expand)
+    , ("M-]",          sendMessage (IncMasterN 1))
+    , ("M-[",          sendMessage (IncMasterN (-1)))
+    , ("M-S-]",        sendMessage Taller)
+    , ("M-S-[",        sendMessage Wider)
+    , ("M-b",          sendMessage ToggleStruts)
+    , ("M-/",          sendMessage NextLayout)
+    , ("M-\\",         sendMessage $ Toggle MIRROR)
+    , ("M-=",          sendMessage $ Toggle FULL)
+    ] ++ -- }}}
+    [ -- Workspaces {{{
+      ("M-.",          nextWS)
+    , ("M-,",          prevWS)
+    , ("M-S-.",        shiftToNext >> nextWS)
+    , ("M-S-,",        shiftToPrev >> prevWS)
+    ] ++
+    [ -- (List comprehension for switching, shifting, etc.)
+      (otherModMasks ++ "M-" ++ [key], action tag)
+      | (tag, key) <- zip myWS (concat $ map show [1..9])
+      , (otherModMasks, action) <- [ ("",   toggleOrView)
+                                   , ("S-", windows . W.shift)
+                                   , ("C-", windows . copy)
+                                   ]
+    ] ++ -- }}}
+    [ -- Spawn programs, windows, XMonad commands {{{
+      ("M-<Return>",   spawn $ terminal c)
+    -- , ("M-;",          spawn "exe=`yeganesh -x` && eval \"exec $exe\"")
+    , ("M-e",          launchAppInTerm myPrompt "vim")
+    , ("M-w",          promptSearchBrowser myPrompt "uzbl-browser" (intelligent duckduckgo))
+    , ("M-;",          runOrRaisePrompt myPrompt)  -- TODO: Combine
+    , ("M-<Space>",    windowPromptGoto myPrompt)  --       all of these
+    , ("M-S-<Space>",  windowPromptBring myPrompt) --       & do fuzzy search
+    , ("M-S-r",        myCommands >>= runCommand)  -- TODO: change binding
+    , ("M-q",          kill1)
+    , ("M-S-<Esc>",    io (exitWith ExitSuccess))
+    , ("M-<Esc>",      spawn "xmonad --recompile && xmonad-restart")
+    ] -- }}}
+-- }}}
 -- {{{ XMobar
 myBar = "xmobar" ++ concat myXmobargs
   where myXmobargs = [
@@ -253,13 +228,9 @@ myPP = defaultPP
              -- ^ add `. ('}':)` when you figure out the xmobar escaping thing
            , ppLayout          = \s -> xmobarColor (magenta' myCS) "" $
                                  case s of
-                                   "Full"                            -> "_"
-                                   ('M':'i':'r':'r':'o':'r':l)       -> '~':l
-                                   ('R':'e':'f':'l':'e':'c':'t':'X':l)
-                                                                     -> 'x':l
-                                   ('R':'e':'f':'l':'e':'c':'t':'Y':l)
-                                                                     -> 'y':l
-                                   _                                 -> s
+                                   "Full"                          -> "_"
+                                   ('M':'i':'r':'r':'o':'r':' ':l) -> l++"\\"
+                                   _                               -> s
            , ppOrder           = \(ws:l:t:_) -> [ws, l, t]
            , ppExtras          = []
            }

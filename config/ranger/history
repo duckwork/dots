@@ -8,3 +8,6 @@ rename config
 rename .config
 rename fuzzy.hs
 delete 
+rename .xmonad
+rename Colorschemes.hs
+edit 
