@@ -290,6 +290,11 @@ augroup ft_netrw
     au!
     au FileType netrw nnoremap <buffer> <Esc> :bd!<CR>
 augroup END
+
+augroup ft_Haskell
+    au!
+    au FileType haskell let &formatprg="stylish-haskell"
+augroup END
 " }}}
 "}}}
 " CAN I HAS(?) {{{
@@ -741,6 +746,7 @@ Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
 " --------------------------------------
 Plug 'raichoo/haskell-vim'              " Haskell syntax files
 Plug 'Twinside/vim-hoogle'              " Search Hoogle from Vim
+" Plug 'pbrisbin/vim-syntax-shakespeare'  " Syntax for hakell html templates
 " --------------------------------------
 Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt
 
@@ -764,9 +770,6 @@ endif
 if executable('ag')                     " Ag implementation
     Plug 'rking/ag.vim'
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" '
-endif
-if executable('stylish-haskell')
-    Plug 'nbouscal/vim-stylish-haskell' " Autoformatting for prettiness
 endif
 if executable('ghc-mod') && ! has('win32')
     Plug 'Shougo/vimproc.vim',          " Run outside process asynchronously
