@@ -92,9 +92,9 @@ main = do
 -- }}}
 -- {{{ Hooks = [ Layout, Log, Manage, HandleEvents, Startup ]
 myWS = -- {{{
-    [ "1web" -- web browser & media
-    , "2txt" -- coding + writing & files
-    , "3yak" -- communication (irc, email)
+    [ "1" -- web browser & media
+    , "2" -- coding + writing & files
+    , "3" -- communication (irc, email)
     ] ++ map show [4..9]
 -- }}}
 myLayoutHook = -- {{{
@@ -102,21 +102,27 @@ myLayoutHook = -- {{{
              . smartBorders
              . mkToggle (single FULL)
              . windowNavigation
-             $ onWorkspace "¹web" (myTabbed ||| myMRTile)
-             $ -- On the rest of the workspaces:
+             $ onWorkspace "1" myTabbed
+             $ onWorkspace "2" myMRTile
+             $ onWorkspace "3" myMirroredMRTile
+             $
                    myMRTile
-                   ||| (mkToggle (single MIRROR) myAccordion )
+               ||| myMirroredMRTile
                ||| myTabbed
     where
-          myMRTile    = renamed [Replace "#"] $
-                              mouseResizableTile { nmaster       = 1
-                                                  , masterFrac    = 1/2
-                                                  , fracIncrement = 1/50
-                                                  }
-          myTabbed    = renamed [Replace "T"] $
+          myMRTile    = renamed [Replace "Tiled"] $
+                          mouseResizableTile { nmaster        = 1
+                                             , masterFrac    = 1/2
+                                             , fracIncrement = 1/50
+                                             }
+          myMirroredMRTile    = renamed [Replace "Mirror"] $
+                                  mouseResizableTile { nmaster        = 1
+                                                     , masterFrac    = 1/2
+                                                     , fracIncrement = 1/50
+                                                     , isMirrored    = True
+                                                     }
+          myTabbed    = renamed [Replace "Tabbed"] $
                               tabbed shrinkText myTabConfig
-          myAccordion = renamed [Replace "Z"] $
-                              limitSlice 4 (Mirror Accordion)
 -- }}}
 myLogHook h = do -- {{{
     fadeInactiveLogHook 0.7
@@ -135,11 +141,11 @@ myManageHook = -- {{{
         , [className =? c --> doFloat | c <- myFloats]
         , [resource  =? i --> doIgnore | i <- myIgnores]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "1web" | x <- my1Shifts]
+                                    --> doShiftAndGo "1" | x <- my1Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "2txt" | x <- my2Shifts]
+                                    --> doShiftAndGo "2" | x <- my2Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "3yak" | x <- my3Shifts]
+                                    --> doShiftAndGo "3" | x <- my3Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
                                     --> doShiftAndGo "4" | x <- my4Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
@@ -205,7 +211,6 @@ myKeymap = \c -> mkKeymap c $
     , ("M-[",          sendMessage (IncMasterN (-1)))
     , ("M-b",          sendMessage ToggleStruts)
     , ("M-/",          sendMessage NextLayout)
-    , ("M-\\",         sendMessage $ Toggle MIRROR)
     , ("M-=",          sendMessage $ Toggle FULL)
     ] ++ -- }}}
     [ -- Workspaces {{{
@@ -263,7 +268,7 @@ myPP = defaultPP
                                    "Full"                          -> "_"
                                    ('M':'i':'r':'r':'o':'r':' ':l) -> l++"\\"
                                    _                               -> s
-           , ppOrder           = \(ws:l:t:_) -> [ws, l, t]
+           , ppOrder           = \(ws:l:t:_) -> [ws, t]
            , ppExtras          = []
            }
 -- }}}
@@ -291,7 +296,7 @@ myTabConfig = defaultTheme
             , activeBorderColor   = bg myCS
             , inactiveBorderColor = black' myCS
             , activeTextColor     = red' myCS
-            , inactiveTextColor   = black' myCS
+            , inactiveTextColor   = fg myCS
             , urgentColor         = red myCS
             , urgentBorderColor   = red' myCS
             , urgentTextColor     = white' myCS
