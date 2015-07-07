@@ -258,6 +258,12 @@ augroup Windowstuff "{{{
     au BufWinLeave * silent! mkview
     au BufWinEnter * silent! loadview
 augroup END "}}}
+augroup Configs " {{{
+  au!
+  au BufEnter,BufRead xmonad.hs
+        \ nnoremap <leader>xx
+        \ :call vimproc#system("xmonad --recompile && xmonad --restart")<CR>
+augroup END "}}}
 " Filetypes {{{
 " TODO: move to after/ftplugin
 augroup ft_Help
@@ -503,7 +509,7 @@ function! StatusLine(winnr) " {{{
     let status .= '%#CursorLine#'
     let status .= '%=' " Gutter ------------------------------------
 
-    let status .= '%#warningmsg#%{SyntasticStatuslineFlag()}%*'
+    " let status .= '%#warningmsg#%{SyntasticStatuslineFlag()}%*'
     let status .= '%{fugitive#head(6)} '
 
     " Right side ---------------------------------------------------
@@ -746,7 +752,7 @@ Plug 'reedes/vim-litecorrect',          " autocorret w/ iabbrev
 Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
             \ { 'for': [ 'pandoc', 'markdown' ] }
 " --------------------------------------
-Plug 'scrooloose/syntastic'             " Syntax checking on the fly
+" Plug 'scrooloose/syntastic'             " Syntax checking on the fly
 " --------------------------------------
 Plug 'raichoo/haskell-vim'              " Haskell syntax files
 Plug 'Twinside/vim-hoogle'              " Search Hoogle from Vim
@@ -1282,7 +1288,7 @@ function! StatusLine(winnr) " {{{
     let status .= '%#CursorLine#'
     let status .= '%=' " Gutter ------------------------------------
 
-    let status .= '%#warningmsg#%{SyntasticStatuslineFlag()}%*'
+    " let status .= '%#warningmsg#%{SyntasticStatuslineFlag()}%*'
     let status .= '%{fugitive#head(6)} '
 
     " Right side ---------------------------------------------------
@@ -1525,7 +1531,7 @@ Plug 'reedes/vim-litecorrect',          " autocorret w/ iabbrev
 Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
             \ { 'for': [ 'pandoc', 'markdown' ] }
 " --------------------------------------
-Plug 'scrooloose/syntastic'             " Syntax checking on the fly
+" Plug 'scrooloose/syntastic'             " Syntax checking on the fly
 " --------------------------------------
 Plug 'raichoo/haskell-vim'              " Haskell syntax files
 Plug 'Twinside/vim-hoogle'              " Search Hoogle from Vim
@@ -1633,10 +1639,10 @@ let g:pandoc#syntax#conceal#urls = 0
 " Splitjoin -----------------------------------------------
 let g:splitjoin_split_mapping = 'gK'
 " Syntastic
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
+" let g:syntastic_always_populate_loc_list = 1
+" let g:syntastic_auto_loc_list = 1
+" let g:syntastic_check_on_open = 1
+" let g:syntastic_check_on_wq = 0
 " Vim-Plug
 let g:plug_url_format = 'https://github.com/%s.git'
 " Vim-shell
@@ -1847,10 +1853,10 @@ let g:pandoc#syntax#conceal#urls = 0
 " Splitjoin -----------------------------------------------
 let g:splitjoin_split_mapping = 'gK'
 " Syntastic
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
+" let g:syntastic_always_populate_loc_list = 1
+" let g:syntastic_auto_loc_list = 1
+" let g:syntastic_check_on_open = 1
+" let g:syntastic_check_on_wq = 0
 " Vim-Plug
 let g:plug_url_format = 'https://github.com/%s.git'
 " Vim-shell
