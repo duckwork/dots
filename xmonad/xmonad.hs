@@ -10,6 +10,7 @@ import           XMonad                              hiding ((|||))
 import           XMonad.Actions.Commands
 import           XMonad.Actions.CopyWindow
 import           XMonad.Actions.CycleWS
+import           XMonad.Actions.Navigation2D
 import           XMonad.Actions.Promote
 import           XMonad.Actions.Search
 import           XMonad.Actions.Submap
@@ -75,7 +76,13 @@ mySearch = duckduckgo
 -- Main {{{
 main = do
     h <- spawnPipe myBar
-    xmonad defaultConfig { modMask            = myModMask
+    xmonad $ withNavigation2DConfig defaultNavigation2DConfig
+                         { defaultTiledNavigation = centerNavigation
+                         , layoutNavigation   = [("Full", centerNavigation)]
+                         , unmappedWindowRect = [("Full", singleWindowRect)]
+                         }
+           $ defaultConfig
+                         { modMask            = myModMask
                          , focusFollowsMouse  = True
                          , terminal           = "termite"
                          , workspaces         = myWS
@@ -195,14 +202,24 @@ myKeymap = \c -> mkKeymap c $
     , ("M-m",          windows W.focusMaster)
     , ("M-S-m",        windows W.swapMaster)
     , ("M-t",          withFocused $ windows . W.sink)
-    , ("M-j",          sendMessage $ Go D)
-    , ("M-S-j",        sendMessage $ Swap D)
-    , ("M-k",          sendMessage $ Go U)
-    , ("M-S-k",        sendMessage $ Swap U)
-    , ("M-h",          sendMessage $ Go L)
-    , ("M-S-h",        sendMessage $ Swap L)
-    , ("M-l",          sendMessage $ Go R)
-    , ("M-S-l",        sendMessage $ Swap L)
+    -- , ("M-j",          sendMessage $ Go D)
+    -- , ("M-S-j",        sendMessage $ Swap D)
+    -- , ("M-k",          sendMessage $ Go U)
+    -- , ("M-S-k",        sendMessage $ Swap U)
+    -- , ("M-h",          sendMessage $ Go L)
+    -- , ("M-S-h",        sendMessage $ Swap L)
+    -- , ("M-l",          sendMessage $ Go R)
+    -- , ("M-S-l",        sendMessage $ Swap L)
+    ----------- Navigation2D
+    , ("M-j",          windowGo   D True)
+    , ("M-S-j",        windowSwap D True)
+    , ("M-k",          windowGo   U True)
+    , ("M-S-k",        windowSwap U True)
+    , ("M-h",          windowGo   L True)
+    , ("M-S-h",        windowSwap L True)
+    , ("M-l",          windowGo   R True)
+    , ("M-S-l",        windowSwap R True)
+    -----------
     , ("M-C-j",        sendMessage ExpandSlave)
     , ("M-C-k",        sendMessage ShrinkSlave)
     , ("M-C-h",        sendMessage Shrink)
@@ -263,11 +280,7 @@ myPP = defaultPP
            , ppWsSep           = xmobarColor (black' myCS) "" ","
            , ppTitle           = xmobarColor (green' myCS) "" . shorten 40
              -- ^ add `. ('}':)` when you figure out the xmobar escaping thing
-           , ppLayout          = \s -> xmobarColor (magenta' myCS) "" $
-                                 case s of
-                                   "Full"                          -> "_"
-                                   ('M':'i':'r':'r':'o':'r':' ':l) -> l++"\\"
-                                   _                               -> s
+           , ppLayout          = xmobarColor (magenta' myCS) ""
            , ppOrder           = \(ws:l:t:_) -> [ws, t]
            , ppExtras          = []
            }

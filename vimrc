@@ -261,7 +261,7 @@ augroup END "}}}
 augroup Configs " {{{
   au!
   au BufEnter,BufRead xmonad.hs
-        \ nnoremap <leader>xx
+        \ nnoremap <leader>xx :w<CR>
         \ :call vimproc#system("xmonad --recompile && xmonad --restart")<CR>
 augroup END "}}}
 " Filetypes {{{
