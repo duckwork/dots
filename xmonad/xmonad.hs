@@ -228,9 +228,9 @@ myKeymap = \c -> mkKeymap c $
     [ -- (List comprehension for switching, shifting, etc.)
       (otherModMasks ++ "M-" ++ [key], action tag)
       | (tag, key) <- zip myWS (concat $ map show [1..9])
-      , (otherModMasks, action) <- [ ("",   toggleOrView)
-                                   , ("S-", windows . W.shift)
-                                   , ("C-", windows . copy)
+      , (otherModMasks, action) <- [ ("",   windows . W.greedyView)
+                                   , ("S-", \w -> windows $ W.greedyView w . W.shift w)
+                                   , ("C-", \w -> windows $ W.greedyView w . copy w)
                                    ]
     ] ++ -- }}}
     [ -- Spawn programs, windows, XMonad commands {{{
