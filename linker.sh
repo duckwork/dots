@@ -33,6 +33,9 @@ msgInstall() {
 # ~/.config directory
 doLink "config" "$HOME/.config"
 
+doLink "bashrc" "$HOME/.bashrc"
+doLink "inputrc" "$HOME/.inputrc"
+
 # vimrc
 doLink "vimrc" "$HOME/.vimrc";
 # initialize vim
