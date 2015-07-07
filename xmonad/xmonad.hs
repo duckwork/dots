@@ -108,10 +108,8 @@ myLayoutHook = -- {{{
                avoidStruts
              . smartBorders
              . mkToggle (single FULL)
-             . windowNavigation
              $ onWorkspace "1" myTabbed
-             $ onWorkspace "2" myMRTile
-             $ onWorkspace "3" myMirroredMRTile
+             $ onWorkspace "2" (myMRTile ||| myMirroredMRTile)
              $
                    myMRTile
                ||| myMirroredMRTile
@@ -202,15 +200,7 @@ myKeymap = \c -> mkKeymap c $
     , ("M-m",          windows W.focusMaster)
     , ("M-S-m",        windows W.swapMaster)
     , ("M-t",          withFocused $ windows . W.sink)
-    -- , ("M-j",          sendMessage $ Go D)
-    -- , ("M-S-j",        sendMessage $ Swap D)
-    -- , ("M-k",          sendMessage $ Go U)
-    -- , ("M-S-k",        sendMessage $ Swap U)
-    -- , ("M-h",          sendMessage $ Go L)
-    -- , ("M-S-h",        sendMessage $ Swap L)
-    -- , ("M-l",          sendMessage $ Go R)
-    -- , ("M-S-l",        sendMessage $ Swap L)
-    ----------- Navigation2D
+    , ("M-S-t",        switchLayer)
     , ("M-j",          windowGo   D True)
     , ("M-S-j",        windowSwap D True)
     , ("M-k",          windowGo   U True)
@@ -219,7 +209,6 @@ myKeymap = \c -> mkKeymap c $
     , ("M-S-h",        windowSwap L True)
     , ("M-l",          windowGo   R True)
     , ("M-S-l",        windowSwap R True)
-    -----------
     , ("M-C-j",        sendMessage ExpandSlave)
     , ("M-C-k",        sendMessage ShrinkSlave)
     , ("M-C-h",        sendMessage Shrink)
