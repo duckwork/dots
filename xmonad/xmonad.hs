@@ -40,6 +40,7 @@ import           XMonad.Prompt.Window
 import qualified XMonad.StackSet                     as W
 import           XMonad.Util.EZConfig
 import           XMonad.Util.Run
+import Data.Char
 -- import XMonad.Actions.WindowGo
 -- }}}
 -- {{{ Default programs, etc.
@@ -99,17 +100,20 @@ main = do
 -- }}}
 -- {{{ Hooks = [ Layout, Log, Manage, HandleEvents, Startup ]
 myWS = -- {{{
-    [ "1" -- web browser & media
-    , "2" -- coding + writing & files
-    , "3" -- communication (irc, email)
-    ] ++ map show [4..9]
+    [ "home" -- beginning screen
+    , "webs" -- web browser & media
+    , "term" -- coding + writing
+    , "talk" -- communication (irc, email)
+    , "docs" -- gui editors (libreoffice, gimp, etc.)
+    , "arts" -- media
+    ] -- ++ map show [7..9]
 -- }}}
 myLayoutHook = -- {{{
                avoidStruts
              . smartBorders
              . mkToggle (single FULL)
-             $ onWorkspace "1" myTabbed
-             $ onWorkspace "2" (myMRTile ||| myMirroredMRTile)
+             $ onWorkspace "webs" myTabbed
+             $ onWorkspace "home" (myMRTile ||| myMirroredMRTile)
              $
                    myMRTile
                ||| myMirroredMRTile
@@ -131,13 +135,13 @@ myLayoutHook = -- {{{
 -- }}}
 myLogHook h = do -- {{{
     fadeInactiveLogHook 0.7
-    copies <- wsContainingCopies
-    let check ws | ws `elem` copies = xmobarColor (red myCS) "" $ ws
-                 | otherwise = xmobarColor (yellow myCS) "" $ ws
+    copies <- wsContainingCopies -- TODO: fix theming here
+    let check ws | ws `elem` copies = xmobarColor (red myCS) "" . pad $ ws
+                 | otherwise = xmobarColor (yellow myCS) "" . pad $ ws
      in dynamicLogWithPP defaultPP
            {
-             ppCurrent         = xmobarColor (red' myCS) "" . wrap "[" "]"
-           , ppHidden          = check . pad
+             ppCurrent         = xmobarColor (red' myCS) "" . pad . map toUpper
+           , ppHidden          = check
            , ppHiddenNoWindows = xmobarColor (black' myCS) "" . pad
            , ppUrgent          = xmobarColor (white myCS) (red' myCS)
            , ppSep             = xmobarColor (black' myCS) "" "//"
@@ -148,6 +152,17 @@ myLogHook h = do -- {{{
            , ppExtras          = []
            , ppOutput          = hPutStrLn h
            }
+-- {{{ XMobar options
+myBar = "xmobar" ++ concat myXmobargs
+  where myXmobargs = [
+                       " -B ", "'" ++ (bg myCS) ++ "'"
+                     , " -F ", "'" ++ (fg myCS) ++ "'"
+                     , " -f ", "'" ++ myFont ++ "'"
+                     , " -a ", "'}{'"   -- chars to sep sections
+                     , " -s ", "'%'"    -- char to sep text from commands
+                     , " -o"            -- place at top, others = "-b"
+                     ]
+-- }}}
 -- }}}
 myManageHook = -- {{{
         insertPosition Below Newer -- Xmonad default = Above Newer
@@ -157,46 +172,46 @@ myManageHook = -- {{{
         , [className =? c --> doFloat | c <- myFloats]
         , [resource  =? i --> doIgnore | i <- myIgnores]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "1" | x <- my1Shifts]
+                                    --> doShiftAndGo "home" | x <- my1Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "2" | x <- my2Shifts]
+                                    --> doShiftAndGo "webs" | x <- my2Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "3" | x <- my3Shifts]
+                                    --> doShiftAndGo "term" | x <- my3Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "4" | x <- my4Shifts]
+                                    --> doShiftAndGo "talk" | x <- my4Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "5" | x <- my5Shifts]
+                                    --> doShiftAndGo "docs" | x <- my5Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "6" | x <- my6Shifts]
-        , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "7" | x <- my7Shifts]
-        , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "8" | x <- my8Shifts]
-        , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "9" | x <- my9Shifts]
+                                    --> doShiftAndGo "arts" | x <- my6Shifts]
+        -- , [(className =? x <||> title =? x <||> resource =? x)
+        --                             --> doShiftAndGo "7" | x <- my7Shifts]
+        -- , [(className =? x <||> title =? x <||> resource =? x)
+        --                             --> doShiftAndGo "8" | x <- my8Shifts]
+        -- , [(className =? x <||> title =? x <||> resource =? x)
+        --                             --> doShiftAndGo "9" | x <- my9Shifts]
         ]) -- }}}
         where
             doShiftAndGo = doF . liftM2 (.) W.greedyView W.shift
             myFloats = ["MPlayer"]
             myIgnores = ["desktop_window", "kdesktop"]
-            my1Shifts = [ -- web browsers
+            my1Shifts = []
+            my2Shifts = [ -- web browsers
                           ".uzbl-core-wrapped"
                         , "Navigator" , "Firefox"
                         , "surf", "Surf"
                         , "Chromium"
                         ]
-            my2Shifts = [ -- coding + writing + files
+            my3Shifts = [ -- coding + writing + files
                           "vim"
                         , "ranger"
                         , "Termite"
                         ]
-            my3Shifts = []
             my4Shifts = []
             my5Shifts = []
-            my6Shifts = []
-            my7Shifts = []
-            my8Shifts = []
-            my9Shifts = []
+            my6Shifts = ["MPlayer"]
+            -- my7Shifts = []
+            -- my8Shifts = []
+            -- my9Shifts = []
 -- }}}
 myHandleEventHook = docksEventHook
 myStartupHook = return ()
@@ -238,8 +253,8 @@ myKeymap = \c -> mkKeymap c $
     ] ++
     [ -- (List comprehension for switching, shifting, etc.)
       (otherModMasks ++ "M-" ++ [key], action tag)
-      | (tag, key) <- zip myWS (concat $ map show [1..9])
-      , (otherModMasks, action) <- [ ("",   windows . W.greedyView)
+      | (tag, key) <- zip myWS (concat $ map show [1..])
+      , (otherModMasks, action) <- [ ("",   toggleOrView)
                                    , ("S-", \w -> windows $ W.greedyView w . W.shift w)
                                    , ("C-", \w -> windows $ W.greedyView w . copy w)
                                    ]
@@ -258,17 +273,6 @@ myKeymap = \c -> mkKeymap c $
     , ("M-S-<Esc>",    io (exitWith ExitSuccess))
     , ("M-<Esc>",      spawn "xmonad --recompile && xmonad-restart")
     ] -- }}}
--- }}}
--- {{{ XMobar
-myBar = "xmobar" ++ concat myXmobargs
-  where myXmobargs = [
-                       " -B ", "'" ++ (bg myCS) ++ "'"
-                     , " -F ", "'" ++ (fg myCS) ++ "'"
-                     , " -f ", "'" ++ myFont ++ "'"
-                     , " -a ", "'}{'"   -- chars to sep sections
-                     , " -s ", "'%'"    -- char to sep text from commands
-                     , " -o"            -- place at top, others = "-b"
-                     ]
 -- }}}
 -- {{{ XMonad.Prompt config
 myPrompt = defaultXPConfig

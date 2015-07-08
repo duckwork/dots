@@ -4,7 +4,7 @@ Config {
          border = BottomB
        , borderColor = "#646464"
        -- layout
-       , template = " %StdinReader% } %date% { %KFLG% "
+       , template = " %date% } %StdinReader% { %KFLG% "
           commands = [ Run Date "%H:%M" "date" 30
                      , Run Weather "KFLG" [ "-t"
                                           , "<tempF>F @ <rh>% rh: <skyCondition>"
