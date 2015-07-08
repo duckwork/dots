@@ -138,16 +138,16 @@ myLayoutHook = -- {{{
 myLogHook h = do -- {{{
     fadeInactiveLogHook 0.7
     copies <- wsContainingCopies -- TODO: fix theming here
-    let check ws | ws `elem` copies = xmobarColor (red myCS) "" . pad $ ws
-                 | otherwise = xmobarColor (yellow myCS) "" . pad $ ws
+    let check ws | ws `elem` copies = xmobarColor (red myCS) "" $ ws
+                 | otherwise = xmobarColor (yellow myCS) "" $ ws
      in dynamicLogWithPP defaultPP
            {
-             ppCurrent         = xmobarColor (red' myCS) "" . pad . map toUpper
+             ppCurrent         = xmobarColor (red' myCS) "" . map toUpper
            , ppHidden          = check
-           , ppHiddenNoWindows = xmobarColor (black' myCS) "" . pad
+           , ppHiddenNoWindows = xmobarColor (black' myCS) ""
            , ppUrgent          = xmobarColor (white myCS) (red' myCS)
            , ppSep             = xmobarColor (black' myCS) "" "//"
-           , ppWsSep           = xmobarColor (black' myCS) "" ""
+           , ppWsSep           = xmobarColor (black' myCS) "" " "
            , ppTitle           = xmobarColor (green' myCS) "" . shorten 40
            , ppLayout          = xmobarColor (magenta' myCS) ""
            , ppOrder           = \(ws:l:t:_) -> [ws]
@@ -243,9 +243,9 @@ myKeymap = \c -> mkKeymap c $
     , ("M-C-k",        sendMessage ShrinkSlave)
     , ("M-C-h",        sendMessage Shrink)
     , ("M-C-l",        sendMessage Expand)
-    , ("M-]",          sendMessage (IncMasterN 1))
     , ("M-[",          sendMessage (IncMasterN (-1)))
-    , ("M-/",          sendMessage NextLayout)
+    , ("M-]",          sendMessage (IncMasterN 1))
+    , ("M-\\",         sendMessage NextLayout)
     , ("M-=",          sendMessage $ Toggle FULL)
     , ("M-S-=",        sendMessage ToggleStruts) -- extra FULLness
     ] ++ -- }}}
@@ -269,9 +269,9 @@ myKeymap = \c -> mkKeymap c $
     , ("M-e",          launchAppInTerm myPrompt "vim")
     , ("M-S-e",        spawn (myTerm ++ "-t vim -e vim"))
     , ("M-w",          promptSearchBrowser myPrompt myBrowser mySearch)
-    , ("M-;",          runOrRaisePrompt myPrompt)  -- TODO: Combine
-    , ("M-<Space>",    windowPromptGoto myPrompt)  --       all of these
-    , ("M-S-<Space>",  windowPromptBring myPrompt) --       & do fuzzy search
+    , ("M-<Space>",    runOrRaisePrompt myPrompt)  -- TODO: Combine
+    , ("M-/",          windowPromptGoto myPrompt)  --       all of these
+    , ("M-S-/",        windowPromptBring myPrompt) --       & do fuzzy search
     , ("M-S-r",        myCommands >>= runCommand)  -- TODO: change binding
     , ("M-q",          kill1)
     , ("M-S-<Esc>",    io (exitWith ExitSuccess))
