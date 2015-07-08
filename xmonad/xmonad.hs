@@ -1,23 +1,24 @@
 -- Imports {{{
 import           Colorschemes
-import           Control.Monad                       (liftM2)
+import           Control.Monad                        (liftM2)
 import           Data.Char
 import           Data.List
-import qualified Data.Map                            as M
+import qualified Data.Map                             as M
 import           Data.Monoid
 import           Fuzzy
 import           System.Exit
 import           TermAppLauncher
-import           XMonad                              hiding ((|||))
+import           XMonad                               hiding ((|||))
 import           XMonad.Actions.Commands
 import           XMonad.Actions.CopyWindow
 import           XMonad.Actions.CycleWS
+import           XMonad.Actions.CycleWS
+import qualified          XMonad.Actions.DynamicWorkspaceOrder as DO
+import           XMonad.Actions.DynamicWorkspaces
 import           XMonad.Actions.Navigation2D
-import           XMonad.Actions.Promote
 import           XMonad.Actions.Search
 import           XMonad.Actions.Submap
 import           XMonad.Actions.WindowBringer
-import           XMonad.Actions.WithAll
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.FadeInactive
 import           XMonad.Hooks.InsertPosition
@@ -34,13 +35,12 @@ import           XMonad.Layout.NoBorders
 import           XMonad.Layout.PerWorkspace
 import           XMonad.Layout.Renamed
 import           XMonad.Layout.Tabbed
-import           XMonad.Layout.WindowNavigation
 import           XMonad.Prompt
 import           XMonad.Prompt.AppLauncher
 import           XMonad.Prompt.RunOrRaise
 import           XMonad.Prompt.Shell
 import           XMonad.Prompt.Window
-import qualified XMonad.StackSet                     as W
+import qualified XMonad.StackSet                      as W
 import           XMonad.Util.EZConfig
 import           XMonad.Util.Run
 -- import XMonad.Actions.WindowGo
@@ -114,8 +114,6 @@ myLayoutHook = -- {{{
                avoidStruts
              . smartBorders
              . mkToggle (single FULL)
-             $ onWorkspace "webs" myTabbed
-             $ onWorkspace "home" (myMRTile ||| myMirroredMRTile)
              $
                    myMRTile
                ||| myMirroredMRTile
