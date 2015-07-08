@@ -133,10 +133,21 @@ myLogHook h = do -- {{{
     fadeInactiveLogHook 0.7
     copies <- wsContainingCopies
     let check ws | ws `elem` copies = xmobarColor (red myCS) "" $ ws
-                 | otherwise = ws
-     in dynamicLogWithPP myPP { ppHidden = check
-                              , ppOutput = hPutStrLn h
-                              }
+                 | otherwise = xmobarColor (yellow myCS) "" $ ws
+     in dynamicLogWithPP defaultPP
+           {
+             ppCurrent         = xmobarColor (red' myCS) "" . wrap "[" "]"
+           , ppHidden          = check . pad
+           , ppHiddenNoWindows = xmobarColor (black' myCS) "" . pad
+           , ppUrgent          = xmobarColor (white myCS) (red' myCS)
+           , ppSep             = xmobarColor (black' myCS) "" "//"
+           , ppWsSep           = xmobarColor (black' myCS) "" ""
+           , ppTitle           = xmobarColor (green' myCS) "" . shorten 40
+           , ppLayout          = xmobarColor (magenta' myCS) ""
+           , ppOrder           = \(ws:l:t:_) -> [ws]
+           , ppExtras          = []
+           , ppOutput          = hPutStrLn h
+           }
 -- }}}
 myManageHook = -- {{{
         insertPosition Below Newer -- Xmonad default = Above Newer
@@ -258,21 +269,6 @@ myBar = "xmobar" ++ concat myXmobargs
                      , " -s ", "'%'"    -- char to sep text from commands
                      , " -o"            -- place at top, others = "-b"
                      ]
-
-myPP = defaultPP
-           {
-             ppCurrent         = xmobarColor (red' myCS) ""
-           , ppHidden          = xmobarColor (yellow myCS) ""
-           , ppHiddenNoWindows = const ""
-           , ppUrgent          = xmobarColor (white myCS) (red' myCS)
-           , ppSep             = xmobarColor (black' myCS) "" "//"
-           , ppWsSep           = xmobarColor (black' myCS) "" ","
-           , ppTitle           = xmobarColor (green' myCS) "" . shorten 40
-             -- ^ add `. ('}':)` when you figure out the xmobar escaping thing
-           , ppLayout          = xmobarColor (magenta' myCS) ""
-           , ppOrder           = \(ws:l:t:_) -> [ws, t]
-           , ppExtras          = []
-           }
 -- }}}
 -- {{{ XMonad.Prompt config
 myPrompt = defaultXPConfig
