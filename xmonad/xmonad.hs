@@ -1,6 +1,7 @@
 -- Imports {{{
 import           Colorschemes
 import           Control.Monad                       (liftM2)
+import           Data.Char
 import           Data.List
 import qualified Data.Map                            as M
 import           Data.Monoid
@@ -15,6 +16,7 @@ import           XMonad.Actions.Promote
 import           XMonad.Actions.Search
 import           XMonad.Actions.Submap
 import           XMonad.Actions.WindowBringer
+import           XMonad.Actions.WithAll
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.FadeInactive
 import           XMonad.Hooks.InsertPosition
@@ -40,7 +42,6 @@ import           XMonad.Prompt.Window
 import qualified XMonad.StackSet                     as W
 import           XMonad.Util.EZConfig
 import           XMonad.Util.Run
-import Data.Char
 -- import XMonad.Actions.WindowGo
 -- }}}
 -- {{{ Default programs, etc.
@@ -192,7 +193,7 @@ myManageHook = -- {{{
         ]) -- }}}
         where
             doShiftAndGo = doF . liftM2 (.) W.greedyView W.shift
-            myFloats = ["MPlayer"]
+            myFloats = ["MPlayer", "xmessage"]
             myIgnores = ["desktop_window", "kdesktop"]
             my1Shifts = []
             my2Shifts = [ -- web browsers
@@ -226,7 +227,7 @@ myKeymap = \c -> mkKeymap c $
     , ("M-m",          windows W.focusMaster)
     , ("M-S-m",        windows W.swapMaster)
     , ("M-t",          withFocused $ windows . W.sink)
-    , ("M-S-t",        switchLayer)
+    , ("M-C-t",        switchLayer)
     , ("M-j",          windowGo   D True)
     , ("M-S-j",        windowSwap D True)
     , ("M-k",          windowGo   U True)
