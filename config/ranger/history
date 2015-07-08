@@ -7,7 +7,8 @@ open_with tar -xvf
 rename config
 rename .config
 rename fuzzy.hs
-delete 
 rename .xmonad
 rename Colorschemes.hs
 edit 
+delete 
+rename fuzzylauncher.hs

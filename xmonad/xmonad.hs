@@ -5,6 +5,7 @@ import           Data.Char
 import           Data.List
 import qualified Data.Map                            as M
 import           Data.Monoid
+import           Fuzzy
 import           System.Exit
 import           TermAppLauncher
 import           XMonad                              hiding ((|||))
@@ -226,8 +227,10 @@ myKeymap = \c -> mkKeymap c $
     , ("M-S-<Tab>",    windows W.focusUp)
     , ("M-m",          windows W.focusMaster)
     , ("M-S-m",        windows W.swapMaster)
-    , ("M-t",          withFocused $ windows . W.sink)
-    , ("M-C-t",        switchLayer)
+    , ("M-`",          withFocused $ windows . W.sink)
+    , ("M-S-`",        withFocused $ windows . flip W.float --Middle of screen
+                                     (W.RationalRect (1/4) (1/4) (1/2) (1/2)))
+    , ("M-C-`",        switchLayer)
     , ("M-j",          windowGo   D True)
     , ("M-S-j",        windowSwap D True)
     , ("M-k",          windowGo   U True)
@@ -242,9 +245,9 @@ myKeymap = \c -> mkKeymap c $
     , ("M-C-l",        sendMessage Expand)
     , ("M-]",          sendMessage (IncMasterN 1))
     , ("M-[",          sendMessage (IncMasterN (-1)))
-    , ("M-b",          sendMessage ToggleStruts)
     , ("M-/",          sendMessage NextLayout)
     , ("M-=",          sendMessage $ Toggle FULL)
+    , ("M-S-=",        sendMessage ToggleStruts) -- extra FULLness
     ] ++ -- }}}
     [ -- Workspaces {{{
       ("M-.",          moveTo Next NonEmptyWS)
@@ -288,7 +291,7 @@ myPrompt = defaultXPConfig
            , alwaysHighlight = True
            , historySize     = 10000
            , height          = 16
-           , searchPredicate = isInfixOf
+           , searchPredicate = fuzzyMatch
            }
 -- }}}
 -- {{{ XMonad.Layout.Tabbed config
