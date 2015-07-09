@@ -1759,6 +1759,7 @@ function! s:add_xmonad_path()
         let b:ghcmod_ghc_options = []
     endif
     call add(b:ghcmod_ghc_options, '-i' . expand('~/.xmonad/lib'))
+    call add(b:ghcmod_ghc_options, '-i' . expand('~/.xmonad'))
 endfunction " }}}
 "}}}
 " Plugin can I has(?) {{{

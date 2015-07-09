@@ -14,7 +14,7 @@ import           XMonad.Actions.CopyWindow
 import           XMonad.Actions.CycleWS
 import           XMonad.Actions.CycleWS
 import qualified          XMonad.Actions.DynamicWorkspaceOrder as DO
-import           XMonad.Actions.DynamicWorkspaces
+import           XMonad.Actions.DynamicWorkspacesPure
 import           XMonad.Actions.Navigation2D
 import           XMonad.Actions.Search
 import           XMonad.Actions.Submap
@@ -103,11 +103,11 @@ main = do
 -- {{{ Hooks = [ Layout, Log, Manage, HandleEvents, Startup ]
 myWS = -- {{{
     [ "home" -- beginning screen
-    , "webs" -- web browser & media
-    , "term" -- coding + writing
-    , "talk" -- communication (irc, email)
-    , "docs" -- gui editors (libreoffice, gimp, etc.)
-    , "arts" -- media
+    -- , "webs" -- web browser & media
+    -- , "term" -- coding + writing
+    -- , "talk" -- communication (irc, email)
+    -- , "docs" -- gui editors (libreoffice, gimp, etc.)
+    -- , "arts" -- media
     ] -- ++ map show [7..9]
 -- }}}
 myLayoutHook = -- {{{
@@ -183,15 +183,16 @@ myManageHook = -- {{{
                                     --> doShiftAndGo "docs" | x <- my5Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
                                     --> doShiftAndGo "arts" | x <- my6Shifts]
-        -- , [(className =? x <||> title =? x <||> resource =? x)
-        --                             --> doShiftAndGo "7" | x <- my7Shifts]
-        -- , [(className =? x <||> title =? x <||> resource =? x)
-        --                             --> doShiftAndGo "8" | x <- my8Shifts]
-        -- , [(className =? x <||> title =? x <||> resource =? x)
-        --                             --> doShiftAndGo "9" | x <- my9Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "7" | x <- my7Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "8" | x <- my8Shifts]
+        , [(className =? x <||> title =? x <||> resource =? x)
+                                    --> doShiftAndGo "9" | x <- my9Shifts]
         ]) -- }}}
         where
             doShiftAndGo = doF . liftM2 (.) W.greedyView W.shift
+            -- doShiftAndGo = liftX . addWorkspace
             myFloats = ["MPlayer", "xmessage"]
             myIgnores = ["desktop_window", "kdesktop"]
             my1Shifts = []
@@ -209,9 +210,9 @@ myManageHook = -- {{{
             my4Shifts = []
             my5Shifts = []
             my6Shifts = ["MPlayer"]
-            -- my7Shifts = []
-            -- my8Shifts = []
-            -- my9Shifts = []
+            my7Shifts = []
+            my8Shifts = []
+            my9Shifts = []
 -- }}}
 myHandleEventHook = docksEventHook
 myStartupHook = return ()
@@ -246,6 +247,7 @@ myKeymap = \c -> mkKeymap c $
     , ("M-\\",         sendMessage NextLayout)
     , ("M-=",          sendMessage $ Toggle FULL)
     , ("M-S-=",        sendMessage ToggleStruts) -- extra FULLness
+    , ("M-q",          kill1 >> removeEmptyWorkspace)
     ] ++ -- }}}
     [ -- Workspaces {{{
       ("M-.",          moveTo Next NonEmptyWS)
@@ -271,7 +273,6 @@ myKeymap = \c -> mkKeymap c $
     , ("M-/",          windowPromptGoto myPrompt)  --       all of these
     , ("M-S-/",        windowPromptBring myPrompt) --       & do fuzzy search
     , ("M-S-r",        myCommands >>= runCommand)  -- TODO: change binding
-    , ("M-q",          kill1)
     , ("M-S-<Esc>",    io (exitWith ExitSuccess))
     , ("M-<Esc>",      spawn "xmonad --recompile && xmonad-restart")
     ] -- }}}
