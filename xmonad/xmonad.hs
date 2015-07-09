@@ -103,12 +103,13 @@ main = do
 -- {{{ Hooks = [ Layout, Log, Manage, HandleEvents, Startup ]
 myWS = -- {{{
     [ "home" -- beginning screen
-    -- , "webs" -- web browser & media
-    -- , "term" -- coding + writing
-    -- , "talk" -- communication (irc, email)
-    -- , "docs" -- gui editors (libreoffice, gimp, etc.)
-    -- , "arts" -- media
-    ] -- ++ map show [7..9]
+    , "webs" -- web browser & media
+    , "term" -- coding + writing
+    , "talk" -- communication (irc, email)
+    , "docs" -- gui editors (libreoffice, gimp, etc.)
+    , "arts" -- media
+    ]
+    -- ++ map show [7..9]
 -- }}}
 myLayoutHook = -- {{{
                avoidStruts
@@ -135,7 +136,7 @@ myLayoutHook = -- {{{
 -- }}}
 myLogHook h = do -- {{{
     fadeInactiveLogHook 0.7
-    copies <- wsContainingCopies -- TODO: fix theming here
+    copies <- wsContainingCopies
     let check ws | ws `elem` copies = xmobarColor (red myCS) "" $ ws
                  | otherwise = xmobarColor (yellow myCS) "" $ ws
      in dynamicLogWithPP defaultPP
@@ -144,6 +145,7 @@ myLogHook h = do -- {{{
            , ppHidden          = check
            , ppHiddenNoWindows = xmobarColor (black' myCS) ""
            , ppUrgent          = xmobarColor (white myCS) (red' myCS)
+           -- , ppSort            = DO.getSortByOrder
            , ppSep             = xmobarColor (black' myCS) "" "//"
            , ppWsSep           = xmobarColor (black' myCS) "" " "
            , ppTitle           = xmobarColor (green' myCS) "" . shorten 40
@@ -183,16 +185,18 @@ myManageHook = -- {{{
                                     --> doShiftAndGo "docs" | x <- my5Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
                                     --> doShiftAndGo "arts" | x <- my6Shifts]
-        , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "7" | x <- my7Shifts]
-        , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "8" | x <- my8Shifts]
-        , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "9" | x <- my9Shifts]
+        -- , [(className =? x <||> title =? x <||> resource =? x)
+        --                             --> doShiftAndGo "7" | x <- my7Shifts]
+        -- , [(className =? x <||> title =? x <||> resource =? x)
+        --                             --> doShiftAndGo "8" | x <- my8Shifts]
+        -- , [(className =? x <||> title =? x <||> resource =? x)
+        --                             --> doShiftAndGo "9" | x <- my9Shifts]
         ]) -- }}}
         where
             doShiftAndGo = doF . liftM2 (.) W.greedyView W.shift
-            -- doShiftAndGo = liftX . addWorkspace
+            -- doShiftAndGo ws = doF (addHiddenWorkspace' ws myLayoutHook) <+> doShift ws
+            -- doShiftAndGo ws = liftX (asks (layoutHook . config)) >>=
+            --                  \l -> doF (addHiddenWorkspace'' ws l) <+> doShift ws
             myFloats = ["MPlayer", "xmessage"]
             myIgnores = ["desktop_window", "kdesktop"]
             my1Shifts = []
@@ -210,9 +214,9 @@ myManageHook = -- {{{
             my4Shifts = []
             my5Shifts = []
             my6Shifts = ["MPlayer"]
-            my7Shifts = []
-            my8Shifts = []
-            my9Shifts = []
+            -- my7Shifts = []
+            -- my8Shifts = []
+            -- my9Shifts = []
 -- }}}
 myHandleEventHook = docksEventHook
 myStartupHook = return ()
@@ -247,14 +251,17 @@ myKeymap = \c -> mkKeymap c $
     , ("M-\\",         sendMessage NextLayout)
     , ("M-=",          sendMessage $ Toggle FULL)
     , ("M-S-=",        sendMessage ToggleStruts) -- extra FULLness
-    , ("M-q",          kill1 >> removeEmptyWorkspace)
+    -- , ("M-q",          kill1)
+    , ("M-q",          removeEmptyWorkspaceAfterExcept ["home"] kill1)
     ] ++ -- }}}
     [ -- Workspaces {{{
       ("M-.",          moveTo Next NonEmptyWS)
     , ("M-,",          moveTo Prev NonEmptyWS)
     , ("M-S-.",        shiftToNext >> nextWS)
     , ("M-S-,",        shiftToPrev >> prevWS)
+    , ("M-;",          addWorkspacePrompt myPrompt)
     ] ++
+    -- zip ["M-1", "M-2", "M-3", "M-4", "M-5", "M-6", "M-7", "M-8", "M-9"] (map (withNthWorkspace W.greedyView) [0..])
     [ -- (List comprehension for switching, shifting, etc.)
       (otherModMasks ++ "M-" ++ [key], action tag)
       | (tag, key) <- zip myWS (concat $ map show [1..])

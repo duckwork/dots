@@ -27,3 +27,6 @@ xmonad/xmonad-x86_64-linux
 # History files
 config/ranger/history
 xmonad/history
+
+# chromium sux
+config/chromium/
