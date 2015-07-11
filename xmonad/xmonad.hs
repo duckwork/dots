@@ -1,6 +1,5 @@
 -- Imports {{{
 import qualified XMonad.Layout.Groups as G
-import XMonad.Layout.Groups.Helpers
 import XMonad.Layout.Groups.Wmii
 import           Colorschemes
 import           Control.Monad                        (liftM2)
@@ -123,7 +122,7 @@ myLayoutHook = -- {{{
                ||| myMirroredMRTile
                ||| myTabbed
     where
-          myWmii              = renamed [Replace "wmii"] $
+          myWmii              = renamed [Prepend "wmii", CutWordsRight 2] $
                                   wmii shrinkText myTabConfig
           myMRTile            = renamed [Replace "tiled"] $
                                   mouseResizableTile { nmaster        = 1
@@ -147,7 +146,7 @@ myLogHook h = do -- {{{
         mkLengthL n xs | length xs < n = replicate (n - length xs) ' ' ++ xs
                        | otherwise     = shorten n xs
         mkLengthR n xs | length xs < n = xs ++ replicate (n - length xs) ' '
-                       | otherwise     = shorten n xs
+                       | otherwise     = take n xs
      in dynamicLogWithPP defaultPP
            {
              ppCurrent         = xmobarColor (red' myCS) "" . map toUpper
@@ -157,7 +156,7 @@ myLogHook h = do -- {{{
            , ppSep             = xmobarColor (black' myCS) "" " // "
            , ppWsSep           = " "
            , ppTitle           = xmobarColor (green' myCS) "" . mkLengthL 10
-           , ppLayout          = xmobarColor (magenta' myCS) "" . mkLengthR 10
+           , ppLayout          = xmobarColor (magenta' myCS) "" . mkLengthR 5
            , ppOrder           = \(ws:l:t:_) -> [t, ws, l]
            , ppExtras          = []
            , ppOutput          = hPutStrLn h
@@ -259,6 +258,11 @@ myKeymap = \c -> mkKeymap c $
     , ("M-\\",         sendMessage NextLayout)
     , ("M-=",          sendMessage $ Toggle FULL)
     , ("M-S-=",        sendMessage ToggleStruts) -- extra FULLness
+    , ("M-; 1",        groupToFullLayout)
+    , ("M-; 2",        groupToTabbedLayout)
+    , ("M-; 3",        groupToVerticalLayout)
+    , ("M-; 4",        moveToGroupUp False)
+    , ("M-; 5",        moveToGroupDown False)
     , ("M-q",          kill1)
     ] ++ -- }}}
     [ -- Workspaces {{{
@@ -289,45 +293,45 @@ myKeymap = \c -> mkKeymap c $
     , ("M-<Esc>",      spawn "xmonad --recompile && xmonad-restart")
     ] -- }}}
   where declareMsg msg = do -- {{{
-        winset <- gets windowset
-        let ld = description . W.layout . W.workspace . W.current $ winset
-        case msg of
-          "goL"     -> case ld of
-                         "Tabbed" -> windows W.focusUp
-                         _        -> windowGo L True
-          "swapL"   -> case ld of
-                         "Tabbed" -> windows W.swapUp
-                         _        -> windowSwap L True
-          "resizeL" -> case ld of
-                         "Mirror" -> sendMessage ShrinkSlave
-                         _        -> sendMessage Shrink
-          "goD"     -> case ld of
-                         "Tabbed" -> windows W.focusDown
-                         _        -> windowGo D True
-          "swapD"   -> case ld of
-                         "Tabbed" -> windows W.swapDown
-                         _        -> windowSwap D True
-          "resizeD" -> case ld of
-                         "Mirror" -> sendMessage Expand
-                         _        -> sendMessage ExpandSlave
-          "goU"     -> case ld of
-                         "Tabbed" -> windows W.focusUp
-                         _        -> windowGo U True
-          "swapU"   -> case ld of
-                         "Tabbed" -> windows W.swapUp
-                         _        -> windowSwap U True
-          "resizeU" -> case ld of
-                         "Mirror" -> sendMessage Shrink
-                         _        -> sendMessage ShrinkSlave
-          "goR"     -> case ld of
-                         "Tabbed" -> windows W.focusDown
-                         _        -> windowGo R True
-          "swapR"   -> case ld of
-                         "Tabbed" -> windows W.swapDown
-                         _        -> windowSwap R True
-          "resizeR" -> case ld of
-                         "Mirror" -> sendMessage ExpandSlave
-                         _        -> sendMessage Expand
+          winset <- gets windowset
+          let ld = description . W.layout . W.workspace . W.current $ winset
+          case msg of
+            "goL"     -> case ld of
+                          "Tabbed" -> windows W.focusUp
+                          _        -> windowGo L True
+            "swapL"   -> case ld of
+                          "Tabbed" -> windows W.swapUp
+                          _        -> windowSwap L True
+            "resizeL" -> case ld of
+                          "Mirror" -> sendMessage ShrinkSlave
+                          _        -> sendMessage Shrink
+            "goD"     -> case ld of
+                          "Tabbed" -> windows W.focusDown
+                          _        -> windowGo D True
+            "swapD"   -> case ld of
+                          "Tabbed" -> windows W.swapDown
+                          _        -> windowSwap D True
+            "resizeD" -> case ld of
+                          "Mirror" -> sendMessage Expand
+                          _        -> sendMessage ExpandSlave
+            "goU"     -> case ld of
+                          "Tabbed" -> windows W.focusUp
+                          _        -> windowGo U True
+            "swapU"   -> case ld of
+                          "Tabbed" -> windows W.swapUp
+                          _        -> windowSwap U True
+            "resizeU" -> case ld of
+                          "Mirror" -> sendMessage Shrink
+                          _        -> sendMessage ShrinkSlave
+            "goR"     -> case ld of
+                          "Tabbed" -> windows W.focusDown
+                          _        -> windowGo R True
+            "swapR"   -> case ld of
+                          "Tabbed" -> windows W.swapDown
+                          _        -> windowSwap R True
+            "resizeR" -> case ld of
+                          "Mirror" -> sendMessage ExpandSlave
+                          _        -> sendMessage Expand
     -- }}}
 -- }}}
 -- {{{ XMonad.Prompt config
