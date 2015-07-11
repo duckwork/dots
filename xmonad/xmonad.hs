@@ -245,7 +245,7 @@ myKeymap = \c -> mkKeymap c $
     , ("M-l",          windowGo   R True)
     , ("M-S-l",        windowSwap R True)
     , ("M-C-j",        myMessage "resizeD")
-    , ("M-C-k",        myMessage "resuzeU")
+    , ("M-C-k",        myMessage "resizeU")
     , ("M-C-h",        myMessage "resizeL")
     , ("M-C-l",        myMessage "resizeR")
     , ("M-[",          sendMessage (IncMasterN (-1)))
