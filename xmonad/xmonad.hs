@@ -118,24 +118,26 @@ myLayoutHook = -- {{{
                avoidStruts
              . smartBorders
              . mkToggle (single FULL)
-             $     wmii shrinkText myTabConfig
+             $     myWmii
                ||| myMRTile
                ||| myMirroredMRTile
                ||| myTabbed
     where
-          myMRTile    = renamed [Replace "Tiled"] $
-                          mouseResizableTile { nmaster        = 1
-                                             , masterFrac    = 1/2
-                                             , fracIncrement = 1/50
-                                             }
+          myWmii              = renamed [Replace "Wmii "] $
+                                  wmii shrinkText myTabConfig
+          myMRTile            = renamed [Replace "Tiled"] $
+                                  mouseResizableTile { nmaster        = 1
+                                                     , masterFrac    = 1/2
+                                                     , fracIncrement = 1/50
+                                                     }
           myMirroredMRTile    = renamed [Replace "Mirror"] $
                                   mouseResizableTile { nmaster        = 1
                                                      , masterFrac    = 1/2
                                                      , fracIncrement = 1/50
                                                      , isMirrored    = True
                                                      }
-          myTabbed    = renamed [Replace "Tabbed"] $
-                              tabbed shrinkText myTabConfig
+          myTabbed            = renamed [Replace "Tabbed"] $
+                                      tabbed shrinkText myTabConfig
 -- }}}
 myLogHook h = do -- {{{
     fadeInactiveLogHook 0.7
@@ -148,11 +150,11 @@ myLogHook h = do -- {{{
            , ppHidden          = check
            , ppHiddenNoWindows = xmobarColor (black' myCS) ""
            , ppUrgent          = xmobarColor (white myCS) (red' myCS)
-           , ppSep             = xmobarColor (black' myCS) "" "// "
-           , ppWsSep           = xmobarColor (black' myCS) "" " "
-           , ppTitle           = xmobarColor (green' myCS) "" . shorten 40
-           , ppLayout          = xmobarColor (magenta' myCS) ""
-           , ppOrder           = \(ws:l:t:_) -> [l, ws]
+           , ppSep             = xmobarColor (black' myCS) "" " // "
+           , ppWsSep           = " "
+           , ppTitle           = xmobarColor (green' myCS) "" . shorten 10
+           , ppLayout          = xmobarColor (magenta' myCS) "" . wrap "     " ""
+           , ppOrder           = \(ws:l:t:_) -> [l, ws, t]
            , ppExtras          = []
            , ppOutput          = hPutStrLn h
            }
@@ -236,18 +238,18 @@ myKeymap = \c -> mkKeymap c $
     , ("M-S-`",        withFocused $ windows . flip W.float --Middle of screen
                                      (W.RationalRect (1/4) (1/4) (1/2) (1/2)))
     , ("M-C-`",        switchLayer)
-    , ("M-j",          windowGo   D True)
-    , ("M-S-j",        windowSwap D True)
-    , ("M-k",          windowGo   U True)
-    , ("M-S-k",        windowSwap U True)
-    , ("M-h",          windowGo   L True)
-    , ("M-S-h",        windowSwap L True)
-    , ("M-l",          windowGo   R True)
-    , ("M-S-l",        windowSwap R True)
-    , ("M-C-j",        myMessage "resizeD")
-    , ("M-C-k",        myMessage "resizeU")
-    , ("M-C-h",        myMessage "resizeL")
-    , ("M-C-l",        myMessage "resizeR")
+    , ("M-h",          declareMsg "goL")
+    , ("M-S-h",        declareMsg "swapL")
+    , ("M-j",          declareMsg "goD")
+    , ("M-S-j",        declareMsg "swapD")
+    , ("M-k",          declareMsg "goU")
+    , ("M-S-k",        declareMsg "swapU")
+    , ("M-l",          declareMsg "goR")
+    , ("M-S-l",        declareMsg "swapR")
+    , ("M-C-j",        declareMsg "resizeD")
+    , ("M-C-k",        declareMsg "resizeU")
+    , ("M-C-h",        declareMsg "resizeL")
+    , ("M-C-l",        declareMsg "resizeR")
     , ("M-[",          sendMessage (IncMasterN (-1)))
     , ("M-]",          sendMessage (IncMasterN 1))
     , ("M-\\",         sendMessage NextLayout)
@@ -282,23 +284,47 @@ myKeymap = \c -> mkKeymap c $
     , ("M-S-<Esc>",    io (exitWith ExitSuccess))
     , ("M-<Esc>",      spawn "xmonad --recompile && xmonad-restart")
     ] -- }}}
-    where
-      myMessage msg = do
+  where declareMsg msg = do -- {{{
         winset <- gets windowset
         let ld = description . W.layout . W.workspace . W.current $ winset
         case msg of
+          "goL"     -> case ld of
+                         "Tabbed" -> windows W.focusUp
+                         _        -> windowGo L True
+          "swapL"   -> case ld of
+                         "Tabbed" -> windows W.swapUp
+                         _        -> windowSwap L True
           "resizeL" -> case ld of
                          "Mirror" -> sendMessage ShrinkSlave
                          _        -> sendMessage Shrink
-          "resizeR" -> case ld of
-                         "Mirror" -> sendMessage ExpandSlave
-                         _        -> sendMessage Expand
-          "resizeU" -> case ld of
-                         "Mirror" -> sendMessage Shrink
-                         _        -> sendMessage ShrinkSlave
+          "goD"     -> case ld of
+                         "Tabbed" -> windows W.focusDown
+                         _        -> windowGo D True
+          "swapD"   -> case ld of
+                         "Tabbed" -> windows W.swapDown
+                         _        -> windowSwap D True
           "resizeD" -> case ld of
                          "Mirror" -> sendMessage Expand
                          _        -> sendMessage ExpandSlave
+          "goU"     -> case ld of
+                         "Tabbed" -> windows W.focusUp
+                         _        -> windowGo U True
+          "swapU"   -> case ld of
+                         "Tabbed" -> windows W.swapUp
+                         _        -> windowSwap U True
+          "resizeU" -> case ld of
+                         "Mirror" -> sendMessage Shrink
+                         _        -> sendMessage ShrinkSlave
+          "goR"     -> case ld of
+                         "Tabbed" -> windows W.focusDown
+                         _        -> windowGo R True
+          "swapR"   -> case ld of
+                         "Tabbed" -> windows W.swapDown
+                         _        -> windowSwap R True
+          "resizeR" -> case ld of
+                         "Mirror" -> sendMessage ExpandSlave
+                         _        -> sendMessage Expand
+    -- }}}
 -- }}}
 -- {{{ XMonad.Prompt config
 myPrompt = defaultXPConfig
