@@ -1,4 +1,7 @@
 -- Imports {{{
+import qualified XMonad.Layout.Groups as G
+import XMonad.Layout.Groups.Helpers
+import XMonad.Layout.Groups.Wmii
 import           Colorschemes
 import           Control.Monad                        (liftM2)
 import           Data.Char
@@ -115,8 +118,8 @@ myLayoutHook = -- {{{
                avoidStruts
              . smartBorders
              . mkToggle (single FULL)
-             $
-                   myMRTile
+             $     wmii shrinkText myTabConfig
+               ||| myMRTile
                ||| myMirroredMRTile
                ||| myTabbed
     where
@@ -145,7 +148,6 @@ myLogHook h = do -- {{{
            , ppHidden          = check
            , ppHiddenNoWindows = xmobarColor (black' myCS) ""
            , ppUrgent          = xmobarColor (white myCS) (red' myCS)
-           -- , ppSort            = DO.getSortByOrder
            , ppSep             = xmobarColor (black' myCS) "" "//"
            , ppWsSep           = xmobarColor (black' myCS) "" " "
            , ppTitle           = xmobarColor (green' myCS) "" . shorten 40
@@ -251,17 +253,34 @@ myKeymap = \c -> mkKeymap c $
     , ("M-\\",         sendMessage NextLayout)
     , ("M-=",          sendMessage $ Toggle FULL)
     , ("M-S-=",        sendMessage ToggleStruts) -- extra FULLness
-    -- , ("M-q",          kill1)
-    , ("M-q",          removeEmptyWorkspaceAfterExcept ["home"] kill1)
+    --- wmii bindings
+    -- , ("M-; k",      focusUp)
+    -- , ("M-; j",      focusDown)
+    -- , ("M-; S-k",      swapUp)
+    -- , ("M-; S-j",      swapDown)
+    -- , ("M-; h",      focusGroupUp)
+    -- , ("M-; l",      focusGroupDown)
+    -- , ("M-; S-h",      swapGroupUp)
+    -- , ("M-; S-l",      swapGroupDown)
+    -- , ("M-; ]",      moveToGroupDown False)
+    -- , ("M-; [",      moveToGroupUp False)
+    -- , ("M-; ;",      splitGroup)
+    -- , ("M-; =",      zoomGroupIn)
+    -- , ("M-; -",      zoomGroupOut)
+    -- , ("M-; 0",      toggleGroupFull)
+    -- , ("M-; \\",     groupToNextLayout)
+    -- , ("M-; f",      groupToFullLayout)
+    -- , ("M-; t",      groupToTabbedLayout)
+    -- , ("M-; v",      groupToVerticalLayout)
+    ---
+    , ("M-q",          kill1)
     ] ++ -- }}}
     [ -- Workspaces {{{
       ("M-.",          moveTo Next NonEmptyWS)
     , ("M-,",          moveTo Prev NonEmptyWS)
     , ("M-S-.",        shiftToNext >> nextWS)
     , ("M-S-,",        shiftToPrev >> prevWS)
-    , ("M-;",          addWorkspacePrompt myPrompt)
     ] ++
-    -- zip ["M-1", "M-2", "M-3", "M-4", "M-5", "M-6", "M-7", "M-8", "M-9"] (map (withNthWorkspace W.greedyView) [0..])
     [ -- (List comprehension for switching, shifting, etc.)
       (otherModMasks ++ "M-" ++ [key], action tag)
       | (tag, key) <- zip myWS (concat $ map show [1..])
