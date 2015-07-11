@@ -1,22 +1,27 @@
 # bashrc
 
 shopt -s histappend
+export HISTIGNORE='&:ls:cd ~:cd ..:[bf]g:exit:h:history'
 export HISTCONNTORL=ignoreboth:erasedups
 export HISTFILESIZE=50000
 export HISTSIZE=5000
-export HISTIGNORE=ls:exit:la:l:pwd
-PROMPT_COMMAND='history -a'
+export PROMPT_COMMAND='history -a'
+
+function cleanhist # Remove duplicates from history file
+{
+  nl $HOME/.bash_history | sort -k 2 | uniq -f 1 | sort -n | cut -f 2 > $HOME/.bash_history;
+}
 
 # FANCY ALIASES
 function mkdir # don't complain about parents
 {
-  command mkdir -p "$@"
+  command mkdir -p "$@";
 }
 function ls # add distinguishing marks after names
 {
-  command ls -F --color=auto "$@"
+  command ls -F --color=auto "$@";
 }
 function grep # always recursive
 {
-  command grep -r "$@"
+  command grep -r "$@";
 }
