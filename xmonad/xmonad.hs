@@ -148,11 +148,11 @@ myLogHook h = do -- {{{
            , ppHidden          = check
            , ppHiddenNoWindows = xmobarColor (black' myCS) ""
            , ppUrgent          = xmobarColor (white myCS) (red' myCS)
-           , ppSep             = xmobarColor (black' myCS) "" "//"
+           , ppSep             = xmobarColor (black' myCS) "" "// "
            , ppWsSep           = xmobarColor (black' myCS) "" " "
            , ppTitle           = xmobarColor (green' myCS) "" . shorten 40
            , ppLayout          = xmobarColor (magenta' myCS) ""
-           , ppOrder           = \(ws:l:t:_) -> [ws]
+           , ppOrder           = \(ws:l:t:_) -> [l, ws]
            , ppExtras          = []
            , ppOutput          = hPutStrLn h
            }
@@ -244,35 +244,15 @@ myKeymap = \c -> mkKeymap c $
     , ("M-S-h",        windowSwap L True)
     , ("M-l",          windowGo   R True)
     , ("M-S-l",        windowSwap R True)
-    , ("M-C-j",        sendMessage ExpandSlave)
-    , ("M-C-k",        sendMessage ShrinkSlave)
-    , ("M-C-h",        sendMessage Shrink)
-    , ("M-C-l",        sendMessage Expand)
+    , ("M-C-j",        myMessage "resizeD")
+    , ("M-C-k",        myMessage "resuzeU")
+    , ("M-C-h",        myMessage "resizeL")
+    , ("M-C-l",        myMessage "resizeR")
     , ("M-[",          sendMessage (IncMasterN (-1)))
     , ("M-]",          sendMessage (IncMasterN 1))
     , ("M-\\",         sendMessage NextLayout)
     , ("M-=",          sendMessage $ Toggle FULL)
     , ("M-S-=",        sendMessage ToggleStruts) -- extra FULLness
-    --- wmii bindings
-    -- , ("M-; k",      focusUp)
-    -- , ("M-; j",      focusDown)
-    -- , ("M-; S-k",      swapUp)
-    -- , ("M-; S-j",      swapDown)
-    -- , ("M-; h",      focusGroupUp)
-    -- , ("M-; l",      focusGroupDown)
-    -- , ("M-; S-h",      swapGroupUp)
-    -- , ("M-; S-l",      swapGroupDown)
-    -- , ("M-; ]",      moveToGroupDown False)
-    -- , ("M-; [",      moveToGroupUp False)
-    -- , ("M-; ;",      splitGroup)
-    -- , ("M-; =",      zoomGroupIn)
-    -- , ("M-; -",      zoomGroupOut)
-    -- , ("M-; 0",      toggleGroupFull)
-    -- , ("M-; \\",     groupToNextLayout)
-    -- , ("M-; f",      groupToFullLayout)
-    -- , ("M-; t",      groupToTabbedLayout)
-    -- , ("M-; v",      groupToVerticalLayout)
-    ---
     , ("M-q",          kill1)
     ] ++ -- }}}
     [ -- Workspaces {{{
@@ -302,6 +282,23 @@ myKeymap = \c -> mkKeymap c $
     , ("M-S-<Esc>",    io (exitWith ExitSuccess))
     , ("M-<Esc>",      spawn "xmonad --recompile && xmonad-restart")
     ] -- }}}
+    where
+      myMessage msg = do
+        winset <- gets windowset
+        let ld = description . W.layout . W.workspace . W.current $ winset
+        case msg of
+          "resizeL" -> case ld of
+                         "Mirror" -> sendMessage ShrinkSlave
+                         _        -> sendMessage Shrink
+          "resizeR" -> case ld of
+                         "Mirror" -> sendMessage ExpandSlave
+                         _        -> sendMessage Expand
+          "resizeU" -> case ld of
+                         "Mirror" -> sendMessage Shrink
+                         _        -> sendMessage ShrinkSlave
+          "resizeD" -> case ld of
+                         "Mirror" -> sendMessage Expand
+                         _        -> sendMessage ExpandSlave
 -- }}}
 -- {{{ XMonad.Prompt config
 myPrompt = defaultXPConfig
