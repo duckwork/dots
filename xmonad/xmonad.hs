@@ -123,20 +123,20 @@ myLayoutHook = -- {{{
                ||| myMirroredMRTile
                ||| myTabbed
     where
-          myWmii              = renamed [Replace "Wmii "] $
+          myWmii              = renamed [Replace "wmii"] $
                                   wmii shrinkText myTabConfig
-          myMRTile            = renamed [Replace "Tiled"] $
+          myMRTile            = renamed [Replace "tiled"] $
                                   mouseResizableTile { nmaster        = 1
                                                      , masterFrac    = 1/2
                                                      , fracIncrement = 1/50
                                                      }
-          myMirroredMRTile    = renamed [Replace "Mirror"] $
+          myMirroredMRTile    = renamed [Replace "mirror"] $
                                   mouseResizableTile { nmaster        = 1
                                                      , masterFrac    = 1/2
                                                      , fracIncrement = 1/50
                                                      , isMirrored    = True
                                                      }
-          myTabbed            = renamed [Replace "Tabbed"] $
+          myTabbed            = renamed [Replace "tabbed"] $
                                       tabbed shrinkText myTabConfig
 -- }}}
 myLogHook h = do -- {{{
@@ -144,6 +144,10 @@ myLogHook h = do -- {{{
     copies <- wsContainingCopies
     let check ws | ws `elem` copies = xmobarColor (red myCS) "" $ ws
                  | otherwise = xmobarColor (yellow myCS) "" $ ws
+        mkLengthL n xs | length xs < n = replicate (n - length xs) ' ' ++ xs
+                       | otherwise     = shorten n xs
+        mkLengthR n xs | length xs < n = xs ++ replicate (n - length xs) ' '
+                       | otherwise     = shorten n xs
      in dynamicLogWithPP defaultPP
            {
              ppCurrent         = xmobarColor (red' myCS) "" . map toUpper
@@ -152,9 +156,9 @@ myLogHook h = do -- {{{
            , ppUrgent          = xmobarColor (white myCS) (red' myCS)
            , ppSep             = xmobarColor (black' myCS) "" " // "
            , ppWsSep           = " "
-           , ppTitle           = xmobarColor (green' myCS) "" . shorten 10
-           , ppLayout          = xmobarColor (magenta' myCS) "" . wrap "     " ""
-           , ppOrder           = \(ws:l:t:_) -> [l, ws, t]
+           , ppTitle           = xmobarColor (green' myCS) "" . mkLengthL 10
+           , ppLayout          = xmobarColor (magenta' myCS) "" . mkLengthR 10
+           , ppOrder           = \(ws:l:t:_) -> [t, ws, l]
            , ppExtras          = []
            , ppOutput          = hPutStrLn h
            }
