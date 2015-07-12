@@ -264,15 +264,14 @@ myKeymap = \c -> mkKeymap c $
     , ("M-S-<KP_Multiply>", sendMessage ToggleStruts)
     , ("M-<KP_Subtract>", sendMessage $ JumpToLayout "mirror")
     , ("M-<KP_Add>",      sendMessage $ JumpToLayout "tiled")
-    , ("M-<KP_0>",        declareMsg "wmiiLayout")
-    , ("M-<KP_Enter>",    sendMessage NextLayout)
+    , ("M-<KP_Enter>",    sendMessage $ JumpToLayout "wmii-Column")
     , ("M-q",             kill1)
     ] ++ -- }}}
     [ -- Workspaces {{{
-      ("M-.",          moveTo Next NonEmptyWS)
-    , ("M-,",          moveTo Prev NonEmptyWS)
-    , ("M-S-.",        shiftToNext >> nextWS)
-    , ("M-S-,",        shiftToPrev >> prevWS)
+      ("M-0",          moveTo Next NonEmptyWS)
+    , ("M-9",          moveTo Prev NonEmptyWS)
+    , ("M-S-0",        shiftToNext >> nextWS)
+    , ("M-S-9",        shiftToPrev >> prevWS)
     ] ++
     [ -- (List comprehension for switching, shifting, etc.)
       (otherModMasks ++ "M-" ++ [key], action tag)
