@@ -1,6 +1,4 @@
 -- Imports {{{
-import qualified XMonad.Layout.Groups as G
-import XMonad.Layout.Groups.Wmii
 import           Colorschemes
 import           Control.Monad                        (liftM2)
 import           Data.Char
@@ -26,8 +24,10 @@ import           XMonad.Hooks.FadeInactive
 import           XMonad.Hooks.InsertPosition
 import           XMonad.Hooks.ManageDocks
 import           XMonad.Hooks.ManageHelpers
-import           XMonad.Layout.Accordion
-import           XMonad.Layout.DragPane
+import qualified XMonad.Layout.Groups                 as G
+import           XMonad.Layout.Groups.Wmii
+-- import           XMonad.Layout.Accordion
+-- import           XMonad.Layout.DragPane
 import           XMonad.Layout.LayoutCombinators
 import           XMonad.Layout.LimitWindows
 import           XMonad.Layout.MouseResizableTile
@@ -117,10 +117,10 @@ myLayoutHook = -- {{{
                avoidStruts
              . smartBorders
              . mkToggle (single FULL)
-             $     myWmii
-               ||| myMRTile
+             $     myMRTile
                ||| myMirroredMRTile
                ||| myTabbed
+               ||| myWmii
                ||| Full
     where -- renamed layouts should be <= 6 characters
           myWmii              = renamed [Prepend "wmii-", CutWordsRight 2] $
@@ -237,36 +237,36 @@ myModMask = mod1Mask        -- Alt
 -- myModMask = mod4Mask        -- Windows key
 myKeymap = \c -> mkKeymap c $
     [ -- Manipulate windows & layouts {{{
-      ("M-<Tab>",      windows W.focusDown)
-    , ("M-S-<Tab>",    windows W.focusUp)
-    , ("M-`",          withFocused $ windows . W.sink)
-    , ("M-S-`",        withFocused $ windows . flip W.float --Middle of screen
+      ("M-<Tab>",         windows W.focusDown)
+    , ("M-S-<Tab>",       windows W.focusUp)
+    , ("M-`",             withFocused $ windows . W.sink)
+    , ("M-S-`",           withFocused $ windows . flip W.float
                                      (W.RationalRect (1/4) (1/4) (1/2) (1/2)))
-    , ("M-C-`",        switchLayer)
-    , ("M-h",          declareMsg "goL")
-    , ("M-S-h",        declareMsg "swapL")
-    , ("M-j",          declareMsg "goD")
-    , ("M-S-j",        declareMsg "swapD")
-    , ("M-k",          declareMsg "goU")
-    , ("M-S-k",        declareMsg "swapU")
-    , ("M-l",          declareMsg "goR")
-    , ("M-S-l",        declareMsg "swapR")
-    , ("M-C-j",        declareMsg "resizeD")
-    , ("M-C-k",        declareMsg "resizeU")
-    , ("M-C-h",        declareMsg "resizeL")
-    , ("M-C-l",        declareMsg "resizeR")
-    , ("M-[",          sendMessage (IncMasterN (-1)))
-    , ("M-]",          sendMessage (IncMasterN 1))
-    , ("M-\\",         windows W.focusMaster)
-    , ("M-S-\\",       windows W.swapMaster)
-    , ("M-=",          sendMessage $ Toggle FULL)
-    , ("M-S-=",        sendMessage ToggleStruts) -- extra FULLness
-    , ("M-; 1",        groupToFullLayout)
-    , ("M-; 2",        groupToTabbedLayout)
-    , ("M-; 3",        groupToVerticalLayout)
-    , ("M-; 4",        moveToGroupUp False)
-    , ("M-; 5",        moveToGroupDown False)
-    , ("M-q",          kill1)
+    , ("M-C-`",           switchLayer)
+    , ("M-h",             declareMsg "goL")
+    , ("M-S-h",           declareMsg "swapL")
+    , ("M-j",             declareMsg "goD")
+    , ("M-S-j",           declareMsg "swapD")
+    , ("M-k",             declareMsg "goU")
+    , ("M-S-k",           declareMsg "swapU")
+    , ("M-l",             declareMsg "goR")
+    , ("M-S-l",           declareMsg "swapR")
+    , ("M-C-j",           declareMsg "resizeD")
+    , ("M-C-k",           declareMsg "resizeU")
+    , ("M-C-h",           declareMsg "resizeL")
+    , ("M-C-l",           declareMsg "resizeR")
+    , ("M-[",             declareMsg "nmDecOrPrevLayout")
+    , ("M-]",             declareMsg "nmIncOrNextLayout")
+    , ("M-\\",            windows W.focusMaster)
+    , ("M-S-\\",          windows W.swapMaster)
+    , ("M-<KP_Divide>",   sendMessage $ JumpToLayout "tabbed")
+    , ("M-<KP_Multiply>", sendMessage $ JumpToLayout "Full")
+    , ("M-S-<KP_Multiply>", sendMessage ToggleStruts)
+    , ("M-<KP_Subtract>", sendMessage $ JumpToLayout "mirror")
+    , ("M-<KP_Add>",      sendMessage $ JumpToLayout "tiled")
+    , ("M-<KP_0>",        declareMsg "wmiiLayout")
+    , ("M-<KP_Enter>",    sendMessage NextLayout)
+    , ("M-q",             kill1)
     ] ++ -- }}}
     [ -- Workspaces {{{
       ("M-.",          moveTo Next NonEmptyWS)
@@ -299,78 +299,88 @@ myKeymap = \c -> mkKeymap c $
           winset <- gets windowset
           let ld = description . W.layout . W.workspace . W.current $ winset
           case msg of
-            "goL"     -> case ld of
-                          "tabbed"      -> windows W.focusUp
-                          "wmii-Column" -> focusGroupUp
-                          "wmii-Tabs"   -> focusGroupUp
-                          "wmii-Full"   -> focusGroupUp
-                          _             -> windowGo L True
-            "swapL"   -> case ld of
-                          "tabbed"      -> windows W.swapUp
-                          "wmii-Column" -> moveToGroupUp False
-                          "wmii-Tabs"   -> moveToGroupUp False
-                          "wmii-Full"   -> moveToGroupUp False
-                          _             -> windowSwap L True
-            "resizeL" -> case ld of
-                          "mirror"      -> sendMessage ShrinkSlave
-                          "wmii-Column" -> zoomGroupOut
-                          "wmii-Tabs"   -> zoomGroupOut
-                          "wmii-Full"   -> zoomGroupOut
-                          _             -> sendMessage Shrink
-            "goD"     -> case ld of
-                          "tabbed"      -> windows W.focusDown
-                          "wmii-Column" -> focusDown
-                          "wmii-Tabs"   -> focusDown
-                          "wmii-Full"   -> focusDown
-                          _             -> windowGo D True
-            "swapD"   -> case ld of
-                          "tabbed"      -> windows W.swapDown
-                          "wmii-Column" -> swapDown
-                          "wmii-Tabs"   -> swapDown
-                          "wmii-Full"   -> swapDown
-                          _             -> windowSwap D True
-            "resizeD" -> case ld of
-                          "mirror"      -> sendMessage Expand
-                          "wmii-Column" -> swapGroupDown
-                          "wmii-Tabs"   -> swapGroupDown
-                          "wmii-Full"   -> swapGroupDown
-                          _             -> sendMessage ExpandSlave
-            "goU"     -> case ld of
-                          "tabbed"      -> windows W.focusUp
-                          "wmii-Column" -> focusUp
-                          "wmii-Tabs"   -> focusUp
-                          "wmii-Full"   -> focusUp
-                          _             -> windowGo U True
-            "swapU"   -> case ld of
-                          "tabbed"      -> windows W.swapUp
-                          "wmii-Column" -> swapUp
-                          "wmii-Tabs"   -> swapUp
-                          "wmii-Full"   -> swapUp
-                          _             -> windowSwap U True
-            "resizeU" -> case ld of
-                          "mirror"      -> sendMessage Shrink
-                          "wmii-Column" -> swapGroupUp
-                          "wmii-Tabs"   -> swapGroupUp
-                          "wmii-Full"   -> swapGroupUp
-                          _             -> sendMessage ShrinkSlave
-            "goR"     -> case ld of
-                          "tabbed"      -> windows W.focusDown
-                          "wmii-Column" -> focusGroupDown
-                          "wmii-Tabs"   -> focusGroupDown
-                          "wmii-Full"   -> focusGroupDown
-                          _             -> windowGo R True
-            "swapR"   -> case ld of
-                          "tabbed"      -> windows W.swapDown
-                          "wmii-Column" -> moveToGroupDown False
-                          "wmii-Tabs"   -> moveToGroupDown False
-                          "wmii-Full"   -> moveToGroupDown False
-                          _             -> windowSwap R True
-            "resizeR" -> case ld of
-                          "mirror"      -> sendMessage ExpandSlave
-                          "wmii-Column" -> zoomGroupIn
-                          "wmii-Tabs"   -> zoomGroupIn
-                          "wmii-Full"   -> zoomGroupIn
-                          _             -> sendMessage Expand
+            "goL"        -> case ld of
+                             "tabbed"      -> windows W.focusUp
+                             "wmii-Column" -> focusGroupUp
+                             "wmii-Tabs"   -> focusGroupUp
+                             "wmii-Full"   -> focusGroupUp
+                             _             -> windowGo L True
+            "swapL"      -> case ld of
+                             "tabbed"      -> windows W.swapUp
+                             "wmii-Column" -> moveToGroupUp False
+                             "wmii-Tabs"   -> moveToGroupUp False
+                             "wmii-Full"   -> moveToGroupUp False
+                             _             -> windowSwap L True
+            "resizeL"    -> case ld of
+                             "mirror"      -> sendMessage ShrinkSlave
+                             "wmii-Column" -> zoomGroupOut
+                             "wmii-Tabs"   -> zoomGroupOut
+                             "wmii-Full"   -> zoomGroupOut
+                             _             -> sendMessage Shrink
+            "goD"        -> case ld of
+                             "tabbed"      -> windows W.focusDown
+                             "wmii-Column" -> focusDown
+                             "wmii-Tabs"   -> focusDown
+                             "wmii-Full"   -> focusDown
+                             _             -> windowGo D True
+            "swapD"      -> case ld of
+                             "tabbed"      -> windows W.swapDown
+                             "wmii-Column" -> swapDown
+                             "wmii-Tabs"   -> swapDown
+                             "wmii-Full"   -> swapDown
+                             _             -> windowSwap D True
+            "resizeD"    -> case ld of
+                             "mirror"      -> sendMessage Expand
+                             "wmii-Column" -> swapGroupDown
+                             "wmii-Tabs"   -> swapGroupDown
+                             "wmii-Full"   -> swapGroupDown
+                             _             -> sendMessage ExpandSlave
+            "goU"        -> case ld of
+                             "tabbed"      -> windows W.focusUp
+                             "wmii-Column" -> focusUp
+                             "wmii-Tabs"   -> focusUp
+                             "wmii-Full"   -> focusUp
+                             _             -> windowGo U True
+            "swapU"      -> case ld of
+                             "tabbed"      -> windows W.swapUp
+                             "wmii-Column" -> swapUp
+                             "wmii-Tabs"   -> swapUp
+                             "wmii-Full"   -> swapUp
+                             _             -> windowSwap U True
+            "resizeU"    -> case ld of
+                             "mirror"      -> sendMessage Shrink
+                             "wmii-Column" -> swapGroupUp
+                             "wmii-Tabs"   -> swapGroupUp
+                             "wmii-Full"   -> swapGroupUp
+                             _             -> sendMessage ShrinkSlave
+            "goR"        -> case ld of
+                             "tabbed"      -> windows W.focusDown
+                             "wmii-Column" -> focusGroupDown
+                             "wmii-Tabs"   -> focusGroupDown
+                             "wmii-Full"   -> focusGroupDown
+                             _             -> windowGo R True
+            "swapR"      -> case ld of
+                             "tabbed"      -> windows W.swapDown
+                             "wmii-Column" -> moveToGroupDown False
+                             "wmii-Tabs"   -> moveToGroupDown False
+                             "wmii-Full"   -> moveToGroupDown False
+                             _             -> windowSwap R True
+            "resizeR"    -> case ld of
+                             "mirror"      -> sendMessage ExpandSlave
+                             "wmii-Column" -> zoomGroupIn
+                             "wmii-Tabs"   -> zoomGroupIn
+                             "wmii-Full"   -> zoomGroupIn
+                             _             -> sendMessage Expand
+            "nmIncOrNextLayout" -> case ld of
+                             "wmii-Column" -> groupToNextLayout
+                             "wmii-Tabs"   -> groupToNextLayout
+                             "wmii-Full"   -> groupToNextLayout
+                             _             -> sendMessage $ IncMasterN 1
+            "nmDecOrPrevLayout" -> case ld of
+                             "wmii-Column" -> groupToFullLayout
+                             "wmii-Tabs"   -> groupToVerticalLayout
+                             "wmii-Full"   -> groupToTabbedLayout
+                             _             -> sendMessage $ IncMasterN (-1)
     -- }}}
 -- }}}
 -- {{{ XMonad.Prompt config
