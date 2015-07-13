@@ -11,7 +11,6 @@ import           Fuzzy
 import           System.Exit
 import           TermAppLauncher
 import           XMonad                               hiding ((|||))
-import           XMonad.Actions.Commands
 import           XMonad.Actions.CopyWindow
 import           XMonad.Actions.CycleWS
 import           XMonad.Actions.CycleWS
@@ -28,13 +27,9 @@ import           XMonad.Hooks.ManageDocks
 import           XMonad.Hooks.ManageHelpers
 import qualified XMonad.Layout.Groups                 as G
 import           XMonad.Layout.Groups.Wmii
--- import           XMonad.Layout.Accordion
--- import           XMonad.Layout.DragPane
 import           XMonad.Layout.LayoutCombinators
 import           XMonad.Layout.LimitWindows
 import           XMonad.Layout.MouseResizableTile
-import           XMonad.Layout.MultiToggle
-import           XMonad.Layout.MultiToggle.Instances
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.PerWorkspace
 import           XMonad.Layout.Renamed
@@ -49,7 +44,7 @@ import           XMonad.Util.EZConfig
 import           XMonad.Util.Run
 -- import XMonad.Actions.WindowGo
 -- }}}
--- {{{ Default programs, etc.
+-- {{{ Defaults
 -- {{{ Theming
 -- Apprentice colorscheme: https://github.com/romainl/Apprentice
 apprentice = Colorscheme { bg       = "#262626"
@@ -75,10 +70,21 @@ myCS   = apprentice
 myFont = "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*"
 -- }}}
 -- TODO: use `env <- M.fromList `fmap` getEnvironment` for env vars
-myTerm        = "termite"
-myBrowser  = "uzbl-browser"
+myTerm     = "termite"
+-- myBrowser  = "uzbl-browser"
+myBrowser = "chromium-browser"
 duckduckgo = searchEngine "duckduckgo" "https://duckduckgo.com/?q="
-mySearch = duckduckgo
+-- mySearch   = duckduckgo
+mySearch = google
+myDmenuOpts = unwords [
+                        "-i"
+                      , "-p '>'"
+                      , "-fn '" ++ myFont ++ "'"
+                      , "-nb '" ++ bg myCS ++ "'"
+                      , "-nf '" ++ fg myCS ++ "'"
+                      , "-sb '" ++ green myCS ++ "'"
+                      , "-sf '" ++ bg myCS ++ "'"
+                      ]
 -- }}}
 -- Main {{{
 main = do
@@ -279,14 +285,14 @@ myKeymap = \c -> mkKeymap c $
     ] ++ -- }}}
     [ -- Spawn programs, windows, XMonad commands {{{
       ("M-<Return>",   spawn $ terminal c)
-    -- , ("M-;",          spawn "exe=`yeganesh -x` && eval \"exec $exe\"")
+    , ("M-<Space>",    spawn $ "exe=`yeganesh -x -- " ++ myDmenuOpts ++
+                               "` && eval \"exec $exe\"")
     , ("M-e",          launchApp myPrompt "gvim")
     , ("M-S-e",        spawn "gvim")
-    , ("M-w",          promptSearchBrowser myPrompt myBrowser mySearch)
-    , ("M-<Space>",    runOrRaisePrompt myPrompt)  -- TODO: Combine
+    -- , ("M-w",          promptSearchBrowser myPrompt myBrowser mySearch)
+    -- , ("M-<Space>",    runOrRaisePrompt myPrompt)  -- TODO: Combine
     , ("M-/",          windowPromptGoto myPrompt)  --       all of these
     , ("M-S-/",        windowPromptBring myPrompt) --       & do fuzzy search
-    , ("M-S-r",        myCommands >>= runCommand)  -- TODO: change binding
     , ("M-S-<Esc>",    io (exitWith ExitSuccess))
     , ("M-<Esc>",      spawn "xmonad --recompile && xmonad-restart")
     ] -- }}}
@@ -409,8 +415,5 @@ myTabConfig = defaultTheme
             , decoHeight          = 14
             , fontName            = myFont
             }
--- }}}
--- {{{ XMonad.Actions.Commands config
-myCommands = defaultCommands
 -- }}}
 -- vim:fdm=marker

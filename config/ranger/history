@@ -9,7 +9,8 @@ rename fuzzy.hs
 rename .xmonad
 rename Colorschemes.hs
 edit 
-delete 
 rename fuzzylauncher.hs
 rename DynamicWorkspacesPure.hs
 
+taskview_move 
+delete 

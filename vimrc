@@ -201,6 +201,9 @@ nnoremap <silent> <leader>rs mz:%s/\s\+$//<CR>:let @/=''<CR>`z
 nnoremap <silent> <leader>rb mz:g/^$/d<CR>:let @/=''<CR>`z
 " Toggle background
 nnoremap <silent> <leader>bg :call ToggleBG()<CR>
+" Paste from clipboard
+nnoremap <silent> <leader>p :set paste<CR>"*p:set nopaste<CR>
+nnoremap <silent> <leader>P :set paste<CR>"*P:set nopaste<CR>
 
 " Close buffer, or if last buf, quit vim
 nnoremap <F12> :call CloseBufWin()<CR>
