@@ -1,5 +1,7 @@
 -- Imports {{{
+import XMonad.Layout.Fullscreen
 import           Colorschemes
+import XMonad.Layout.LayoutHints
 import           Control.Monad                        (liftM2)
 import           Data.Char
 import           Data.List
@@ -116,7 +118,8 @@ myWS = -- {{{
 myLayoutHook = -- {{{
                avoidStruts
              . smartBorders
-             . mkToggle (single FULL)
+             . layoutHints
+             . fullscreenFocus
              $     myMRTile
                ||| myMirroredMRTile
                ||| myTabbed
@@ -160,7 +163,7 @@ myLogHook h = do -- {{{
            , ppTitle           = xmobarColor (green' myCS) ""
                                   . mkLengthL 10
            , ppLayout          = xmobarColor (magenta' myCS) ""
-                                  . mkLengthR 6 . (++ "    ")
+                                  -- . mkLengthR 6 . (++ "    ")
            , ppOrder           = \(ws:l:t:_) -> [t, ws, l]
            , ppExtras          = []
            , ppOutput          = hPutStrLn h
@@ -179,6 +182,7 @@ myBar = "xmobar" ++ concat myXmobargs
 -- }}}
 myManageHook = -- {{{
         insertPosition Below Newer -- Xmonad default = Above Newer
+    <+> fullscreenManageHook
     <+> manageDocks
     <+> (composeAll . concat $ -- {{{
         [ [isDialog --> doFloat]
@@ -229,7 +233,11 @@ myManageHook = -- {{{
             -- my8Shifts = []
             -- my9Shifts = []
 -- }}}
-myHandleEventHook = docksEventHook
+myHandleEventHook = -- {{{
+      hintsEventHook
+  <+> fullscreenEventHook
+  <+> docksEventHook
+-- }}}
 myStartupHook = return ()
 -- }}}
 -- {{{ Key & Mouse bindings
