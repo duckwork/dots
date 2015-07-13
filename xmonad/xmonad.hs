@@ -200,18 +200,9 @@ myManageHook = -- {{{
                                     --> doShiftAndGo "docs" | x <- my5Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
                                     --> doShiftAndGo "arts" | x <- my6Shifts]
-        -- , [(className =? x <||> title =? x <||> resource =? x)
-        --                             --> doShiftAndGo "7" | x <- my7Shifts]
-        -- , [(className =? x <||> title =? x <||> resource =? x)
-        --                             --> doShiftAndGo "8" | x <- my8Shifts]
-        -- , [(className =? x <||> title =? x <||> resource =? x)
-        --                             --> doShiftAndGo "9" | x <- my9Shifts]
         ]) -- }}}
         where
             doShiftAndGo = doF . liftM2 (.) W.greedyView W.shift
-            -- doShiftAndGo ws = doF (addHiddenWorkspace' ws myLayoutHook) <+> doShift ws
-            -- doShiftAndGo ws = liftX (asks (layoutHook . config)) >>=
-            --                  \l -> doF (addHiddenWorkspace'' ws l) <+> doShift ws
             myFloats = ["MPlayer", "xmessage"]
             myIgnores = ["desktop_window", "kdesktop"]
             my1Shifts = []
@@ -229,9 +220,6 @@ myManageHook = -- {{{
             my4Shifts = []
             my5Shifts = []
             my6Shifts = ["MPlayer"]
-            -- my7Shifts = []
-            -- my8Shifts = []
-            -- my9Shifts = []
 -- }}}
 myHandleEventHook = -- {{{
       hintsEventHook
@@ -292,8 +280,8 @@ myKeymap = \c -> mkKeymap c $
     [ -- Spawn programs, windows, XMonad commands {{{
       ("M-<Return>",   spawn $ terminal c)
     -- , ("M-;",          spawn "exe=`yeganesh -x` && eval \"exec $exe\"")
-    , ("M-e",          launchAppInTerm myPrompt "vim")
-    , ("M-S-e",        spawn (myTerm ++ "-t vim -e vim"))
+    , ("M-e",          launchApp myPrompt "gvim")
+    , ("M-S-e",        spawn "gvim")
     , ("M-w",          promptSearchBrowser myPrompt myBrowser mySearch)
     , ("M-<Space>",    runOrRaisePrompt myPrompt)  -- TODO: Combine
     , ("M-/",          windowPromptGoto myPrompt)  --       all of these
