@@ -277,7 +277,6 @@ myKeymap = \c -> mkKeymap c $
     , ("M-9",          moveTo Prev NonEmptyWS)
     , ("M-S-0",        shiftToNext >> nextWS)
     , ("M-S-9",        shiftToPrev >> prevWS)
-    , ("M--",          copyAllFrom "home")
     ] ++
     [ -- (List comprehension for switching, shifting, etc.)
       (otherModMasks ++ "M-" ++ [key], action tag)
