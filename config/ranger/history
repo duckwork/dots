@@ -14,3 +14,5 @@ rename DynamicWorkspacesPure.hs
 
 taskview_move 
 delete 
+mkdir surfraw
+touch bookmarks
