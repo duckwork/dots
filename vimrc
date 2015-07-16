@@ -150,8 +150,8 @@ nnoremap <Space> za
 xnoremap <Space> za
 nnoremap <S-Space> zA
 xnoremap <S-Space> zA
-nnoremap <C-Space> zM
-nnoremap <C-S-Space> zR
+nnoremap <leader><Space> zM
+nnoremap <leader><S-Space> zR
 
 " More consistent capital operators (C, D, Y)
 nnoremap Y y$
