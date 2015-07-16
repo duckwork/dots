@@ -1,7 +1,6 @@
 -- Imports {{{
-import XMonad.Layout.Fullscreen
+import XMonad.Actions.WithAll
 import           Colorschemes
-import XMonad.Layout.LayoutHints
 import           Control.Monad                        (liftM2)
 import           Data.Char
 import           Data.List
@@ -12,6 +11,7 @@ import           System.Exit
 import           TermAppLauncher
 import           XMonad                               hiding ((|||))
 import           XMonad.Actions.CopyWindow
+import           XMonad.Actions.CycleSelectedLayouts
 import           XMonad.Actions.CycleWS
 import           XMonad.Actions.CycleWS
 import qualified XMonad.Actions.DynamicWorkspaceOrder as DO
@@ -25,9 +25,11 @@ import           XMonad.Hooks.FadeInactive
 import           XMonad.Hooks.InsertPosition
 import           XMonad.Hooks.ManageDocks
 import           XMonad.Hooks.ManageHelpers
+import           XMonad.Layout.Fullscreen
 import qualified XMonad.Layout.Groups                 as G
 import           XMonad.Layout.Groups.Wmii
 import           XMonad.Layout.LayoutCombinators
+import           XMonad.Layout.LayoutHints
 import           XMonad.Layout.LimitWindows
 import           XMonad.Layout.MouseResizableTile
 import           XMonad.Layout.NoBorders
@@ -42,6 +44,7 @@ import           XMonad.Prompt.Window
 import qualified XMonad.StackSet                      as W
 import           XMonad.Util.EZConfig
 import           XMonad.Util.Run
+-- import XMonad.Actions.FloatSnap
 -- import XMonad.Actions.WindowGo
 -- }}}
 -- {{{ Defaults
@@ -241,10 +244,10 @@ myKeymap = \c -> mkKeymap c $
     [ -- Manipulate windows & layouts {{{
       ("M-<Tab>",         windows W.focusDown)
     , ("M-S-<Tab>",       windows W.focusUp)
-    , ("M-`",             withFocused $ windows . W.sink)
-    , ("M-S-`",           withFocused $ windows . flip W.float
+    , ("M-'",             withFocused $ windows . W.sink)
+    , ("M-S-'",           withFocused $ windows . flip W.float
                                      (W.RationalRect (1/4) (1/4) (1/2) (1/2)))
-    , ("M-C-`",           switchLayer)
+    , ("M-C-'",           switchLayer) -- TODO: change these to check if window is floating and toggle
     , ("M-h",             declareMsg "goL")
     , ("M-S-h",           declareMsg "swapL")
     , ("M-j",             declareMsg "goD")
@@ -274,6 +277,7 @@ myKeymap = \c -> mkKeymap c $
     , ("M-9",          moveTo Prev NonEmptyWS)
     , ("M-S-0",        shiftToNext >> nextWS)
     , ("M-S-9",        shiftToPrev >> prevWS)
+    , ("M--",          copyAllFrom "home")
     ] ++
     [ -- (List comprehension for switching, shifting, etc.)
       (otherModMasks ++ "M-" ++ [key], action tag)
@@ -285,7 +289,7 @@ myKeymap = \c -> mkKeymap c $
     ] ++ -- }}}
     [ -- Spawn programs, windows, XMonad commands {{{
       ("M-<Return>",   spawn $ terminal c)
-    , ("M-<Space>",    spawn $ "exe=`yeganesh -x -- " ++ myDmenuOpts ++
+    , ("M-<Space>",    spawn $ "exe=`yeganesh -x -p exe -- " ++ myDmenuOpts ++
                                "` && eval \"exec $exe\"")
     , ("M-e",          launchApp myPrompt "gvim")
     , ("M-S-e",        spawn "gvim")
@@ -416,4 +420,11 @@ myTabConfig = defaultTheme
             , fontName            = myFont
             }
 -- }}}
+
+-- TODO: break into a module? Or something.
+onWorkspace' wsid f w = W.view (W.currentTag w) . f . W.view wsid $ w
+withAll'' f w = \ws -> let all' = W.integrate' . W.stack . W.workspace . W.current $ ws
+                        in foldr f ws all'
+
+copyAllFrom wsid = windows $ \ws -> onWorkspace' wsid (withAll'' (\w -> copyWindow w (W.currentTag ws)) ws) ws
 -- vim:fdm=marker
