@@ -331,7 +331,8 @@ if has('gui_running') " {{{
 
     " Change font based on system
     if has('gui_gtk2')
-        set guifont=Terminus
+        " set guifont=Terminus
+        set guifont=Inconsolata\ Medium\ 10
     elseif has('x11')
         set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
@@ -999,4 +1000,4 @@ endif
 "}}}
 
 set background=dark
-colorscheme apprentice
+colorscheme PaperColor
