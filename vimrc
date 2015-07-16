@@ -368,7 +368,7 @@ endfor
 " }}}
 "}}}
 " FUNCTIONS {{{
-" Tools ======================================================================
+" Tools ==================================================================
 function! WordCount() " {{{
     let s:oldstat = v:statusmsg
     let position = getpos('.')
@@ -998,5 +998,5 @@ endif
 " }}}
 "}}}
 
+set background=dark
 colorscheme apprentice
-set bg=dark
