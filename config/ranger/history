@@ -16,3 +16,6 @@ taskview_move
 delete 
 mkdir surfraw
 touch bookmarks
+mkdir
+mkdir Colorschemes
+touch Apprentice.hs
