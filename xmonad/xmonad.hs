@@ -1,12 +1,13 @@
 -- Imports {{{
-import XMonad.Actions.WithAll
 import           Colorschemes
+import           Colorschemes.Apprentice
 import           Control.Monad                        (liftM2)
 import           Data.Char
 import           Data.List
 import qualified Data.Map                             as M
 import           Data.Monoid
 import           Fuzzy
+import           OtherWorkspaces
 import           System.Exit
 import           TermAppLauncher
 import           XMonad                               hiding ((|||))
@@ -50,25 +51,6 @@ import           XMonad.Util.Run
 -- {{{ Defaults
 -- {{{ Theming
 -- Apprentice colorscheme: https://github.com/romainl/Apprentice
-apprentice = Colorscheme { bg       = "#262626"
-                         , fg       = "#bcbcbc"
-                         , black    = "#1c1c1c"
-                         , black'   = "#444444"
-                         , red      = "#af5f5f"
-                         , red'     = "#ff8700"
-                         , green    = "#5f875f"
-                         , green'   = "#87af87"
-                         , yellow   = "#87875f"
-                         , yellow'  = "#ffffaf"
-                         , blue     = "#5f87af"
-                         , blue'    = "#8fafd7"
-                         , magenta  = "#5f5f87"
-                         , magenta' = "#8787af"
-                         , cyan     = "#5f8787"
-                         , cyan'    = "#5fafaf"
-                         , white    = "#6c6c6c"
-                         , white'   = "#ffffff"
-                         }
 myCS   = apprentice
 myFont = "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*"
 -- }}}
@@ -419,11 +401,4 @@ myTabConfig = defaultTheme
             , fontName            = myFont
             }
 -- }}}
-
--- TODO: break into a module? Or something.
-onWorkspace' wsid f w = W.view (W.currentTag w) . f . W.view wsid $ w
-withAll'' f w = \ws -> let all' = W.integrate' . W.stack . W.workspace . W.current $ ws
-                        in foldr f ws all'
-
-copyAllFrom wsid = windows $ \ws -> onWorkspace' wsid (withAll'' (\w -> copyWindow w (W.currentTag ws)) ws) ws
 -- vim:fdm=marker
