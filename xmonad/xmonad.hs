@@ -263,9 +263,10 @@ myKeymap = \c -> mkKeymap c $
     [ -- (List comprehension for switching, shifting, etc.)
       (otherModMasks ++ "M-" ++ [key], action tag)
       | (tag, key) <- zip myWS (concat $ map show [1..])
-      , (otherModMasks, action) <- [ ("",   \w -> windows $ copyAllFrom w)
+      , (otherModMasks, action) <- [ ("",   toggleOrView)
                                    , ("S-", \w -> windows $ W.shift w)
-                                   , ("C-", toggleOrView)
+                                   , ("C-", \w -> windows $ copyAllFrom w)
+                                   , ("S-C-", \w -> windows $ delAllOf w)
                                    ]
     ] ++ -- }}}
     [ -- Spawn programs, windows, XMonad commands {{{
