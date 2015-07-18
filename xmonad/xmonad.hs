@@ -264,7 +264,8 @@ myKeymap = \c -> mkKeymap c $
       (otherModMasks ++ "M-" ++ [key], action tag)
       | (tag, key) <- zip myWS (concat $ map show [1..])
       , (otherModMasks, action) <- [ ("",   toggleOrView)
-                                   , ("S-", \w -> windows $ W.shift w)
+                                   -- , ("S-", \w -> windows $ W.shift w)
+                                   , ("S-", \w -> windows $ toggleView w)
                                    , ("C-", \w -> windows $ copyAllFrom w)
                                    , ("S-C-", \w -> windows $ delAllOf w)
                                    ]
