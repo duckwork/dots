@@ -7,7 +7,7 @@ import           Data.List
 import qualified Data.Map                             as M
 import           Data.Monoid
 import           Fuzzy
-import           OtherWorkspaces as OW
+import           DwmActions
 import           System.Exit
 import           TermAppLauncher
 import           XMonad                               hiding ((|||))
