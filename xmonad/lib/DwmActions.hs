@@ -48,6 +48,8 @@ toggleView t ss =
     where
       cur = W.currentTag ss
 
+wsOn :: (Eq s, Eq i)
+     => i -> W.StackSet i l a s sd -> [a]
 wsOn t' ss' = W.index . W.view t' $ ss'
 
 toggleViewEmpty :: (Eq s, Eq a, Eq i)
