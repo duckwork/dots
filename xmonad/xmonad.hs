@@ -193,7 +193,8 @@ myManageHook = -- {{{
                                     --> doShiftAndGo "arts" | x <- my6Shifts]
         ]) -- }}}
         where
-            doShiftAndGo = doF . liftM2 (.) W.greedyView W.shift
+            -- doShiftAndGo = doF . liftM2 (.) W.greedyView W.shift
+            doShiftAndGo = doShift
             myFloats = ["MPlayer", "xmessage"]
             myIgnores = ["desktop_window", "kdesktop"]
             my1Shifts = []
@@ -263,7 +264,7 @@ myKeymap = \c -> mkKeymap c $
     [ -- (List comprehension for switching, shifting, etc.)
       (otherModMasks ++ "M-" ++ [key], action tag)
       | (tag, key) <- zip myWS (concat $ map show [1..])
-      , (otherModMasks, action) <- [ ("",   \t -> windows $ toggleView t)
+      , (otherModMasks, action) <- [ ("",   \t -> windows $ toggleViewEmpty t)
                                    , ("S-", \t -> windows $ W.shift t)
                                    , ("C-", toggleOrView)
                                    ]

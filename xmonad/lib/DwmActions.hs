@@ -1,9 +1,9 @@
 module DwmActions where
 
+import           Data.List                 (intersect)
 import           XMonad
 import           XMonad.Actions.CopyWindow
 import qualified XMonad.StackSet           as W
-import Data.List (intersect)
 
 -- | Do an action on an arbitrary workspace
 viewing :: (Eq s, Eq i)
@@ -47,4 +47,12 @@ toggleView t ss =
   else viewTag t ss
     where
       cur = W.currentTag ss
-      wsOn t' ss' = W.index . W.view t' $ ss'
+
+wsOn t' ss' = W.index . W.view t' $ ss'
+
+toggleViewEmpty :: (Eq s, Eq a, Eq i)
+                => i -> W.StackSet i l a s sd -> W.StackSet i l a s sd
+toggleViewEmpty t ss | t == cur         = ss
+                     | null $ wsOn t ss = W.view t ss
+                     | otherwise        = toggleView t ss
+                     where cur = W.currentTag ss

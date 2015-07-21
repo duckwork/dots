@@ -11,8 +11,9 @@ rename Colorschemes.hs
 edit 
 rename fuzzylauncher.hs
 rename DynamicWorkspacesPure.hs
-
 taskview_move 
-delete 
 mkdir surfraw
 touch bookmarks
+delete 
+
+rename DwmActions.hs
