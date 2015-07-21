@@ -133,28 +133,29 @@ myLayoutHook = -- {{{
           myTabbed            = renamed [Replace "tabbed"] $
                                       tabbed shrinkText myTabConfig
 -- }}}
-myLogHook h = do -- {{{
+myLogHook h = do -- {{{ ( & dynamicLogWithPP config
     fadeInactiveLogHook 0.7
     copies <- wsContainingCopies
-    let check ws | ws `elem` copies = xmobarColor (red myCS) "" $ ws
-                 | otherwise = xmobarColor (yellow myCS) "" $ ws
-        mkLengthL n xs | length xs < n = replicate (n - length xs) ' ' ++ xs
+    let checkCopy ws | ws `elem` copies = xmobarColor (red myCS) "" $ ws
+                     | otherwise        = xmobarColor (yellow myCS) "" $ ws
+        mkLengthL n xs | length xs < n = replicate (n - length xs) '_' ++ xs
                        | otherwise     = shorten n xs
-        mkLengthR n xs | length xs < n = xs ++ replicate (n - length xs) ' '
+        mkLengthR n xs | length xs < n = xs ++ replicate (n - length xs) '_'
                        | otherwise     = take n xs
+        myTitleLength = 20
      in dynamicLogWithPP defaultPP
            {
              ppCurrent         = xmobarColor (red' myCS) ""
-                                   . map toUpper
-           , ppHidden          = check
+                                . map toUpper
+           , ppHidden          = checkCopy
            , ppHiddenNoWindows = xmobarColor (black' myCS) ""
            , ppUrgent          = xmobarColor (white myCS) (red' myCS)
            , ppSep             = xmobarColor (black' myCS) "" " // "
            , ppWsSep           = " "
            , ppTitle           = xmobarColor (green' myCS) ""
-                                  . mkLengthL 10
+                                . mkLengthL myTitleLength
            , ppLayout          = xmobarColor (magenta' myCS) ""
-                                  -- . mkLengthR 6 . (++ "    ")
+                                . mkLengthR myTitleLength
            , ppOrder           = \(ws:l:t:_) -> [t, ws, l]
            , ppExtras          = []
            , ppOutput          = hPutStrLn h
