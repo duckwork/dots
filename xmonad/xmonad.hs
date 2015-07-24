@@ -28,6 +28,7 @@ import           XMonad.Hooks.ManageDocks
 import           XMonad.Hooks.ManageHelpers
 import           XMonad.Layout.Fullscreen
 import qualified XMonad.Layout.Groups                 as G
+import XMonad.Layout.Groups.Examples
 import           XMonad.Layout.Groups.Wmii
 import           XMonad.Layout.LayoutCombinators
 import           XMonad.Layout.LayoutHints
@@ -111,7 +112,8 @@ myLayoutHook = -- {{{
              . smartBorders
              . layoutHints
              . fullscreenFocus
-             $     myMRTile
+             $
+                   myMRTile
                ||| myMirroredMRTile
                ||| myTabbed
                ||| myWmii
@@ -155,7 +157,7 @@ myLogHook h = do -- {{{ ( & dynamicLogWithPP config
            , ppTitle           = xmobarColor (green' myCS) ""
                                 . mkLengthL myTitleLength
            , ppLayout          = xmobarColor (magenta' myCS) ""
-                                . mkLengthR myTitleLength
+                                -- . mkLengthR myTitleLength
            , ppOrder           = \(ws:l:t:_) -> [t, ws, l]
            , ppExtras          = []
            , ppOutput          = hPutStrLn h
@@ -255,6 +257,19 @@ myKeymap = \c -> mkKeymap c $
     , ("M-<KP_Add>",      sendMessage $ JumpToLayout "tiled")
     , ("M-<KP_Enter>",    sendMessage $ JumpToLayout "wmii-Column")
     , ("M-q",             kill1)
+    , ("M-; =",           zoomColumnIn)
+    , ("M-; -",           zoomColumnOut)
+    , ("M-; 0",           zoomColumnReset)
+    , ("M-; \\",          toggleColumnFull)
+    , ("M-; [",           zoomWindowIn)
+    , ("M-; ]",           zoomWindowOut)
+    , ("M-; p",           zoomWindowReset)
+    , ("M-; |",           toggleWindowFull)
+    , ("M-, ]",           increaseNMasterGroups)
+    , ("M-, [",           decreaseNMasterGroups)
+    , ("M-, -",           shrinkMasterGroups)
+    , ("M-, =",           expandMasterGroups)
+    , ("M-, \\",          nextOuterLayout)
     ] ++ -- }}}
     [ -- Workspaces {{{
       ("M-0",          moveTo Next NonEmptyWS)

@@ -204,6 +204,10 @@ nnoremap <silent> <leader>bg :call ToggleBG()<CR>
 " Paste from clipboard
 nnoremap <silent> <leader>p :set paste<CR>"*p:set nopaste<CR>
 nnoremap <silent> <leader>P :set paste<CR>"*P:set nopaste<CR>
+" Format entire file with gq
+nnoremap <leader>gq mzgggqG`z
+" Change tabs in insert mode
+inoremap <C-Tab> <C-o>gt
 
 " Close buffer, or if last buf, quit vim
 nnoremap <F12> :call CloseBufWin()<CR>
