@@ -105,7 +105,6 @@ myWS = -- {{{
     , "docs" -- gui editors (libreoffice, gimp, etc.)
     , "arts" -- media
     ]
-    -- ++ map show [7..9]
 -- }}}
 myLayoutHook = -- {{{
                avoidStruts
