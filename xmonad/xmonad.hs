@@ -83,11 +83,11 @@ main = do
            $ defaultConfig
                          { modMask            = myModMask
                          , focusFollowsMouse  = True
-                         , terminal           = "termite"
+                         , terminal           = myTerm
                          , workspaces         = myWS
-                         , borderWidth        = 2
+                         , borderWidth        = 1
                          , normalBorderColor  = bg myCS
-                         , focusedBorderColor = red' myCS
+                         , focusedBorderColor = green myCS
                          , keys               = myKeymap
                          , logHook            = myLogHook h
                          , layoutHook         = myLayoutHook
@@ -98,13 +98,12 @@ main = do
 -- }}}
 -- {{{ Hooks = [ Layout, Log, Manage, HandleEvents, Startup ]
 myWS = -- {{{
-    [ "home" -- beginning screen
-    , "webs" -- web browser & media
-    , "term" -- coding + writing
-    , "talk" -- communication (irc, email)
-    , "docs" -- gui editors (libreoffice, gimp, etc.)
-    , "arts" -- media
-    ]
+    [ my1 , my2 , my3 , my4 , my5 ]
+my1 = "home" -- beginning screen
+my2 = "surf" -- web browser
+my3 = "edit" -- coding + writing
+my4 = "docs" -- gui editors (libreoffice, gimp, etc.)
+my5 = "view" -- media
 -- }}}
 myLayoutHook = -- {{{
                avoidStruts
@@ -156,7 +155,7 @@ myLogHook h = do -- {{{ ( & dynamicLogWithPP config
            , ppTitle           = xmobarColor (green' myCS) ""
                                 . mkLengthL myTitleLength
            , ppLayout          = xmobarColor (magenta' myCS) ""
-                                -- . mkLengthR myTitleLength
+                                . mkLengthR myTitleLength
            , ppOrder           = \(ws:l:t:_) -> [t, ws, l]
            , ppExtras          = []
            , ppOutput          = hPutStrLn h
@@ -182,17 +181,15 @@ myManageHook = -- {{{
         , [className =? c --> doFloat | c <- myFloats]
         , [resource  =? i --> doIgnore | i <- myIgnores]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "home" | x <- my1Shifts]
+                                    --> doShiftAndGo my1 | x <- my1Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "webs" | x <- my2Shifts]
+                                    --> doShiftAndGo my2 | x <- my2Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "term" | x <- my3Shifts]
+                                    --> doShiftAndGo my3 | x <- my3Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "talk" | x <- my4Shifts]
+                                    --> doShiftAndGo my4 | x <- my4Shifts]
         , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "docs" | x <- my5Shifts]
-        , [(className =? x <||> title =? x <||> resource =? x)
-                                    --> doShiftAndGo "arts" | x <- my6Shifts]
+                                    --> doShiftAndGo my5 | x <- my5Shifts]
         ]) -- }}}
         where
             -- doShiftAndGo = doF . liftM2 (.) W.greedyView W.shift
@@ -208,8 +205,7 @@ myManageHook = -- {{{
                         ]
             my3Shifts = [ -- coding + writing + files
                           "vim"
-                        , "ranger"
-                        , "Termite"
+                        , "gvim", "Gvim"
                         ]
             my4Shifts = []
             my5Shifts = []
@@ -256,19 +252,6 @@ myKeymap = \c -> mkKeymap c $
     , ("M-<KP_Add>",      sendMessage $ JumpToLayout "tiled")
     , ("M-<KP_Enter>",    sendMessage $ JumpToLayout "wmii-Column")
     , ("M-q",             kill1)
-    , ("M-; =",           zoomColumnIn)
-    , ("M-; -",           zoomColumnOut)
-    , ("M-; 0",           zoomColumnReset)
-    , ("M-; \\",          toggleColumnFull)
-    , ("M-; [",           zoomWindowIn)
-    , ("M-; ]",           zoomWindowOut)
-    , ("M-; p",           zoomWindowReset)
-    , ("M-; |",           toggleWindowFull)
-    , ("M-, ]",           increaseNMasterGroups)
-    , ("M-, [",           decreaseNMasterGroups)
-    , ("M-, -",           shrinkMasterGroups)
-    , ("M-, =",           expandMasterGroups)
-    , ("M-, \\",          nextOuterLayout)
     ] ++ -- }}}
     [ -- Workspaces {{{
       ("M-0",          moveTo Next NonEmptyWS)

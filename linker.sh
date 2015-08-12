@@ -3,6 +3,12 @@
 # (it's simpler than install.sh.)
 
 doLink() {
+  if [[ $1 = "-r" ]]; then
+    EXEC="sudo";
+    shift 1;
+  else
+    EXEC="exec";
+  fi
     local dir="${0%/*}"
     local myCopy="$dir/$1";
     local sysCopy="$2";
@@ -15,11 +21,11 @@ doLink() {
 
     if [[ -f $sysCopy ]]; then
         mkdir -p $oldConfigs;
-        mv $sysCopy $oldConfigs;
+        $EXEC mv $sysCopy $oldConfigs;
     elif [[ -L $sysCopy ]]; then
-        rm $sysCopy;
+        $EXEC rm $sysCopy;
     fi
-    ln -s $myCopy $sysCopy;
+    $EXEC ln -s $myCopy $sysCopy;
 }
 msgInstall() {
     if [[ -z $(which $1) ]]; then
@@ -59,4 +65,4 @@ msgInstall "ghc"
 doLink "agignore"  "$HOME/.agignore";
 msgInstall "ag"
 
-# TODO: /etc/nixos/configuration.nix
+doLink -r "configuration.nix" "/etc/nixos/configuration.nix"
