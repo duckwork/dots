@@ -3,41 +3,36 @@
 # (it's simpler than install.sh.)
 
 doLink() {
-  if [[ $1 = "-r" ]]; then
-    EXEC="sudo";
-    shift 1;
-  else
-    EXEC="exec";
-  fi
-    local dir="${0%/*}"
+    local dir="$(dirname $(realpath "$0"))"
     local myCopy="$dir/$1";
     local sysCopy="$2";
     local oldConfigs="$HOME/.config/old-configs/"
+    echo "Linking '$myCopy' to '$sysCopy'"
 
-    if [[ ! -f $myCopy ]]; then
+    if [[ ! -e "$myCopy" ]]; then
         echo "File '$myCopy' doesn't exist!"
         exit 1
     fi
 
-    if [[ -f $sysCopy ]]; then
-        mkdir -p $oldConfigs;
-        $EXEC mv $sysCopy $oldConfigs;
-    elif [[ -L $sysCopy ]]; then
-        $EXEC rm $sysCopy;
+    if [[ -e "$sysCopy" ]]; then
+        mkdir -p "$oldConfigs";
+        mv "$sysCopy" "$oldConfigs";
+    elif [[ -L "$sysCopy" ]]; then
+        rm "$sysCopy";
     fi
-    $EXEC ln -s $myCopy $sysCopy;
+    ln -s "$myCopy" "$sysCopy";
 }
 msgInstall() {
-    if [[ -z $(which $1) ]]; then
-        echo "Be sure to install `$1`!"
-        return 1
-    else
+    if which "$1" &>/dev/null; then
         return 0
+    else
+        echo "Be sure to install '$1'!"
+        return 1
     fi
 }
 
 # ~/.config directory
-doLink "config" "$HOME/.config"
+doLink "config/" "$HOME/.config"
 
 doLink "bashrc" "$HOME/.bashrc"
 doLink "inputrc" "$HOME/.inputrc"
@@ -64,5 +59,3 @@ msgInstall "ghc"
 
 doLink "agignore"  "$HOME/.agignore";
 msgInstall "ag"
-
-doLink -r "configuration.nix" "/etc/nixos/configuration.nix"
