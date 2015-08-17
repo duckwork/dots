@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Linker.sh: link stuff from in here to "out there."
 # (it's simpler than install.sh.)
 
