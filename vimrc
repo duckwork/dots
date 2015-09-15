@@ -419,6 +419,16 @@ endfunction
 command! -bar RangerChooser call RangeChooser()
 nnoremap <leader>f :<C-u>RangerChooser<CR>
 endif " }}}
+function! CharToEnd(char)
+  let s:l = len(getline('.')) + 1
+  if &textwidth > 0
+    let s:e = &textwidth
+  else
+    let s:e = 78
+  endif
+  exe "normal! A "
+  exe "normal! " . (s:e - s:l) . "A" . a:char
+endfunction
 " Managing buffers, tabs, windows ============================================
 function! ChTabBuf(motion) " {{{
     if tabpagenr('$') == 1
