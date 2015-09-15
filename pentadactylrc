@@ -3,23 +3,47 @@
 loadplugins '\.(js|penta)$'
 group user
 " Settings {{{
-set hintkeys=asdfg;lkjhqwertpoiuyzxcmnbv
+set editor="gvim -f"
+set hintkeys=asdg;lhqwertpoiuyzxcmnbv
 set wildmode=list:full
 set autocomplete=
 set defsearch=duckduckgo-html
 " Turn smooth scrolling off
 set scrollsteps=1
+set incfind
 set hlfind
+set findcase=smart
 set visualbell
-set guioptions=CMrns
+set guioptions=Mrs
+set showmode=caret,output_multiline,!normal,!ex,base,operator
 " Passkeys {{{
 " --- Gmail
 " --- up, down, archive, open; go-inbox
 set passkeys+=mail.google.com:jke<CR>,gi
+set passkeys+=inbox.google.com:jke<CR>,gi
 " --- Facebook
 " --- up, down, comment
 set passkeys+=facebook.com:jkc
 " }}}
+" }}}
+" Maps {{{
+nmap -builtin ; :
+nmap -builtin : ;
+map , <Leader>
+nmap -b <Leader>re :source $MY_PENTADACTYLRC<CR>
+map -b <F2> :set guioptions!=T<CR>
+map -b -s <F3> y:open about:reader?url=<C-v><C-v><CR>
+map -b <F4> <C-S-e>
+map -b j 6j
+map -b k 6k
+map -b h 6h
+map -b l 6l
+map -m hints j -ex normal! 6j
+map -m hints k -ex normal! 6k
+map -m hints f <CR>
+nmap -b > gt
+nmap -b <lt> gT
+map -b gb :ls<CR>:b<Space>
 " }}}
 " Hilight groups {{{
 hi Bell background-color: white !important;
@@ -27,7 +51,7 @@ hi Bell background-color: white !important;
 hi -a FontFixed font-family: Consolas,monospace !important;
               \ font-size: 9pt !important;
 hi -a FontProportional font-family: Garamond,Georgia,serif !important;
-                     \ font-size: 9pt !important;
+                     \ font-size: 16px !important;
 
 hi Hint font: 12px Consolas,monospace !important;
       \ background-color: rgba(0, 255, 255, 1) !important;
@@ -35,89 +59,8 @@ hi Hint font: 12px Consolas,monospace !important;
       \ border: 1px solid red !important;
       \ margin-top: -2px !important;
       \ padding: 1px !important;
+
+hi TabNumber::after content: ">" !important;
+hi TabNumber::before content: "|" !imporant;
 " }}}
-" Maps {{{
-nmap -builtin ; :
-nmap -builtin : ;
-map , <Leader>
-nmap -builtin <Leader>re :source $MY_PENTADACTYLRC<CR>
-nmap -builtin <F2> :extdisable Pentadactyl<CR>
-
-nmap -builtin <S-F7> :set noscript-sites!=<A-Tab>
-nmap -builtin <F7> :set noscript-tempsites!=<A-Tab>
-
-nmap -builtin <F3> :set usermode!<CR>:styletoggle -name=Readable<CR>
-" }}}
-" Styles {{{
-style -name Readable * <<EOM
-    body {
-        max-width: 30em;
-        margin: auto !important;
-        font-size: 18pt;
-        background-color: #333 !important;
-        color: #eee !important;
-    }
-    p,ul,ol,li,table {
-        line-height: 1.5em;
-        font-family: Garamond,Georgia,serif;
-        text-align: left;
-        margin: 1.75em auto;
-    }
-    h1,h2,h3,h4,h5,h6 {
-        font-family: Tahoma,Arial,sans-serif;
-    }
-    img {
-        max-width: 100%;
-    }
-    a:link {
-        text-underline: none !important;
-        text-decoration: none !important;
-        color: #3ee !important;
-    }
-EOM
-
-styledisable -name=Readable
-
-javascript <<EOF
-function Reader() {
-}
-
-" style -name minitabs chrome://* <<EOM
-"     #TabsToolbar toolbarbutton {
-"         display: none !important;
-"     }
-"     .tabbrowser-tabs {
-"         background: #1d282c !important;
-"     }
-"     .tabbrowser-tab {
-"         -moz-appearance: none !important;
-"         -moz-border-radius: 0 !important;
-"         background: #1d282c !important;
-"         border: none !important;
-"         color: #707880 !important;
-"         font-family: Cousine;
-"         font-size: 9pt !important;
-"         height: 18px !important;
-"         margin: 0 !important;
-"         min-height: 0 !important;
-"         padding: 0 0.5ex !important;
-"     }
-"     .tabbrowser-tab:not([pinned]) {
-"         max-width: 125px !important;
-"         min-width: 125px !important;
-"     }
-"     .tabbrowser-tab:not([fadein]) {
-"         max-width: 1px !important;
-"         min-width: 1px !important;
-"     }
-"     .tabbrowser-tab:hover {
-"         background: #f0c674 !important;
-"         color: #282a2e !important;
-"     }
-"     .tabbrowser-tab[selected] {
-"         background: #282a2e !important;
-"         color: #f0c674 !important;
-"     }
-" EOM
-" }}}
-" vim: set ft=pentadactyl:
+" vim:ft=pentadactyl:fdm=marker
