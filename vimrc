@@ -226,6 +226,11 @@ cmap w!! %!sudo tee > /dev/null %
 
 " Fix line endings to Unix b/c why not
 nnoremap <F9> :update<CR>:e ++ff=dos<CR>:setlocal ff=unix<CR>:w<CR>
+
+" Add '=' to end of line for headings
+nnoremap <leader>= :call CharToEnd("=")<CR>
+" Same idea, but '-'
+nnoremap <leader>- :call CharToEnd("-")<CR>
 "}}}
 " COMMANDS {{{
 " }}}
