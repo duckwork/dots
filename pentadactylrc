@@ -33,6 +33,9 @@ map , <Leader>
 nmap -b <Leader>re :source $MY_PENTADACTYLRC<CR>
 map -b <F2> :set guioptions!=T<CR>
 map -b -s <F3> y:open about:reader?url=<C-v><C-v><CR>
+map -b -s <S-F3> :set usermode:js <<EOF
+   
+EOF
 map -b <F4> <C-S-e>
 map -b j 6j
 map -b k 6k

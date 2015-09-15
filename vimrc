@@ -235,7 +235,7 @@ augroup Filestuff "{{{
     " Autosave files
     au FocusLost * silent! wall
     " Auto-remove whitespace when saving
-    au BufWritePre * %s/\s\+$//e
+    " au BufWritePre * %s/\s\+$//e
     " Auto-source vimrc on save
     "au BufWritePost $MYVIMRC source $MYVIMRC
 
@@ -340,7 +340,8 @@ if has('gui_running') " {{{
     elseif has('x11')
         set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
-        set guifont=InputMono:h8:cANSI
+        " set guifont=InputMono:h8:cANSI
+        set guifont=Hack:h10:cANSI
         " Start at this size
         augroup CustomSizeVim
             au!
@@ -476,6 +477,7 @@ function! StatusLine(winnr) " {{{
 
     let buffer     = winbufnr(a:winnr)
     let fname      = bufname(buffer)
+    let dirname    = getcwd()
     let ftype      = getbufvar(buffer, '&filetype')
 
     let isactive   = winnr() == a:winnr
@@ -498,9 +500,9 @@ function! StatusLine(winnr) " {{{
     " Left side ----------------------------------------------------
     " Column indicator
     if isactive
-        let status .= '%3v '
+        let status .= '>%3v '
     else
-        let status .= '>%n. '
+        let status .= '[%n]  '
     endif
 
     " Scroll
@@ -545,21 +547,29 @@ function! StatusLine(winnr) " {{{
     " else
     "     let filepart = '« %%<%s: %s »'
     " endif
-    let filepart = '“ %%<%s: %s ”'
     " Filename
-    if fname =~ '__Gundo' || ftype =~ 'netrw' || fname == ''
-        let filepart = '{ %%<%s: %s }'
+    if fname =~ '__Gundo' || ftype =~ 'netrw'
         let fname  = len(ftype) > 0 ? ftype : ''
+        let fsep = ''
+    elseif fname == '' && ftype == ''
+        let fname = '__'
+        let fsep = ''
+    elseif fname == '' && len(ftype) > 0
+        let fname = '__'
+        let fsep = '::'
     else
         let fname  = '%f'
+        let fsep = '::'
     endif
+    let filepart = '%s'.fsep.'%s'
 
     if isactive
-        let status .= '%#StatusLine# '
+        let status .= '%#CursorLine#' . ' %<' . dirname
+        let status .= '%#StatusLine#/ '
         let status .= printf(filepart, fname, ftype)
         let status .= ' %#CursorLine#'
     else
-        let status .= fname . ': ' . ftype
+        let status .= '%<' . dirname .'/'. fname . fsep . ftype . ' '
     endif
 
     return status
@@ -598,8 +608,8 @@ function! Typewriter(switch) " {{{
         let s:colorscheme = g:colors_name
         let s:bg = &background
 
-        set guifont=Courier_Prime:h10:cANSI
-        colorscheme pencil
+        set guifont=Courier_Prime:h14:cANSI
+        colorscheme PaperColor
         set background=light
 
         return 1
@@ -761,7 +771,7 @@ Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
 " --------------------------------------
 " Plug 'scrooloose/syntastic'             " Syntax checking on the fly
 " --------------------------------------
-Plug 'raichoo/haskell-vim'              " Haskell syntax files
+Plug 'neovimhaskell/haskell-vim'              " Haskell syntax files
 Plug 'Twinside/vim-hoogle'              " Search Hoogle from Vim
 " Plug 'pbrisbin/vim-syntax-shakespeare'  " Syntax for hakell html templates
 " --------------------------------------
@@ -898,7 +908,8 @@ nnoremap gS :%S/
 xnoremap gS :S/
 " J/K intelligently SplitJoin.vim or fallback to default
 nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin', 'J')<CR>
-nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit', "i\r")<CR>
+nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit',
+                                        \ "i\r\ed^kg_lD")<CR>
 
 " Disable pandoc#formatting#autoformat
 nnoremap <F4> :call pandoc#formatting#ToggleAutoformat()<CR>
