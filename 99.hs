@@ -1,5 +1,8 @@
-import Data.List (group)
--- 01-10 {{{
+import Data.List
+import Data.Ord (comparing)
+import Data.Function (on)
+import System.Random
+-- 01-10 {{{ =================================================================
 -- 01. Find the last element of a list. ----------------------------------
 myLast :: [a] -> a
 myLast [] = error "Empty list"
@@ -82,7 +85,7 @@ encode xs = zip (map length $ myGroup xs) (compress xs)
 encode' :: Eq a => [a] -> [(Int, a)]
 encode' = map (\x -> (length x, head x)) . group
 -- }}}
--- 11-20 {{{
+-- 11-20 {{{ =================================================================
 -- 11. Modified run-length encoding. -------------------------------------
 -- Modify 10 so that if an element is alone, it's copied into result.
 data Some a = Single a
@@ -150,13 +153,127 @@ removeAt :: Int -> [a] -> (a, [a])
 removeAt n xs = (head $ drop (n - 1) xs, take (n-1) xs ++ drop n xs)
 --OR
 removeAt' 1 (x:xs) = (x, xs)
-removeAt' n (x;xs) = (l , x:r)
+removeAt' n (x:xs) = (l , x:r)
   where (l, r) = removeAt (n - 1) xs
--- OR WITH MAYBE
-removeAtMaybe :: Int -> [a] -> (Maybe a, [a])
-removeAtMaybe _ [] = (Nothing, [])
-removeAtMaybe 1 (x:xs) = (Just x, xs)
-removeAtMaybe k (x:xs) = let (a, r) = removeAt (k - 1) xs
-                          in (a, x:r)
+-- }}}
+-- {{{ 21-30 (28, really, for some reason) ===================================
+-- 21. Insert an element at a given position into a list ---------------------
+-- e.g. insertAt 'X' 2 "abcd" = "aXbcd"
+insertAt :: a -> Int -> [a] -> [a]
+insertAt x 1 xs = x:xs
+insertAt x n (x':xs) = x':insertAt x (n - 1) xs
+
+-- 22. Create a list containing all integers in a given range ----------------
+range :: Int -> Int -> [Int]
+range n m
+  | n > m    = []
+  | otherwise = n : range (n + 1) m
+
+-- 23. Extract a given number of randomly selected elements from a list ------
+randomSelect :: Int -> [a] -> IO [a]
+-- NOTE: TOTALLY CHEATED
+randomSelect n xs = do
+  gen <- getStdGen
+  return $ take n [ xs !! x | x <- randomRs (0, (length xs) - 1) gen]
+
+-- 24-25 : Random problems. As in, problems involving random. ----------------
+-- ....... so I'm not doing them. meh. TODO ----------------------------------
+
+-- 26. Generate the combinations of K objects from a list --------------------
+-- eg. in how many ways can a committee of 3 be chosen from a group of 12? we
+--     all know that there are C(12,3) = 220 possibilities (binomial coeffici-
+--     ents). But what are all 220 different combinations?
+combinations :: Int -> [a] -> [[a]]
+combinations 0 _  = [ [] ]
+combinations n xs = [ y:ys | y:xs' <- tails xs
+                           , ys    <- combinations (n - 1) xs' ]
+
+-- 27. Group the elements of a set into disjoint subsets ---------------------
+-- I'm not even sure what this means. So leaving for now. TODO  --------------
+
+-- 28. Sort a list of lists according to the length of sublists
+--  a. sort short to long.
+listList :: [[Char]]
+listList = ["abc","de","fgh","de","ijkl","mn","o"]
+lsort :: [[a]] -> [[a]]
+lsort = sortBy (\lx ly -> length lx `compare` length ly)
+-- OR FUCKING THIS: (with 'comparing' from Data.Ord)
+lsort' = sortBy (comparing length) -- which is the same.
+-- OR:
+--lsort'' = sortOn length -- sortOn == sortBy . comparing (but evaluates
+                        --                             elements only once)
+
+--  b. Sort by 'length frequency' : lists with rare lengths are first, then
+--     more frequently-occuring lists.
+lfsort :: [[a]] -> [[a]]
+lfsort = concat . lsort . groupBy (\lx ly -> length lx == length ly) . lsort
+-- OR (with 'on' from Data.Function)
+lfsort' = concat . lsort . groupBy ((==) `on` length) . lsort
+-- OR what I was originally thinking:
+-- lfsort'' = map snd
+--          . concat
+--          . sortOn length
+--          . groupBy ((==) `on` fst)
+--          . sortOn fst
+--          . map (\x -> (length x, x))
+
+-- }}}
+-- {{{ 31-41   ===============================================================
+-- 31. Determine whether a given integer is prime  ---------------------------
+isPrime :: Int -> Bool
+isPrime 1 = False
+isPrime x = let ys = [2..x']
+                x' = floor . sqrt . fromIntegral $ x
+                divides i j = i `rem` j == 0
+             in not $ any (divides x) ys
+
+
+primeTest :: [Int]
+primeTest = filter isPrime [1..100]
+
+-- 32. Determine the greatest common divisor of 2 integers using Euclid ------
+myGCD :: Int -> Int -> Int
+myGCD x y
+  | x `rem` y == 0 = abs y
+  | y `rem` x == 0 = abs x
+  | x > y          = myGCD y (x `rem` y)
+  | x < y          = myGCD x (y `rem` x)
+
+-- 33. Find whether 2 ints are coprime  --------------------------------------
+coprime :: Int -> Int -> Bool
+coprime x y = gcd x y == 1
+
+-- 34. Find the totient (number of coprimes) of x ----------------------------
+totient :: Int -> Int
+totient 1 = 1
+totient x = length $ filter (coprime x) [1..(x - 1)]
+-- OR
+{- this is more efficient on big numbers:
+import Data.List (nub)
+import Data.Ratio
+totient :: (Integral a) => a -> a
+totient 1 = 1
+totient n = numerator ratio `div` denominator ratio
+  where ratio = foldl (\acc x -> acc * (1 - (1 % x)))
+                   (n % 1) $ nub (primeFactors n)
+-}
+
+-- 35. Find an integer's prime factors in a flat, ascending list  ------------
+--     e.g. primeFactors 315 ==> [3,3,5,7]
+primeFactors :: Int -> [Int] -- CHEATED
+primeFactors n = primeFactors' n 2
+  where
+    primeFactors' 1 _ = []
+    primeFactors' n f
+      | f * f > n      = [n]
+      | n `rem` f == 0 = f : primeFactors' (n `div` f) f
+      | otherwise      = primeFactors' n (f + 1)
+
+-- 36. Determine the prime factors of x, but with "multiplicity"  ------------
+--     e.g. primeFactorsMult 315 ==> [(3,2),(5,1),(7,1)]
+primeFactorsMult :: Int -> [(Int, Int)]
+primeFactorsMult = map swap . encode . primeFactors
+  where swap (x, y) = (y, x)
+
 -- }}}
 -- vim: fdm=marker
