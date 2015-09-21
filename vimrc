@@ -1031,4 +1031,4 @@ endif
 "}}}
 
 set background=dark
-colorscheme PaperColor
+colorscheme gruvbox
