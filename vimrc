@@ -724,12 +724,12 @@ if empty(glob('~/.vim/autoload/plug.vim'))
 endif " }}}
 call plug#begin('~/.vim/plugged')
 
-" GUI ==================================
-Plug 'chriskempson/base16-vim'
+" COLORSCHEMES =========================
+" Plug 'chriskempson/base16-vim'
 Plug 'tomasr/molokai'
-Plug 'zenorocha/dracula-theme', { 'rtp': 'vim/' }
 Plug 'romainl/Apprentice'
 Plug 'NLKNguyen/papercolor-theme'
+Plug 'morhetz/gruvbox'
 
 " WRITING ==============================
 " Prose --------------------------------
