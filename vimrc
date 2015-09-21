@@ -581,7 +581,7 @@ function! StatusLine(winnr) " {{{
     if isactive
         let status .= '%#CursorLine#' . ' %<' . dirname
         if has('win32')
-          let status .= '\\'
+          let status .= '\'
         else
           let status .= '/'
         endif
