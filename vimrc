@@ -340,8 +340,8 @@ if has('gui_running') " {{{
 
     " Change font based on system
     if has('gui_gtk2')
-        set guifont=Terminus\ 9
-        " set guifont=Inconsolata\ Medium\ 10
+        " set guifont=Terminus\ 9
+        set guifont=Inconsolata\ Medium\ 10
     elseif has('x11')
         set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
@@ -425,7 +425,7 @@ endfunction
 command! -bar RangerChooser call RangeChooser()
 nnoremap <leader>f :<C-u>RangerChooser<CR>
 endif " }}}
-function! CharToEnd(char)
+function! CharToEnd(char) " {{{
   let s:l = len(getline('.')) + 1
   if &textwidth > 0
     let s:e = &textwidth
@@ -434,7 +434,7 @@ function! CharToEnd(char)
   endif
   exe "normal! A "
   exe "normal! " . (s:e - s:l) . "A" . a:char
-endfunction
+endfunction " }}}
 " Managing buffers, tabs, windows ============================================
 function! ChTabBuf(motion) " {{{
     if tabpagenr('$') == 1
@@ -580,7 +580,12 @@ function! StatusLine(winnr) " {{{
 
     if isactive
         let status .= '%#CursorLine#' . ' %<' . dirname
-        let status .= '%#StatusLine#/ '
+        if has('win32')
+          let status .= '\\'
+        else
+          let status .= '/'
+        endif
+        let status .= '%#StatusLine# '
         let status .= printf(filepart, fname, ftype)
         let status .= ' %#CursorLine#'
     else
@@ -786,8 +791,10 @@ Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
 " --------------------------------------
 " Plug 'scrooloose/syntastic'             " Syntax checking on the fly
 " --------------------------------------
-Plug 'neovimhaskell/haskell-vim'              " Haskell syntax files
+Plug 'neovimhaskell/haskell-vim'        " Haskell syntax files
 Plug 'Twinside/vim-hoogle'              " Search Hoogle from Vim
+Plug 'urso/haskell_syntax.vim'          " Syntax colors for moar schemes
+Plug 'duckwork/vim-haskellConceal'      " UTF characters!
 " Plug 'pbrisbin/vim-syntax-shakespeare'  " Syntax for hakell html templates
 " --------------------------------------
 Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt

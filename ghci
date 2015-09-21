@@ -1,1 +1,5 @@
-:set prompt "λ_ "
+:set prompt  "λ -> "
+:set prompt2 "λ... "
+:set editor "vim"
+
+:set +m
