@@ -312,6 +312,7 @@ augroup END
 augroup ft_Haskell
     au!
     au FileType haskell let &formatprg="stylish-haskell"
+    au FileType haskell let &concealcursor="nc"
 augroup END
 " }}}
 "}}}
@@ -346,7 +347,7 @@ if has('gui_running') " {{{
         set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
         " set guifont=InputMono:h8:cANSI
-        set guifont=Hack:h10:cANSI
+        set guifont=Hack:h11:cANSI
         " Start at this size
         augroup CustomSizeVim
             au!
