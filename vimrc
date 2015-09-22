@@ -734,7 +734,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'tomasr/molokai'
 Plug 'romainl/Apprentice'
 Plug 'NLKNguyen/papercolor-theme'
-Plug 'morhetz/gruvbox'
+Plug 'duckwork/gruvbox'
 
 " WRITING ==============================
 " Prose --------------------------------
@@ -834,6 +834,8 @@ endif
 call plug#end()                         " req'd
 "}}}
 " Plugin settings {{{
+" Colorscheme settings ------------------------------------
+let g:gruvbox_improved_strings = 1
 " Ag ------------------------------------------------------
 let g:agprg = 'ag --column --smart-case'
 let g:aghighlight = 1 " highlight searches

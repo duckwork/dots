@@ -275,5 +275,7 @@ primeFactorsMult :: Int -> [(Int, Int)]
 primeFactorsMult = map swap . encode . primeFactors
   where swap (x, y) = (y, x)
 
+-- 37. Calculate totient (improved) ------------------------------------------
+
 -- }}}
 -- vim: fdm=marker
