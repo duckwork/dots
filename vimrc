@@ -347,7 +347,7 @@ if has('gui_running') " {{{
         set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
         " set guifont=InputMono:h8:cANSI
-        set guifont=Hack:h11:cANSI
+        set guifont=Hack:h9:cANSI
         " Start at this size
         augroup CustomSizeVim
             au!
@@ -380,7 +380,7 @@ endfor
 " }}}
 "}}}
 " FUNCTIONS {{{
-" Tools ==================================================================
+" Tools {{{  =================================================================
 function! WordCount() " {{{
     let s:oldstat = v:statusmsg
     let position = getpos('.')
@@ -436,7 +436,8 @@ function! CharToEnd(char) " {{{
   exe "normal! A "
   exe "normal! " . (s:e - s:l) . "A" . a:char
 endfunction " }}}
-" Managing buffers, tabs, windows ============================================
+" }}} ========================================================================
+" Managing buffers, tabs, windows {{{ ========================================
 function! ChTabBuf(motion) " {{{
     if tabpagenr('$') == 1
         " there is only 1 tab; switch buffers
@@ -470,7 +471,8 @@ function! PopOpen(file) " {{{
         execute "tabe" s:fpath
     endif
 endfunction " }}}
-" Custom interface lines =====================================================
+" }}} ========================================================================
+" Custom interface lines {{{ =================================================
 function! FoldLine() " {{{
     let line = getline(v:foldstart)
     let foldedlinecount = printf('%3d', v:foldend - v:foldstart)
@@ -608,7 +610,8 @@ function! s:RefreshStatus(...) " {{{
 endfunction " }}}
 function! TabLine() " {{{
 endfunction " }}}
-" Custom theming =============================================================
+" }}} ========================================================================
+" Custom theming {{{ =========================================================
 function! Typewriter(switch) " {{{
     function! s:typewriter_on()
         " let s:wrap = &wrap
@@ -704,7 +707,8 @@ function! ListPlus(switch) "{{{
                     \ : <SID>listplus_on()
     endif
 endfunction "}}}
-" Other fun stuff! ===========================================================
+" }}} ========================================================================
+" Miscellaneous {{{ ==========================================================
 function! RealScrollTo(direction) " {{{
     let s:scroff = &scrolloff
     set scrolloff=0
@@ -718,6 +722,7 @@ function! RealScrollTo(direction) " {{{
     let &scrolloff = s:scroff
     unlet s:scroff
 endfunction " }}}
+" }}} ========================================================================
 " }}}
 " PLUGINS {{{
 " Vim-plug {{{
@@ -866,7 +871,8 @@ let g:goyo_margin_bottom = g:goyo_margin_top
 " Pandoc --------------------------------------------------
 let g:pandoc#modules#disabled = [ 'menu' ] " Get rid of Pandoc menu
 let g:pandoc#command#custom_open = "PandocOpen" " function defined below
-let g:pandoc#filetypes#handled = [ 'markdown', 'rst', 'textile', ]
+let g:pandoc#command#use_message_buffers = 0
+let g:pandoc#filetypes#handled = [ 'markdown', 'rst', 'textile' ]
 let g:pandoc#folding#fdc = &fdc
 " let g:pandoc#formatting#mode = 'h' " hard wrap, autoformat smart
 let g:pandoc#formatting#textwidth = g:tw
