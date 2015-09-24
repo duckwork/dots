@@ -82,8 +82,8 @@ testEncode = do
 encode :: Eq a => [a] -> [(Int, a)]
 encode xs = zip (map length $ myGroup xs) (compress xs)
 -- pointfree : map (\x -> (length x, head x)) . group
-encode' :: Eq a => [a] -> [(Int, a)]
-encode' = map (\x -> (length x, head x)) . group
+encode2 :: Eq a => [a] -> [(Int, a)]
+encode2 = map (\x -> (length x, head x)) . group
 -- }}}
 -- 11-20 {{{ =================================================================
 -- 11. Modified run-length encoding. -------------------------------------

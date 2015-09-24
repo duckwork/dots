@@ -312,7 +312,6 @@ augroup END
 augroup ft_Haskell
     au!
     au FileType haskell let &formatprg="stylish-haskell"
-    au FileType haskell let &concealcursor="nc"
 augroup END
 " }}}
 "}}}
@@ -347,7 +346,7 @@ if has('gui_running') " {{{
         set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
         " set guifont=InputMono:h8:cANSI
-        set guifont=Hack:h9:cANSI
+        set guifont=Source_Code_Pro:h9:cANSI
         " Start at this size
         augroup CustomSizeVim
             au!
@@ -797,11 +796,12 @@ Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
 " --------------------------------------
 " Plug 'scrooloose/syntastic'             " Syntax checking on the fly
 " --------------------------------------
-Plug 'neovimhaskell/haskell-vim'        " Haskell syntax files
+" Plug 'neovimhaskell/haskell-vim'        " Haskell syntax files
 Plug 'Twinside/vim-hoogle'              " Search Hoogle from Vim
-Plug 'urso/haskell_syntax.vim'          " Syntax colors for moar schemes
-Plug 'duckwork/vim-haskellConceal'      " UTF characters!
+" Plug 'urso/haskell_syntax.vim'          " Syntax colors for moar schemes
+" Plug 'duckwork/vim-haskellConceal'      " UTF characters!
 " Plug 'pbrisbin/vim-syntax-shakespeare'  " Syntax for hakell html templates
+Plug 'duckwork/vim2hs'                    " Can this do everything?
 " --------------------------------------
 Plug 'freitass/todo.txt-vim'            " Syntax + keybinds for todo.txt
 
@@ -911,6 +911,10 @@ let g:splitjoin_split_mapping = 'gK'
 " let g:syntastic_auto_loc_list = 1
 " let g:syntastic_check_on_open = 1
 " let g:syntastic_check_on_wq = 0
+" Vim2HS
+let g:hpaste_author = 'duckwork'
+let g:haskell_conceal_wide = 0
+let g:haskell_conceal = 0 " don't conceal nothin'
 " Vim-Plug
 let g:plug_url_format = 'https://github.com/%s.git'
 " Vim-shell
