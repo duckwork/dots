@@ -312,7 +312,6 @@ augroup END
 augroup ft_Haskell
     au!
     au FileType haskell let &formatprg="stylish-haskell"
-    au FileType haskell let &concealcursor="nc"
 augroup END
 " }}}
 "}}}
@@ -342,7 +341,8 @@ if has('gui_running') " {{{
     " Change font based on system
     if has('gui_gtk2')
         " set guifont=Terminus\ 9
-        set guifont=Inconsolata\ Medium\ 10
+        " set guifont=Inconsolata\ Medium\ 10
+        set guifont=Fira\ Mono\ 10
     elseif has('x11')
         set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
@@ -780,6 +780,7 @@ Plug 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
 Plug 'tpope/vim-surround'               " Format surroundings easily
 
 " FILETYPES ============================
+Plug 'vim-scripts/SyntaxAttr.vim'       " show hi group of char under cursor
 Plug 'gregsexton/MatchTag',             " Match HTML tags with %
             \ { 'for': [ 'html', 'xml', ] }
 
@@ -792,7 +793,7 @@ Plug 'gbgar/pandoc-sections.vim',       " pandoc textobjects
 " --------------------------------------
 " Plug 'scrooloose/syntastic'             " Syntax checking on the fly
 " --------------------------------------
-Plug 'neovimhaskell/haskell-vim'        " Haskell syntax files
+" Plug 'neovimhaskell/haskell-vim'        " Haskell syntax files
 Plug 'Twinside/vim-hoogle'              " Search Hoogle from Vim
 Plug 'urso/haskell_syntax.vim'          " Syntax colors for moar schemes
 Plug 'duckwork/vim-haskellConceal'      " UTF characters!
@@ -836,7 +837,6 @@ call plug#end()                         " req'd
 "}}}
 " Plugin settings {{{
 " Colorscheme settings ------------------------------------
-let g:gruvbox_improved_strings = 1
 " Ag ------------------------------------------------------
 let g:agprg = 'ag --column --smart-case'
 let g:aghighlight = 1 " highlight searches
@@ -1042,3 +1042,4 @@ endif
 
 set background=dark
 colorscheme gruvbox
+" colorscheme PaperColor

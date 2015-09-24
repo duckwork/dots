@@ -276,6 +276,35 @@ primeFactorsMult = map swap . encode . primeFactors
   where swap (x, y) = (y, x)
 
 -- 37. Calculate totient (improved) ------------------------------------------
+phi :: Int -> Int
+phi m = undefined -- FUCK THIS UGH
+
+-- 38. FUCK THIS TOO
+--
+-- 39. A list of prime numbers b/w 2 bounds ----------------------------------
+primesR :: Int -> Int -> [Int]
+primesR n m = filter isPrime [n..m]
+
+-- 40. Goldbach's conjecture. Sum any number w/ 2 primes ---------------------
+goldbach :: Int -> (Int, Int)
+goldbach n = head $
+  [ (x, y)
+  | x <- pr
+  , y <- pr
+  , x + y == n
+  ]
+  where pr = primesR 2 (n - 2)
+
+-- 41. Given a range of integers, print a list of evens
+--     and their Goldbach compsitions
+goldbachList :: Int -> Int -> [(Int, Int)]
+goldbachList n m = map goldbach $ [even_n, even_n+2 .. m]
+  where even_n = max ((n + 1) `div` 2 * 2) 4
+
+goldbachList' :: Int -> Int -> Int -> [(Int, Int)]
+-- ^ 3rd Int is all cases where both primes > Int
+goldbachList' n m x = filter (\(a,b) -> a > x && b > x) $
+  goldbachList n m
 
 -- }}}
 -- vim: fdm=marker
