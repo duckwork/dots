@@ -340,13 +340,11 @@ if has('gui_running') " {{{
 
     " Change font based on system
     if has('gui_gtk2')
-        " set guifont=Terminus\ 9
-        " set guifont=Inconsolata\ Medium\ 10
-        set guifont=Fira\ Mono\ 10
+        " set guifont=Terminus\ 9 " same as termite
+        set guifont=Source\ Code\ Pro\ 9
     elseif has('x11')
-        set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
+        set guifont=-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*
     elseif has('gui_win32')
-        " set guifont=InputMono:h8:cANSI
         set guifont=Source_Code_Pro:h9:cANSI
         " Start at this size
         augroup CustomSizeVim
