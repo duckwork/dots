@@ -341,7 +341,8 @@ if has('gui_running') " {{{
     " Change font based on system
     if has('gui_gtk2')
         " set guifont=Terminus\ 9
-        set guifont=Inconsolata\ Medium\ 10
+        " set guifont=Inconsolata\ Medium\ 10
+        set guifont=Fira\ Mono\ 10
     elseif has('x11')
         set guifont=*-lucidatypewriter-medium-r-normal-*-*-180-*-*-m-*-*
     elseif has('gui_win32')
@@ -739,7 +740,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'tomasr/molokai'
 Plug 'romainl/Apprentice'
 Plug 'NLKNguyen/papercolor-theme'
-Plug 'morhetz/gruvbox'
+Plug 'duckwork/gruvbox'
 
 " WRITING ==============================
 " Prose --------------------------------
@@ -784,6 +785,7 @@ Plug 'michaeljsmith/vim-indent-object'  " a textobj for indentblocks
 Plug 'tpope/vim-surround'               " Format surroundings easily
 
 " FILETYPES ============================
+Plug 'vim-scripts/SyntaxAttr.vim'       " show hi group of char under cursor
 Plug 'gregsexton/MatchTag',             " Match HTML tags with %
             \ { 'for': [ 'html', 'xml', ] }
 
@@ -840,6 +842,7 @@ endif
 call plug#end()                         " req'd
 "}}}
 " Plugin settings {{{
+" Colorscheme settings ------------------------------------
 " Ag ------------------------------------------------------
 let g:agprg = 'ag --column --smart-case'
 let g:aghighlight = 1 " highlight searches
@@ -1050,3 +1053,4 @@ endif
 
 set background=dark
 colorscheme gruvbox
+" colorscheme PaperColor
