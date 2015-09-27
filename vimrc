@@ -41,10 +41,10 @@ set sidescroll=1 " minimal number of columns to scroll
 set sidescrolloff=1 " number of columns to show around cursor
 set display=lastline " show as much of the window's last line as possible
 " Characters to fill empty space in the following lines:
-let &fillchars = 'stl:^' " Focused statusline
+let &fillchars = 'stl:_' " Focused statusline
 let &fcs      .= ',stlnc: ' " Unfocused statusline
 let &fcs      .= ',vert:|' " Vertical window separators
-let &fcs      .= ',fold:-' " 'foldtext'
+let &fcs      .= ',fold:~' " 'foldtext'
 let &fcs      .= ',diff:-' " deleted lines of 'diff' option
 set cmdheight=1 " number of lines to use for the command-line
 set lazyredraw " don't redraw while executing macros
@@ -365,6 +365,10 @@ inoremap <C-Tab> <C-o>gt
 
 nnoremap <silent> <BS> :b#<CR>
 
+" Folds
+nnoremap <Space> za
+nnoremap <S-Space> zA
+
 " File & filesystem shortcuts
 nnoremap <Leader>er :call PopOpen(g:myvimrc)<CR>
 nnoremap <Leader>re :source <C-r>=g:myvimrc<CR><CR>
@@ -389,7 +393,8 @@ nnoremap <Leader>= :call CharToEnd("=")<CR>
 nnoremap <Leader>- :call CharToEnd("-")<CR>
 
 " Toggle settings
-nnoremap <silent> <leader>bg :call ToggleBG()<CR>
+nnoremap <silent> <Leader>bg :call ToggleBG()<CR>
+nnoremap <silent> <Leader>nr :set invrelativenumber<CR>
 
 " Clipboard
 if has('unnamedplus')
@@ -541,6 +546,8 @@ function! StatusLine(winnr) " {{{
   if isactive
     if &number
       let status .= '>%3v '
+    elseif ishelp
+      let status .= '> ? '
     else
       let status .= '>%3l:%v '
     endif
@@ -550,22 +557,22 @@ function! StatusLine(winnr) " {{{
   " Scroll {{{
   if !isactive
     let status .= '%#CursorLine#'
-    let status .= ' %-3pp%%'
+    let status .= ' %2p%%'
   else
-    let status .= '| %-3pp%%'
+    let status .= '| %2p%% '
     if exists("b:texty") " set by FT_text augroup
-      let status .= ' | %{WordCount()}'
+      let status .= '| %{WordCount()} '
     endif
   endif " }}}
   " }}} ----------------------------------------------------------------------
-  let status .= '%#CursorLine#%=' " Gutter -----------------------------------
+  let status .= ' %#CursorLine#%= ' " Gutter -----------------------------------
   " Right side {{{ -----------------------------------------------------------
   " File status indicators {{{
   if isactive
     if ! isreadonly
       if ismodified
         let status .= '%#DiffAdd'
-        let status = ' + '
+        let status .= ' + '
       endif
     else
       if ishelp
@@ -608,7 +615,11 @@ function! StatusLine(winnr) " {{{
   endif
 
   if isactive
-    let status .= '%#CursorLine#%<' . getcwd()
+    let status .= '%#CursorLine#'
+    let status .= '%<'
+    if ! ishelp
+      let status .= getcwd()
+    endif
     if has('win32')
       let status .= '\'
     else
@@ -645,12 +656,12 @@ endfunction "}}}
 function! ListPlus(switch) "{{{
     function! s:listplus_off()
         let s:cul  = &l:cursorline
-        let s:cc   = &l:colorcolumn
+        " let s:cc   = &l:colorcolumn
         let s:list = &l:list
         let s:rnu  = &l:relativenumber
 
         setlocal nocursorline
-        setlocal colorcolumn=
+        " setlocal colorcolumn=
         setlocal nolist
         setlocal norelativenumber
         match none /\s\+$/
@@ -709,22 +720,25 @@ augroup WindowCmds " {{{
   au InsertEnter * call ListPlus('off')
   au InsertLeave * call ListPlus('on')
 
-  au BufWinLeave * set norelativenumber
-  au BufWinEnter * set relativenumber
+  " au BufWinLeave * set norelativenumber
+  " au BufWinEnter * set relativenumber
 
   au BufWinLeave * silent! mkview
   au BufWinEnter * silent! loadview
 augroup END " }}}
 augroup FileTriggers " {{{
   au!
-  au BufEnter,BufRead xmonad.hs
-        \ if exists('g:loaded_vimproc')
-        \ |  nnoremap <Leader>xx :w<CR>
-        \ |  :call vimproc#system("xmonad --recompile && xmonad --restart")<CR>
-        \ | else
-        \ |  nnoremap <Leader>xx :w<CR>
-        \ |  :!xmonad --recompile && xmonad --restart<CR>
-        \ | endif
+  " au BufEnter,BufRead xmonad.hs :call <SID>XMonadConfSettings()<CR>
+augroup END
+" function! s:XMonadConfSettings() " {{{
+"   if exists('g:loaded_vimproc')
+"   nnoremap <Leader>xx :w<CR>
+"   :call vimproc#system("xmonad --recompile && xmonad --restart")<CR>
+"  else
+"   nnoremap <Leader>xx :w<CR>
+"   :!xmonad --recompile && xmonad --restart<CR>
+"   endif
+" endfunction " }}}
 " }}}
 " __FILETYPE__ {{{ -----------------------------------------------------------
 " TODO: add :set define,include
@@ -755,7 +769,7 @@ augroup FT_text " {{{
 augroup END " }}}
 augroup FT_netrw " {{{
   au!
-  au FileType netrw nnoremap <buffer> <Esc> :q!<CR>
+  au FileType netrw nnoremap <buffer> <Esc> :bd!<CR>
 augroup END " }}}
 augroup FT_haskell " {{{
   au!
