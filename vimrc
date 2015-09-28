@@ -33,6 +33,8 @@ set breakindent                 " preserve indents in wrapped text
 set lazyredraw                  " don't redraw while executing macros
 set linebreak                   " wrap long lines to a character in 'breakat'
 set list
+set number
+"set norelativenumber
 set wrap                        " long lines wrap
 set cmdheight=1                 " number of lines to use for the command-line
 set display=lastline            " show as much of the last line as possible
@@ -561,9 +563,9 @@ function! StatusLine(winnr) " {{{
   if isactive
     if ! isreadonly
       if ismodified
-        let status .= '%#DiffAdd'
+        let status .= '%#DiffAdd#'
         let status .= ' + '
-        let status .= '%#CursorLine#'
+        let status .= '%#CursorLine# '
       endif
     else
       if ishelp
@@ -572,12 +574,12 @@ function! StatusLine(winnr) " {{{
         let status .= '%#DiffDelete#'
         let status .= ' ! '
       endif
-      let status .= '%#CursorLine#'
+      let status .= '%#CursorLine# '
     endif
     if &paste
       let status .= '%#DiffChange'
       let status .= ' P '
-      let status .= '%#CursorLine#'
+      let status .= '%#CursorLine# '
     endif
   else
     if ! isreadonly
