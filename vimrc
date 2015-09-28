@@ -924,9 +924,9 @@ Plug 'vim-pandoc/vim-pandoc',
       \ { 'for': [ 'pandoc', 'markdown' ] }
   let g:pandoc#modules#disabled = [ 
         \ 'menu',
-        \ 'bibliographies', " TODO: see about Linux okay-ness
+        \ 'bibliographies',
         \ 'command',
-        \ ]
+        \ ] " TODO: see about Linux okay-ness
   let g:pandoc#command#custom_open = "PandocOpen" " function defined below
   let g:pandoc#command#use_message_buffers = 0
   let g:pandoc#filetypes#handled = [ 'markdown', 'rst', 'textile' ]
