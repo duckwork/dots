@@ -42,9 +42,9 @@ set sidescroll=1                " minimal number of columns to scroll
 set sidescrolloff=1             " number of columns to show around cursor
 let &showbreak = '└ '
 " Characters to fill empty space in the following lines:
-let &fillchars = 'stl:_'        " Focused statusline
+let &fillchars = 'stl:.'        " Focused statusline
 let &fcs      .= ',stlnc: '     " Unfocused statusline
-let &fcs      .= ',vert:|'      " Vertical window separators
+let &fcs      .= ',vert:.'      " Vertical window separators
 let &fcs      .= ',fold:~'      " 'foldtext'
 let &fcs      .= ',diff:-'      " deleted lines of 'diff' option
 " Characters to replace non-printing characters with:
@@ -374,7 +374,7 @@ endif
 
 " Remove annoyances
 nnoremap <silent> <Leader>/ :nohlsearch<CR>
-nnoremap <silent> <leader>rs mz:%s\+$//<CR>:let @/=''<CR>`z
+nnoremap <silent> <leader>rs mz:%s/\s\+$//<CR>:let @/=''<CR>`z
 nnoremap <silent> <leader>rb mz:g/^$/d<CR>:let @/=''<CR>`z
 
 " File formatting
@@ -536,6 +536,7 @@ function! StatusLine(winnr) " {{{
   " Left side {{{ ------------------------------------------------------------
   " Ruler {{{
   if isactive
+    let status .= '%#CursorLineNr#'
     if &number
       let status .= '>%3v '
     elseif ishelp
@@ -547,10 +548,7 @@ function! StatusLine(winnr) " {{{
     let status .= ' [%n] '
   endif " }}}
   " Scroll {{{
-  if !isactive
-    let status .= '%#CursorLine#'
-    let status .= ' %2p%%'
-  else
+  if isactive
     let status .= '| %2p%% '
     if exists("b:texty") " set by FT_text augroup
       let status .= '| %{WordCount()} '
@@ -569,9 +567,9 @@ function! StatusLine(winnr) " {{{
       endif
     else
       if ishelp
-        let status .= '%#DiffDelete'
         let status .= ' ? '
       else
+        let status .= '%#DiffDelete#'
         let status .= ' ! '
       endif
       let status .= '%#CursorLine#'
@@ -609,20 +607,26 @@ function! StatusLine(winnr) " {{{
     endif
   endif
 
-  if isactive
-    let status .= '%<'
-    if ! ishelp
+  if ! ishelp
+    if isactive
+      let status .= '%<'
       let status .= getcwd()
-    endif
-    if has('win32')
-      let status .= '\'
+      if has('win32')
+        let status .= '\'
+      else
+        let status .= '/'
+      endif
+      let status .= '%#CursorLineNr#'
+      let status .= fstat . ' '
     else
-      let status .= '/'
+      let status .= '%<' . fstat . ' '
     endif
-    let status .= '%#StatusLine#'
-    let status .= ' ' . fstat . ' '
   else
-    let status .= '%< ' . fstat . ' '
+    if isactive
+      let status .= '%<%#CursorLineNr#%f '
+    else
+      let status .= '%<%f'
+    endif
   endif
   " }}}
   " }}} ----------------------------------------------------------------------
@@ -754,7 +758,10 @@ augroup FT_text " {{{
 
   au FileType *wiki,markdown,pandoc setlocal spell
   au FileType *wiki,markdown,pandoc setlocal complete+=kspell
-  au FileType *wiki,markdown,pandoc let b:texty = 1
+  au FileType *wiki,markdown,pandoc let b:texty =
+        \ getbufvar(winbufnr('.'), '&ft') == 'help'
+        \ ? 0
+        \ : 1
 
   au CursorHold *.{txt,m*d*}
         \ if &modifiable && &modified
