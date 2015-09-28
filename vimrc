@@ -557,7 +557,7 @@ function! StatusLine(winnr) " {{{
     endif
   endif " }}}
   " }}} ----------------------------------------------------------------------
-  let status .= ' %#CursorLine#%= ' " Gutter -----------------------------------
+  let status .= '%#CursorLine# %= ' " Gutter -----------------------------------
   " Right side {{{ -----------------------------------------------------------
   " File status indicators {{{
   if isactive
@@ -565,6 +565,7 @@ function! StatusLine(winnr) " {{{
       if ismodified
         let status .= '%#DiffAdd'
         let status .= ' + '
+        let status .= '%#CursorLine#'
       endif
     else
       if ishelp
@@ -573,10 +574,12 @@ function! StatusLine(winnr) " {{{
       else
         let status .= ' ! '
       endif
+      let status .= '%#CursorLine#'
     endif
     if &paste
       let status .= '%#DiffChange'
       let status .= ' P '
+      let status .= '%#CursorLine#'
     endif
   else
     if ! isreadonly
@@ -607,7 +610,6 @@ function! StatusLine(winnr) " {{{
   endif
 
   if isactive
-    let status .= '%#CursorLine#'
     let status .= '%<'
     if ! ishelp
       let status .= getcwd()
