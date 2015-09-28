@@ -1,10 +1,10 @@
 " __VARIABLES__ {{{ ==========================================================
-let g:tw = 78 " fake textwidth
 if filereadable(glob("~/dots/vimrc"))
-let g:myvimrc = "~/dots/vimrc"
+  let g:myvimrc = "~/dots/vimrc"
 else
-let g:myvimrc = $MYVIMRC
+  let g:myvimrc = $MYVIMRC
 endif
+let g:tw      = 78 " fake textwidth
 let g:is_bash = 1
 " }}} ========================================================================
 " __SETTINGS__ {{{ ===========================================================
@@ -13,109 +13,104 @@ set nocompatible " be iMproved
 set cpoptions+=J " sentences are delimeted by 2 spaces
 " }}} ------------------------------------------------------------------------
 "  2 moving around, searching and patterns {{{ -------------------------------
+set ignorecase    " Ignore case when searching
+set incsearch     " Show match for partly typed search
+set magic         " Backslashes quote more in regexes
+set nostartofline " Move to the start of line with movement
+set smartcase     " ... unless the pattern has upper case
+set wrapscan      " Searches wrap around file ends
+"set cdpath=,,
 " The following keys wrap movement around lines in the given modes:
 set whichwrap=b,s " <BS> and <Space>
 set ww      +=<,> " Arrow keys {N, V}
 set ww      +=[,] " Arrow keys {I, R}
-set nostartofline " Move to the start of line with movement
-"set cdpath=,,
-set wrapscan " Searches wrap around file ends
-set incsearch " Show match for partly typed search
-set magic " Backslashes quote more in regexes
-set ignorecase " Ignore case when searching
-set smartcase " ... unless the pattern has upper case
 "  }}} -----------------------------------------------------------------------
 "  3 tags {{{ ----------------------------------------------------------------
 "  TODO
 "  }}} -----------------------------------------------------------------------
 "  4 displaying text {{{ -----------------------------------------------------
-set scrolloff=8 " number of lines to show around cursor
-set wrap " long lines wrap
-set linebreak " wrap long lines to a character in 'breakat'
-set breakindent " preserve indents in wrapped text
-set breakindentopt=min:20 " broken text will be > 20 chars
-"set briopt       +=shift:-2 " subsequent lines shift on breaks
-set briopt       +=sbr " show the 'showbreak' before indent
-let &showbreak = '└ '
-set sidescroll=1 " minimal number of columns to scroll
-set sidescrolloff=1 " number of columns to show around cursor
-set display=lastline " show as much of the window's last line as possible
-" Characters to fill empty space in the following lines:
-let &fillchars = 'stl:_' " Focused statusline
-let &fcs      .= ',stlnc: ' " Unfocused statusline
-let &fcs      .= ',vert:|' " Vertical window separators
-let &fcs      .= ',fold:~' " 'foldtext'
-let &fcs      .= ',diff:-' " deleted lines of 'diff' option
-set cmdheight=1 " number of lines to use for the command-line
-set lazyredraw " don't redraw while executing macros
+set breakindent                 " preserve indents in wrapped text
+set lazyredraw                  " don't redraw while executing macros
+set linebreak                   " wrap long lines to a character in 'breakat'
 set list
+set wrap                        " long lines wrap
+set cmdheight=1                 " number of lines to use for the command-line
+set display=lastline            " show as much of the last line as possible
+set numberwidth=4               " minimum width of line number column
+set scrolloff=8                 " number of lines to show around cursor
+set sidescroll=1                " minimal number of columns to scroll
+set sidescrolloff=1             " number of columns to show around cursor
+let &showbreak = '└ '
+" Characters to fill empty space in the following lines:
+let &fillchars = 'stl:_'        " Focused statusline
+let &fcs      .= ',stlnc: '     " Unfocused statusline
+let &fcs      .= ',vert:|'      " Vertical window separators
+let &fcs      .= ',fold:~'      " 'foldtext'
+let &fcs      .= ',diff:-'      " deleted lines of 'diff' option
 " Characters to replace non-printing characters with:
-let &listchars = 'tab:» ' " <Tab>s
-let &lcs      .= ',trail:·' " Trailing whitespace
-let &lcs      .= ',extends: ' " 'nowrap': line goes past right
-let &lcs      .= ',precedes: ' " 'nowrap': line goes past left
-let &lcs      .= ',eol: ' " end-of-line
-let &lcs      .= ',nbsp:~' " Non-breaking spaces
-set number " show line number for each line
-"set relativenumber " show relative line numbers < AUCMD
-set numberwidth=4 " minimum width of line number column
+let &listchars = 'tab:» '       " <Tab>s
+let &lcs      .= ',trail:·'     " Trailing whitespace
+let &lcs      .= ',extends: '   " 'nowrap': line goes past right
+let &lcs      .= ',precedes: '  " 'nowrap': line goes past left
+let &lcs      .= ',eol: '       " end-of-line
+let &lcs      .= ',nbsp:~'      " Non-breaking spaces
 "  }}} -----------------------------------------------------------------------
 "  5 syntax, highlighting and spelling {{{ -----------------------------------
-set background=dark " background color brightness
-set synmaxcol=300 " maximum column to syntax highlight to
-set hlsearch " highlight all matches for last used search
-set nocursorcolumn " highlight screen column of cursor
-set cursorline " highlight the screen line of cursor
-let &colorcolumn = g:tw + 1 " columns to highlight
-set spelllang=en_us " list of accepted languages
-set spellfile=~/.vim/spell/en_us.utf-8.add " file to store custom words
+set cursorline                              " hilite the screen line of crsor
+set hlsearch                                " highlight matches for last srch
+set nocursorcolumn                          " hilite screen column of crsr
+set background=dark                         " background color brightness
+set spellfile=~/.vim/spell/en_us.utf-8.add  " file to store custom words
+set spelllang=en_us                         " list of accepted languages
+set synmaxcol=300                           " maximum col to hilite to
+let &colorcolumn = g:tw + 1                 " columns to hilite
 "  }}} -----------------------------------------------------------------------
 "  6 multiple windows {{{ ----------------------------------------------------
-set laststatus=2 " always show statusline
+set equalalways           " resize windows to accomodate changes
+set hidden                " don't unload a buffer when window closes
+set splitbelow            " new windows open below current
+set splitright            " new windoes open to the right of current
+set eadirection=both      " which direction to 'equalalways'
+set laststatus=2          " always show statusline
 "set statusline= "__UpdateStatus()
-set equalalways " resize windows to accomodate changes
-set eadirection=both " which direction to 'equalalways'
-set winheight=20 " minimal lines for current window
-set winminheight=2 " minimum lines for any window
-let &winwidth = g:tw + 1 " minimal columns for current window
-set winminwidth=2 " minimum columns for any window
-set hidden " don't unload a buffer when window closes
-set switchbuf=useopen " how to switch to a buffer
-set splitbelow " new windows open below current
-set splitright " new windoes open to the right of current
+set switchbuf=useopen     " how to switch to a buffer
+set winheight=20          " minimal lines for current window
+set winminheight=2        " minimum lines for any window
+set winminwidth=2         " minimum columns for any window
+let &winwidth = g:tw + 1  " minimal columns for current window
 "  }}} -----------------------------------------------------------------------
 "  7 multiple tab pages {{{ --------------------------------------------------
-"set showtabline=1
-"set tabpagemax=10
-"set tabline=
 "set guitablable=
 "set guitabtooltip=
+"set showtabline=1
+"set tabline=
+"set tabpagemax=10
 "  }}} -----------------------------------------------------------------------
 "  8 terminal {{{ ------------------------------------------------------------
-"set term=$TERM
-"set ttytype=$TERM
-"set ttybuiltin
-"set nottyfast
-"set noweirdinvert
 "set esckeys
-"set scrolljump=1
-"set ttyscroll=999
 "set guicursor=...
-set title
-"set titlelen=85
-"set titleold=Thanks\ for\ flying\ Vim
 "set icon
 "set iconstring=
+"set nottyfast
+"set noweirdinvert
+"set scrolljump=1
+"set term=$TERM
+"set titlelen=85
+"set titleold=Thanks\ for\ flying\ Vim
+"set ttybuiltin
+"set ttyscroll=999
+"set ttytype=$TERM
+set title
 "  }}} -----------------------------------------------------------------------
 "  9 using the mouse {{{ -----------------------------------------------------
 if has('mouse')
-  set mouse=a " enable mouse
-  "set nomousefocus
   "set mousehide
-  set mousemodel=popup " what the right mouse button is for
-  "set mousetime=500
-  "set ttymouse=
   "set mouseshape=...
+  "set mousetime=500
+  "set nomousefocus
+  "set ttymouse=
+  set mouse=a          " enable mouse
+  set mousemodel=popup " what the right mouse button is for
 endif
 "  }}} -----------------------------------------------------------------------
 " 10 GUI {{{ -----------------------------------------------------------------
@@ -128,127 +123,124 @@ if has('gui_running')
   elseif has('gui_win32')
     set guifont=Source_Code_Pro:h9:cANSI
   endif
-  "set guifontwide=
-  set guioptions=a " autocopy Vim's selection
-  set go       +=c " use console instead of popups for choices
-  set go       +=g " grey out inactive menu items
-  set go       +=i " use Vim icon
-  set go       +=t " include tearoff menus
-  set browsedir=buffer " where to open the file browser
-  set winaltkeys=no " how to map the <ALT> keys to the menu
+  set guioptions=a      " autocopy Vim's selection
+  set go       +=c      " use console instead of popups for choices
+  set go       +=g      " grey out inactive menu items
+  set go       +=i      " use Vim icon
+  set go       +=t      " include tearoff menus
+  set browsedir=buffer  " where to open the file browser
   set linespace=1
+  set winaltkeys=no     " how to map the <ALT> keys to the menu
 endif
 " }}} ------------------------------------------------------------------------
 " 11 printing {{{ ------------------------------------------------------------
-"set printoptions=
 "set printdevice=
+"set printencoding=
 "set printexpr=...
 "set printfont=courier
 "set printheader=%<%f%h%m%=Page\ %N
-"set printencoding=
 "set printmbcharset=
 "set printmbfont=
+"set printoptions=
 " }}} ------------------------------------------------------------------------
 " 12 messages and info {{{ ---------------------------------------------------
-set shortmess=a  " shm=filmnrwx
-set shm     +=oO " overwrite file messages
-set shm     +=tT " truncate messages in {C}
-set shm     +=I  " no intro message
-set showcmd " show partial commands as they're typed
-set showmode " show current mode in statusline
-set ruler " show ruler position in statusline
-set report=5 " threshold for reporting number of changed lines
-set verbose=0
-set verbosefile=~/.vim/log.txt
 set confirm " ask to save before quitting
 set noerrorbells " ring the bell for error messages
+set ruler " show ruler position in statusline
+set showcmd " show partial commands as they're typed
+set showmode " show current mode in statusline
 set visualbell " use a visual bell instead of sound
 set helplang=en
+set report=5 " threshold for reporting number of changed lines
+set shortmess=a  " shm=filmnrwx
+set shm     +=I  " no intro message
+set shm     +=oO " overwrite file messages
+set shm     +=tT " truncate messages in {C}
+set verbose=0
+set verbosefile=~/.vim/log.txt
 " }}} ------------------------------------------------------------------------
 " 13 selecting text {{{ ------------------------------------------------------
-set selection=exclusive " how selecting text behaves
 if has('unnamedplus')
   set clipboard=autoselect,unnamedplus,exclude:cons\\\|linux
 else
   set clipboard=autoselect,unnamed,exclude:cons\\\|linux
 endif
-set keymodel=startsel,stopsel " select with <Home>,<End>,<PgUp>,<PgDn>
+set keymodel=startsel,stopsel  " select with <Home>,<End>,<PgUp>,<PgDn>
+set selection=exclusive        " how selecting text behaves
 " }}} ------------------------------------------------------------------------
 " 14 editing text {{{ --------------------------------------------------------
-set undolevels=10000 " max number of undoable changes
-set undoreload=10000 " max lines to save for undo on reload
-set textwidth=0 " where to break a line (0 -> don't)
-set backspace=indent " allow backspacing over autoindent
-set bs      +=eol " allow backspacing over line breaks
-set bs      +=start " allow backspacing over start of insert
-set formatoptions-=ro " disable autocomments in {I}
-set tildeop " make <~> command behave like an operator
+set tildeop            " make <~> command behave like an operator
 "set matchpairs=(:),{:},[:]
-set nrformats=alpha " inc/dec alphabetical chars w/<C-a>,<C-x>
-set nf      +=hex   " ''      hexadecimal nums   ''
+set backspace=indent   " allow backspacing over autoindent
+set bs      +=eol      " allow backspacing over line breaks
+set bs      +=start    " allow backspacing over start of insert
+set formatoptions-=ro  " disable autocomments in {I}
+set nrformats=alpha    " inc/dec alphabetical chars w/<C-a>,<C-x>
+set nf      +=hex      " ''      hexadecimal nums   ''
+set textwidth=0        " where to break a line (0 -> don't)
+set undolevels=10000   " max number of undoable changes
+set undoreload=10000   " max lines to save for undo on reload
 " }}} ------------------------------------------------------------------------
 " 15 tabs and indenting {{{ --------------------------------------------------
-set shiftwidth=2 " number of spaces to autoindent
-set smarttab " a <Tab> in an indent inserts 'shiftwidth' spaces
-set softtabstop=2 " number of spaces to a <Tab>
-set shiftround " round to 'shiftwidth' for <<,>>
-set expandtab " expand <Tab> to spaces in {I}
-set autoindent " automatically set the indent of a new line
-set smartindent " clever autoindenting
+set autoindent     " automatically set the indent of a new line
+set expandtab      " expand <Tab> to spaces in {I}
+set shiftround     " round to 'shiftwidth' for <<,>>
+set smartindent    " clever autoindenting
+set smarttab       " a <Tab> in an indent inserts 'shiftwidth' spaces
+set shiftwidth=2   " number of spaces to autoindent
+set softtabstop=2  " number of spaces to a <Tab>
 " }}} ------------------------------------------------------------------------
 " 16 folding {{{ -------------------------------------------------------------
 set foldenable
-"set foldlevel=0
-"set foldlevelstart=-1
 set foldcolumn=1 " width of gutter column to indicate folds
 set foldtext=FoldLine()
 "set foldclose=all
-"set foldopen=block,hor,mark,percent,quickfix,search,tag,undo
-"set foldminlines=1
-"set foldmethod=...
 "set foldexpr=0
 "set foldignore=#
 "set foldmarker={{{,}}}
+"set foldmethod=...
+"set foldminlines=1
 "set foldnestmax=20
+"set foldopen=block,hor,mark,percent,quickfix,search,tag,undo
 " }}} ------------------------------------------------------------------------
 " 17 diff mode {{{ -----------------------------------------------------------
-"set nodiff
-"set diffopt=filler
 "set diffexpr=
+"set diffopt=filler
+"set nodiff
 "set patchexpr=
 " }}} ------------------------------------------------------------------------
 " 18 mapping {{{ -------------------------------------------------------------
+set timeoutlen=1000
 "set maxmapdepth=1000
 "set remap
 "set timeout
 "set ttimeout
-set timeoutlen=1000
 "set ttimeoutlen=-1
 " }}} ------------------------------------------------------------------------
 " 19 reading and writing files {{{ -------------------------------------------
-set fileformat=unix " end-of-line format
-set fileformats=unix,dos " list of eol formats to look for
-set backup
-set backupcopy=yes " whether to backup a copy or rename existing
-set backupdir=$HOME/.vim/backup/ " directory to store backups
+set autoread                      " automatically read a file when modified outside Vim
 set autowriteall
-set autoread " automatically read a file when modified outside Vim
+set backup
+set backupcopy=yes                " whether to backup a copy or rename existing
+set backupdir=$HOME/.vim/backup/  " directory to store backups
+set fileformat=unix               " end-of-line format
+set fileformats=unix,dos          " list of eol formats to look for
 " }}} ------------------------------------------------------------------------
 " 20 the swap file {{{ -------------------------------------------------------
 set directory=$HOME/.vim/swap/ " list of dirs for swap files
 "set swapfile
 " }}} ------------------------------------------------------------------------
 " 21 command line editing {{{ ------------------------------------------------
-set history=1000 " how many command lines are remembered
-set wildmode=full
-set wildignore+=*/.git/* " ignore git files in wildmenu
-set wig       +=*/.hg/*  " ''     hg files ''
-set wig       +=*/.svn/* " ''    svn files ''
 "set nofileignorecase
-set wildignorecase " ignore case when completing filenames
-set wildmenu " show a list of matches w/ cmd completion
 set undofile
+set wildignorecase        " ignore case when completing filenames
+set wildmenu              " show a list of matches w/ cmd completion
+set history=1000          " how many command lines are remembered
 set undodir=$HOME/.vim/undoes/
+set wildignore+=*/.git/*  " ignore git files in wildmenu
+set wig       +=*/.hg/*   " ''     hg files ''
+set wig       +=*/.svn/*  " ''    svn files ''
+set wildmode=full
 " }}} ------------------------------------------------------------------------
 " 22 executing external commands {{{ -----------------------------------------
 "set shell=__
@@ -296,7 +288,7 @@ set undodir=$HOME/.vim/undoes/
 "set imsearch=0
 " }}} ------------------------------------------------------------------------
 " 25 multi-byte characters {{{ -----------------------------------------------
-set encoding=utf-8 " character encoding used
+set encoding=utf-8     " character encoding used
 set fileencoding=utf-8 " character encoding for file
 "set fileencodings=...
 "set termencoding=utf-8
@@ -306,20 +298,20 @@ set fileencoding=utf-8 " character encoding for file
 "set ambiwidth=single
 " }}} ------------------------------------------------------------------------
 " 26 various {{{ -------------------------------------------------------------
-set virtualedit=block " allow positioning cursor anywhere in {^V}
-set exrc " enable reading .vimrc in current directory
-set secure " ..but don't let them do anything dangerous
-set gdefault " use the 'g' flag by default in :s
-set viewoptions=folds " save folds in view
-set vop       +=cursor " save cursor position
-set vop       +=slash " save backslashes as forward slashes
-set vop       +=unix " save views with Unix eol format
+set exrc                " enable reading .vimrc in current directory
+set gdefault            " use the 'g' flag by default in :s
+set secure              " ..but don't let them do anything dangerous
 set viewdir=$HOME/.vim/views/
-set viminfo='100 " Save marks for 100 files max
-set vi    ^=! " Save global all-caps variables
-set vi    +=<50 " Save 50 lines of registers
-set vi    +=s10 " Save only first 10 Kb of each register
-set vi    +=h " Disable 'hlsearch' on saved files
+set viewoptions=folds   " save folds in view
+set vop       +=cursor  " save cursor position
+set vop       +=slash   " save backslashes as forward slashes
+set vop       +=unix    " save views with Unix eol format
+set viminfo='100        " Save marks for 100 files max
+set vi    ^=!           " Save global all-caps variables
+set vi    +=<50         " Save 50 lines of registers
+set vi    +=s10         " Save only first 10 Kb of each register
+set vi    +=h           " Disable 'hlsearch' on saved files
+set virtualedit=block   " allow positioning cursor anywhere in {^V}
 " }}} ------------------------------------------------------------------------
 " }}} ========================================================================
 " __KEYMAPS__ {{{ ============================================================
@@ -328,7 +320,7 @@ let mapleader = ","
 let maplocalleader = ","
 
 " Changing modes
-nnoremap ; :
+noremap ; :
 inoremap jj <Esc>
 inoremap kk <Esc>
 
@@ -785,6 +777,10 @@ augroup END " }}}
 if has('win32') " {{{
   set runtimepath+=$HOME\\.vim
   set viminfo+=rA:,rB:
+  augroup VimEnterWin
+    au VimEnter * let &columns = 1 + g:tw + &fdc + &nu * &nuw
+    au VimEnter * let &lines = 36
+  augroup END
 endif " }}}
 " Create .vim directories if they don't exist {{{  ---------------------------
 if exists("*mkdir")
