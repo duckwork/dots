@@ -239,9 +239,9 @@ set wildignorecase        " ignore case when completing filenames
 set wildmenu              " show a list of matches w/ cmd completion
 set history=1000          " how many command lines are remembered
 set undodir=$HOME/.vim/undoes/
-set wildignore+=*/.git/*  " ignore git files in wildmenu
-set wig       +=*/.hg/*   " ''     hg files ''
-set wig       +=*/.svn/*  " ''    svn files ''
+" set wildignore+=*/.git/*  " ignore git files in wildmenu
+" set wig       +=*/.hg/*   " ''     hg files ''
+" set wig       +=*/.svn/*  " ''    svn files ''
 set wildmode=full
 " }}} ------------------------------------------------------------------------
 " 22 executing external commands {{{ -----------------------------------------
@@ -508,7 +508,7 @@ endfunction " }}}
 
 function! FoldLine() " {{{
     let line = getline(v:foldstart)
-    let foldedlinecount = printf('%3d', v:foldend - v:foldstart)
+    let foldedlinecount = printf('%d', v:foldend - v:foldstart)
     if &foldmethod == 'marker'
         let foldmarks = substitute(&fmr, ',.*', '', '')
         let line = substitute(line, foldmarks . '\d*', '', '')
@@ -520,8 +520,8 @@ function! FoldLine() " {{{
                                 \ '\\\1', 'g')
     let line = substitute(line, commentstr, '', 'g')
     " Replace initial whitespace with dashes indicating foldlevel
-    let line = substitute(line, '^\s*', v:folddashes . ' ', '')
-    return '> ' . v:foldlevel . ': ' . foldedlinecount . ' ' . line . ' <'
+    " let line = substitute(line, '^\s*', v:folddashes . ' ', '')
+    return '|' . v:folddashes .' '. line . '[ ' . foldedlinecount . ' ] '
 endfunction " }}}
 function! StatusLine(winnr) " {{{
   let status = ''
@@ -540,7 +540,8 @@ function! StatusLine(winnr) " {{{
   if isactive
     let status .= '%#CursorLineNr#'
     if &number
-      let status .= '>%3v '
+      let colwid = &fdc + &nu * &nuw
+      let status .= '>%'.colwid.'v '
     elseif ishelp
       let status .= '> ? '
     else
@@ -552,20 +553,33 @@ function! StatusLine(winnr) " {{{
   " Scroll {{{
   if isactive
     let status .= '| %2p%% '
-    if exists("b:texty") " set by FT_text augroup
+    if exists("b:texty") && ! ishelp " set by FT_text augroup
       let status .= '| %{WordCount()} '
     endif
   endif " }}}
   " }}} ----------------------------------------------------------------------
-  let status .= '%#CursorLine# %= ' " Gutter -----------------------------------
+  let status .= '%#CursorLine# %= ' " Gutter ---------------------------------
   " Right side {{{ -----------------------------------------------------------
+  " Git branch {{{
+  if exists('*fugitive#head')
+    let head = fugitive#head()
+
+    if empty(head) && exists('*fugitive#detect') && !exists('b:git_dir')
+      call fugitive#detect(getcwd())
+      let head = fugitive#head()
+    endif
+  endif
+  if !empty(head) && isactive
+    let status .= '%#Folded#'
+    let status .= ' ' . head . ' >'
+  endif
+  " }}}
   " File status indicators {{{
   if isactive
     if ! isreadonly
       if ismodified
         let status .= '%#DiffAdd#'
         let status .= ' + '
-        let status .= '%#CursorLine# '
       endif
     else
       if ishelp
@@ -574,37 +588,40 @@ function! StatusLine(winnr) " {{{
         let status .= '%#DiffDelete#'
         let status .= ' ! '
       endif
-      let status .= '%#CursorLine# '
     endif
     if &paste
       let status .= '%#DiffChange'
       let status .= ' P '
-      let status .= '%#CursorLine# '
     endif
+    let status .= '%#CursorLine# '
   else
+    let status .= '%#CursorLine# '
     if ! isreadonly
       if ismodified
-        let status = '[+]'
+        let status = ' [+] '
       endif
     else
       if ishelp
-        let status .= '[?]'
+        let status .= ' [?] '
       else
-        let status .= '[!]'
+        let status .= ' [!] '
       endif
     endif
   endif " }}}
   " Filename {{{
   let fstat = ''
   let fsep = '::'
+
   if fname == ''
     let fstat .= '__'
     if len(ftype) > 0
+      let fstat .= '%#CursorLine#'
       let fstat .= fsep . ftype
     endif
   else
     let fstat .= '%f'
     if len(ftype) > 0
+      let fstat .= '%#Folded#'
       let fstat .= fsep . ftype
     endif
   endif
@@ -625,14 +642,14 @@ function! StatusLine(winnr) " {{{
     endif
   else
     if isactive
-      let status .= '%<%#CursorLineNr#%f '
+      let status .= '%<%#CursorLineNr#%f'
     else
       let status .= '%<%f'
     endif
   endif
   " }}}
   " }}} ----------------------------------------------------------------------
-  return status
+  return status . ' '
 endfunction " }}}
 function! s:RefreshStatus(...) " {{{
   if !a:0
@@ -760,10 +777,7 @@ augroup FT_text " {{{
 
   au FileType *wiki,markdown,pandoc setlocal spell
   au FileType *wiki,markdown,pandoc setlocal complete+=kspell
-  au FileType *wiki,markdown,pandoc let b:texty =
-        \ getbufvar(winbufnr('.'), '&ft') == 'help'
-        \ ? 0
-        \ : 1
+  au FileType *wiki,markdown,pandoc let b:texty = 1
 
   au CursorHold *.{txt,m*d*}
         \ if &modifiable && &modified
@@ -851,7 +865,8 @@ Plug 'ctrlpvim/ctrlp.vim'
               \ 'prog': 'CtrlPProgressLine'
               \ }
   let g:ctrlp_customignore = {
-              \ 'dir': '\/var\/tmp$',
+              \ 'dir': '\v[\/]\.(tmp|git|hg|svn)$',
+              \ 'file': '\v\.(exe|so|dll|hi)$',
               \ }
   nnoremap gf :CtrlP<CR>
   nnoremap go :CtrlPMRU<CR>
@@ -907,7 +922,11 @@ Plug 'gregsexton/MatchTag',
 
 Plug 'vim-pandoc/vim-pandoc',
       \ { 'for': [ 'pandoc', 'markdown' ] }
-  let g:pandoc#modules#disabled = [ 'menu' ] " Get rid of Pandoc menu
+  let g:pandoc#modules#disabled = [ 
+        \ 'menu',
+        \ 'bibliographies', " TODO: see about Linux okay-ness
+        \ 'command',
+        \ ]
   let g:pandoc#command#custom_open = "PandocOpen" " function defined below
   let g:pandoc#command#use_message_buffers = 0
   let g:pandoc#filetypes#handled = [ 'markdown', 'rst', 'textile' ]
