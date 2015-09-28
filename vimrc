@@ -519,6 +519,8 @@ function! FoldLine() " {{{
     let commentstr = substitute(commentstr, '\([\[\]\$\^\.\*|\\]\)',
                                 \ '\\\1', 'g')
     let line = substitute(line, commentstr, '', 'g')
+    let line = substitute(line, '===\+$', '', '')
+    let line = substitute(line, '---\+$', '', '')
     " Replace initial whitespace with dashes indicating foldlevel
     " let line = substitute(line, '^\s*', v:folddashes . ' ', '')
     return '|' . v:folddashes .' '. line . '[ ' . foldedlinecount . ' ] '
@@ -629,16 +631,20 @@ function! StatusLine(winnr) " {{{
   if ! ishelp
     if isactive
       let status .= '%<'
-      let status .= getcwd()
-      if has('win32')
-        let status .= '\'
-      else
-        let status .= '/'
+      let cdir = getcwd()
+      if (&columns*100) / len(cdir) > 500
+        " if the cwd is shorter than 20% of the window's width
+        let status .= cdir
+        if has('win32')
+          let status .= '\'
+        else
+          let status .= '/'
+        endif
       endif
       let status .= '%#CursorLineNr#'
-      let status .= fstat . ' '
+      let status .= fstat
     else
-      let status .= '%<' . fstat . ' '
+      let status .= '%<' . fstat
     endif
   else
     if isactive
@@ -803,7 +809,7 @@ if has('win32') " {{{
   set runtimepath+=$HOME\\.vim
   set viminfo+=rA:,rB:
   augroup VimEnterWin
-    au VimEnter * let &columns = 1 + g:tw + &fdc + &nu * &nuw
+    au VimEnter * let &columns = 8 + g:tw + &fdc + &nu * &nuw
     au VimEnter * let &lines = 36
   augroup END
 endif " }}}
