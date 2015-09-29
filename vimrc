@@ -1,3 +1,5 @@
+" ViMrc v0.8.0
+" by Case Duckworth
 " __VARIABLES__ {{{ ==========================================================
 if filereadable(glob("~/dots/vimrc"))
   let g:myvimrc = "~/dots/vimrc"
@@ -542,7 +544,7 @@ function! StatusLine(winnr) " {{{
   if isactive
     let status .= '%#CursorLineNr#'
     if &number
-      let colwid = &fdc + &nu * &nuw
+      let colwid = &fdc + (&nu * &nuw) - 1
       let status .= '>%'.colwid.'v '
     elseif ishelp
       let status .= '> ? '
@@ -977,6 +979,8 @@ if executable('git') " {{{
   Plug 'tpope/vim-git'
   "Plug 'int3/vim-extradite'
   Plug 'airblade/vim-gitgutter'
+    let g:gitgutter_realtime = 0
+    let g:gitgutter_eager    = 0
   Plug 'esneider/YUNOcommit.vim'
     let g:YUNOcommit_after = 15
   set wildignore+=COMMIT_EDITMSG
