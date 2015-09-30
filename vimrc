@@ -885,6 +885,16 @@ endif
 Plug 'dockyard/vim-easydir'
 Plug 'tpope/vim-vinegar'
 Plug 'vim-scripts/gitignore'
+Plug 'mhinz/vim-startify'
+  let g:startify_session_dir = '~/.vim/session'
+  let g:startify_bookmarks = [ g:myvimrc ]
+  let g:pad = repeat(' ', (&columns / 2) - 8)
+  let g:startify_custom_header = [
+        \ g:pad . '    ________' .          '_',
+        \ g:pad . '   /        ' .          ' \  ',
+        \ g:pad . '-<(  ViM ' . v:version . '  )>-',
+        \ g:pad . '   \________' .          '_/',
+        \ ]
 " }}} ------------------------------------------------------------------------
 " Extending Vim's behavior {{{ -----------------------------------------------
 " Search & Replace
