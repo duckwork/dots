@@ -48,7 +48,7 @@ let &showbreak = '└ '
 " Characters to fill empty space in the following lines:
 let &fillchars = 'stl:.'        " Focused statusline
 let &fcs      .= ',stlnc: '     " Unfocused statusline
-let &fcs      .= ',vert:.'      " Vertical window separators
+let &fcs      .= ',vert:|'      " Vertical window separators
 let &fcs      .= ',fold:~'      " 'foldtext'
 let &fcs      .= ',diff:-'      " deleted lines of 'diff' option
 " Characters to replace non-printing characters with:
@@ -539,34 +539,11 @@ function! StatusLine(winnr) " {{{
   let isreadonly = getbufvar(buffer, '&readonly')
   let ishelp = ftype == 'help'
 
-  " Left side {{{ ------------------------------------------------------------
-  " Ruler {{{
+  " Right side {{{ -----------------------------------------------------------
   if isactive
     let status .= '%#CursorLineNr#'
-    if &number
-      let colwid = &fdc + (&nu * &nuw) - 2
-      let status .= ' %'.colwid.'v '
-    elseif ishelp
-      let status .= '> ? '
-    else
-      let status .= '>%3l:%v '
-    endif
-  else
-    let status .= ' [%n] '
-    let status .= '%#Folded#'
-  endif " }}}
-  " Scroll {{{
-  if isactive
-    let status .= '| '
-    let status .= '%#Folded#'
-    let status .= '%2p%% '
-    if exists("b:texty") && ! ishelp " set by FT_text augroup
-      let status .= '| %{WordCount()} '
-    endif
-  endif " }}}
-  " }}} ----------------------------------------------------------------------
-  let status .=  '%= ' " Gutter ---------------------------------
-  " Right side {{{ -----------------------------------------------------------
+  endif
+  let status .= 'λ%#Folded#'
   " Git branch {{{
   if exists('*fugitive#head')
     let head = fugitive#head()
@@ -577,47 +554,13 @@ function! StatusLine(winnr) " {{{
     endif
   endif
   if !empty(head) && isactive
-    let status .= '%#Folded#'
-    let status .= ' ' . head . ' >'
+    let status .= ' '.head
   endif
   " }}}
-  " File status indicators {{{
-  if isactive
-    if ! isreadonly
-      if ismodified
-        let status .= '%#DiffAdd#'
-        let status .= ' + '
-      endif
-    else
-      if ishelp
-        let status .= ' ? '
-      else
-        let status .= '%#DiffDelete#'
-        let status .= ' ! '
-      endif
-    endif
-    if &paste
-      let status .= '%#DiffChange'
-      let status .= ' P '
-    endif
-    let status .= '%#CursorLine# '
-  else
-    let status .= '%#CursorLine# '
-    if ! isreadonly
-      if ismodified
-        let status .= ' [+] '
-      endif
-    else
-      if ishelp
-        let status .= ' [?] '
-      else
-        let status .= ' [!] '
-      endif
-    endif
-  endif " }}}
+    let status .= '%#StatusLine# → '
   " Filename {{{
   let fstat = ''
-  let fsep = '::'
+  let fsep = ' :: '
 
   if fname == ''
     let fstat .= '__'
@@ -628,7 +571,7 @@ function! StatusLine(winnr) " {{{
   else
     let fstat .= '%f'
     if len(ftype) > 0 && isactive
-      let fstat .= '%#Folded#'
+      let fstat .= '%#StatusLine#'
       let fstat .= fsep . ftype
     endif
   endif
@@ -659,8 +602,60 @@ function! StatusLine(winnr) " {{{
     endif
   endif
   " }}}
+  " File status indicators {{{
+  if isactive
+    if ! isreadonly
+      if ismodified
+        let status .= '%#DiffAdd#'
+        let status .= ' + '
+      endif
+    else
+      if ishelp
+        let status .= ' ? '
+      else
+        let status .= '%#DiffDelete#'
+        let status .= ' ! '
+      endif
+    endif
+    if &paste
+      let status .= '%#DiffChange'
+      let status .= ' P '
+    endif
+    let status .= '%#StatusLine# '
+  else
+    " let status .= '%#CursorLine# '
+    if ! isreadonly
+      if ismodified
+        let status .= ' [+] '
+      endif
+    else
+      if ishelp
+        let status .= ' [?] '
+      else
+        let status .= ' [!] '
+      endif
+    endif
+  endif " }}}
   " }}} ----------------------------------------------------------------------
-  return status . ' '
+  let status .=  '%= ' " Gutter ---------------------------------
+  " Left side {{{ ------------------------------------------------------------
+  " Ruler {{{
+  if isactive
+    let status .= '%#CursorLineNr#'
+      let status .= '%l:%02v'
+  else
+    let status .= ' [%n] '
+  endif " }}}
+  " Scroll {{{
+  if isactive
+    let status .= '%#Folded# | '
+    let status .= '%2p%% '
+    if exists("b:texty") && ! ishelp " set by FT_text augroup
+      let status .= '| %{WordCount()} '
+    endif
+  endif " }}}
+  " }}} ----------------------------------------------------------------------
+  return status
 endfunction " }}}
 function! s:RefreshStatus(...) " {{{
   if !a:0
@@ -991,8 +986,6 @@ if executable('git') " {{{
   Plug 'tpope/vim-git'
   "Plug 'int3/vim-extradite'
   Plug 'airblade/vim-gitgutter'
-    let g:gitgutter_realtime = 0
-    let g:gitgutter_eager    = 0
   Plug 'esneider/YUNOcommit.vim'
     let g:YUNOcommit_after = 15
   set wildignore+=COMMIT_EDITMSG
@@ -1017,6 +1010,7 @@ Plug 'xolox/vim-shell'
   let g:shell_fullscreen_message = 0
   let g:shell_mappings_enabled   = 0
 Plug 'xolox/vim-session'
+  let g:session_autosave = 'no'
 " }}} ------------------------------------------------------------------------
 call plug#end()
 " Functions for plugins {{{ --------------------------------------------------
