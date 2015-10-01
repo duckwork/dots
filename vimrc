@@ -606,19 +606,19 @@ function! StatusLine(winnr) " {{{
   if isactive
     if ! isreadonly
       if ismodified
-        let status .= '%#DiffAdd#'
+        let status .= ' %#DiffAdd#'
         let status .= ' + '
       endif
     else
       if ishelp
         let status .= ' ? '
       else
-        let status .= '%#DiffDelete#'
+        let status .= ' %#DiffDelete#'
         let status .= ' ! '
       endif
     endif
     if &paste
-      let status .= '%#DiffChange'
+      let status .= ' %#DiffChange'
       let status .= ' P '
     endif
     let status .= '%#StatusLine# '
