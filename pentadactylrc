@@ -33,9 +33,6 @@ map , <Leader>
 nmap -b <Leader>re :source $MY_PENTADACTYLRC<CR>
 map -b <F2> :set guioptions!=T<CR>
 map -b -s <F3> y:open about:reader?url=<C-v><C-v><CR>
-map -b -s <S-F3> :set usermode:js <<EOF
-   
-EOF
 map -b <F4> <C-S-e>
 map -b j 6j
 map -b k 6k
@@ -51,12 +48,12 @@ map -b gb :ls<CR>:b<Space>
 " Hilight groups {{{
 hi Bell background-color: white !important;
 
-hi -a FontFixed font-family: Consolas,monospace !important;
+hi -a FontFixed font-family: "Source Code Pro",Consolas,monospace !important;
               \ font-size: 9pt !important;
 hi -a FontProportional font-family: Garamond,Georgia,serif !important;
                      \ font-size: 16px !important;
 
-hi Hint font: 12px Consolas,monospace !important;
+hi Hint font: 12px "Source Code Pro",Consolas,monospace !important;
       \ background-color: rgba(0, 255, 255, 1) !important;
       \ color: rgba(0, 0, 0, 1) !important;
       \ border: 1px solid red !important;

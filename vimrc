@@ -66,7 +66,7 @@ set nocursorcolumn                          " hilite screen column of crsr
 set background=dark                         " background color brightness
 set spellfile=~/.vim/spell/en_us.utf-8.add  " file to store custom words
 set spelllang=en_us                         " list of accepted languages
-set synmaxcol=300                           " maximum col to hilite to
+let &synmaxcol = g:tw + 3                   " maximum col to hilite to
 let &colorcolumn = g:tw + 1                 " columns to hilite
 "  }}} -----------------------------------------------------------------------
 "  6 multiple windows {{{ ----------------------------------------------------
@@ -196,7 +196,7 @@ set softtabstop=2  " number of spaces to a <Tab>
 " }}} ------------------------------------------------------------------------
 " 16 folding {{{ -------------------------------------------------------------
 set foldenable
-set foldcolumn=1 " width of gutter column to indicate folds
+" set foldcolumn=1 " width of gutter column to indicate folds
 set foldtext=FoldLine()
 "set foldclose=all
 "set foldexpr=0
@@ -544,8 +544,8 @@ function! StatusLine(winnr) " {{{
   if isactive
     let status .= '%#CursorLineNr#'
     if &number
-      let colwid = &fdc + (&nu * &nuw) - 1
-      let status .= '>%'.colwid.'v '
+      let colwid = &fdc + (&nu * &nuw) - 2
+      let status .= ' %'.colwid.'v '
     elseif ishelp
       let status .= '> ? '
     else
@@ -553,16 +553,19 @@ function! StatusLine(winnr) " {{{
     endif
   else
     let status .= ' [%n] '
+    let status .= '%#Folded#'
   endif " }}}
   " Scroll {{{
   if isactive
-    let status .= '| %2p%% '
+    let status .= '| '
+    let status .= '%#Folded#'
+    let status .= '%2p%% '
     if exists("b:texty") && ! ishelp " set by FT_text augroup
       let status .= '| %{WordCount()} '
     endif
   endif " }}}
   " }}} ----------------------------------------------------------------------
-  let status .= '%#CursorLine# %= ' " Gutter ---------------------------------
+  let status .=  '%= ' " Gutter ---------------------------------
   " Right side {{{ -----------------------------------------------------------
   " Git branch {{{
   if exists('*fugitive#head')
@@ -602,7 +605,7 @@ function! StatusLine(winnr) " {{{
     let status .= '%#CursorLine# '
     if ! isreadonly
       if ismodified
-        let status = ' [+] '
+        let status .= ' [+] '
       endif
     else
       if ishelp
@@ -624,7 +627,7 @@ function! StatusLine(winnr) " {{{
     endif
   else
     let fstat .= '%f'
-    if len(ftype) > 0
+    if len(ftype) > 0 && isactive
       let fstat .= '%#Folded#'
       let fstat .= fsep . ftype
     endif
@@ -949,9 +952,8 @@ Plug 'vim-pandoc/vim-pandoc',
   let g:pandoc#command#use_message_buffers = 0
   let g:pandoc#filetypes#handled = [ 'markdown', 'rst', 'textile' ]
   let g:pandoc#folding#fdc = &fdc
-  " let g:pandoc#formatting#mode = 'h' " hard wrap, autoformat smart
+  let g:pandoc#formatting#mode = "hA" " hard wrap, autoformat smart
   let g:pandoc#formatting#textwidth = g:tw
-  let g:pandoc#keyboard#sections#header_style = 's' " enable setext for h1,2
   let g:pandoc#spell#default_langs = ['en']
   let g:pandoc#toc#position = "left" " Table of contents
   let g:pandoc#toc#close_after_navigating = 0 " <CR> navs, <C-CR> navs + closes
@@ -963,8 +965,8 @@ Plug 'vim-pandoc/vim-pandoc-syntax'
                     \ ? "Autoformat enabled"
                     \ : "Autoformat disabled"
                     \ <CR>
-Plug 'gbgar/pandoc-sections.vim',
-      \ { 'for': [ 'pandoc', 'markdown' ] }
+" Plug 'gbgar/pandoc-sections.vim',
+"       \ { 'for': [ 'pandoc', 'markdown' ] }
 Plug 'reedes/vim-litecorrect',
       \ { 'for': [ 'pandoc', 'markdown', 'text' ] }
 
@@ -1010,6 +1012,11 @@ endif " }}}
 if has('unix') " {{{
   Plug 'tpope/vim-eunich'
 endif " }}}
+Plug 'xolox/vim-misc'
+Plug 'xolox/vim-shell'
+  let g:shell_fullscreen_message = 0
+  let g:shell_mappings_enabled   = 0
+Plug 'xolox/vim-session'
 " }}} ------------------------------------------------------------------------
 call plug#end()
 " Functions for plugins {{{ --------------------------------------------------
