@@ -92,7 +92,12 @@ let &winwidth = g:tw + 1  " minimal columns for current window
 "  }}} -----------------------------------------------------------------------
 "  8 terminal {{{ ------------------------------------------------------------
 "set esckeys
-"set guicursor=...
+set guicursor=n:block-Cursor/lCursor
+set gcr     +=v:ver20-Cursor/lCursor-blinkon0
+set gcr     +=o:hor50-Cursor/lCursor
+set gcr     +=i-ci:ver20-Cursor/lCursor
+set gcr     +=r-cr:hor10-Cursor/lCursor
+set gcr     +=c:block-Cursor/lCursor
 "set icon
 "set iconstring=
 "set nottyfast
@@ -543,24 +548,10 @@ function! StatusLine(winnr) " {{{
   if isactive
     let status .= '%#CursorLineNr#'
   endif
-  let status .= 'λ%#Folded#'
-  " Git branch {{{
-  if exists('*fugitive#head')
-    let head = fugitive#head()
+  let status .= 'λ '
 
-    if empty(head) && exists('*fugitive#detect') && !exists('b:git_dir')
-      call fugitive#detect(getcwd())
-      let head = fugitive#head()
-    endif
-  endif
-  if !empty(head) && isactive
-    let status .= ' '.head
-  endif
-  " }}}
-    let status .= '%#StatusLine# → '
-  " Filename {{{
   let fstat = ''
-  let fsep = ' :: '
+  let fsep = ' ∷ '
 
   if fname == ''
     let fstat .= '__'
@@ -576,37 +567,40 @@ function! StatusLine(winnr) " {{{
     endif
   endif
 
+  if isactive
+    let status .= '%#CursorLineNr#'
+    let status .= fstat
+    let status .= '%#StatusLine# → '
+  else
+    let status .= fstat
+  endif
+
   if ! ishelp
     if isactive
-      let status .= '%<'
       let cdir = getcwd()
       if (&columns*100) / len(cdir) > 500
         " if the cwd is shorter than 20% of the window's width
-        let status .= cdir
-        if has('win32')
-          let status .= '\'
-        else
-          let status .= '/'
-        endif
+        let status .= cdir . ' '
       endif
-      let status .= '%#CursorLineNr#'
-      let status .= fstat
-    else
-      let status .= '%<' . fstat
-    endif
-  else
-    if isactive
-      let status .= '%<%#CursorLineNr#%f'
-    else
-      let status .= '%<%f'
     endif
   endif
-  " }}}
-  " File status indicators {{{
+
+  if exists('*fugitive#head')
+    let head = fugitive#head()
+    if empty(head) && exists('*fugitive#detect') && !exists('b:git_dir')
+      call fugitive#detect(getcwd())
+      let head = fugitive#head()
+    endif
+  endif
+  if !empty(head) && isactive
+    let status .= '%#Folded#'
+    let status .= '('.head.')'
+  endif
+
   if isactive
     if ! isreadonly
       if ismodified
-        let status .= ' %#DiffAdd#'
+        let status .= ' %#DiffAdd#' " toggle comments if no gruvbox
         let status .= ' + '
       endif
     else
@@ -618,7 +612,7 @@ function! StatusLine(winnr) " {{{
       endif
     endif
     if &paste
-      let status .= ' %#DiffChange'
+      let status .= ' %#DiffChange#'
       let status .= ' P '
     endif
     let status .= '%#StatusLine# '
@@ -635,26 +629,27 @@ function! StatusLine(winnr) " {{{
         let status .= ' [!] '
       endif
     endif
-  endif " }}}
+  endif
   " }}} ----------------------------------------------------------------------
-  let status .=  '%= ' " Gutter ---------------------------------
+  let status .=  '%=%< ' " Gutter --------------------------------------------
   " Left side {{{ ------------------------------------------------------------
-  " Ruler {{{
+  if isactive
+    let status .= '%#Folded#'
+    let status .= '%2p%% '
+    if exists("b:texty") && ! ishelp " set by FT_text augroup
+      let status .= '| %{WordCount()} '
+    endif
+    let status .= '| '
+  endif
+
   if isactive
     let status .= '%#CursorLineNr#'
       let status .= '%l:%02v'
   else
     let status .= ' [%n] '
-  endif " }}}
-  " Scroll {{{
-  if isactive
-    let status .= '%#Folded# | '
-    let status .= '%2p%% '
-    if exists("b:texty") && ! ishelp " set by FT_text augroup
-      let status .= '| %{WordCount()} '
-    endif
-  endif " }}}
+  endif
   " }}} ----------------------------------------------------------------------
+  let status .= ' '
   return status
 endfunction " }}}
 function! s:RefreshStatus(...) " {{{
@@ -779,7 +774,7 @@ augroup END " }}}
 augroup FT_text " {{{
   au!
   au BufNewFile,BufRead,BufWrite *.txt,*.md
-        \ setf pandoc
+        \ if &ft != 'help' | setf pandoc | endif
 
   au FileType *wiki,markdown,pandoc setlocal spell
   au FileType *wiki,markdown,pandoc setlocal complete+=kspell
@@ -938,7 +933,7 @@ Plug 'gregsexton/MatchTag',
 
 Plug 'vim-pandoc/vim-pandoc',
       \ { 'for': [ 'pandoc', 'markdown' ] }
-  let g:pandoc#modules#disabled = [ 
+  let g:pandoc#modules#disabled = [
         \ 'menu',
         \ 'bibliographies',
         \ 'command',
