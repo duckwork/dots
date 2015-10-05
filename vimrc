@@ -8,6 +8,7 @@ else
 endif
 let g:tw      = 78 " fake textwidth
 let g:is_bash = 1
+let g:spelldir = "$HOME/.vim/spell/"
 " }}} ========================================================================
 " __SETTINGS__ {{{ ===========================================================
 "  1 important {{{ -----------------------------------------------------------
@@ -64,7 +65,7 @@ set cursorline                              " hilite the screen line of crsor
 set hlsearch                                " highlight matches for last srch
 set nocursorcolumn                          " hilite screen column of crsr
 set background=dark                         " background color brightness
-set spellfile=~/.vim/spell/en_us.utf-8.add  " file to store custom words
+let &spellfile = g:spelldir . "en_us.utf-8.add"  " file to store custom words
 set spelllang=en_us                         " list of accepted languages
 let &synmaxcol = g:tw + 3                   " maximum col to hilite to
 let &colorcolumn = g:tw + 1                 " columns to hilite
@@ -822,6 +823,7 @@ if exists("*mkdir")
         \ &backupdir,
         \ &undodir,
         \ &viewdir,
+        \ g:spelldir,
         \ ]
     if !isdirectory(expand(directory))
       call mkdir(expand(directory), 'p')
