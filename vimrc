@@ -544,9 +544,13 @@ function! StatusLine(winnr) " {{{
   let isreadonly = getbufvar(buffer, '&readonly')
   let ishelp = ftype == 'help'
 
-  " Right side {{{ -----------------------------------------------------------
+  let defcolor = '%#StatusLine#'
+  let actcolor = '%#CursorLineNr#'
+  let infcolor = '%#Folded#'
+
+  " Left side {{{ -----------------------------------------------------------
   if isactive
-    let status .= '%#CursorLineNr#'
+    let status .= actcolor
   endif
   let status .= 'λ '
 
@@ -556,24 +560,27 @@ function! StatusLine(winnr) " {{{
   if fname == ''
     let fstat .= '__'
     if len(ftype) > 0
-      let fstat .= '%#CursorLine#'
+      let fstat .= defcolor
       let fstat .= fsep . ftype
     endif
   else
     let fstat .= '%f'
     if len(ftype) > 0 && isactive
-      let fstat .= '%#StatusLine#'
+      let fstat .= defcolor
       let fstat .= fsep . ftype
     endif
   endif
 
   if isactive
-    let status .= '%#CursorLineNr#'
+    let status .= actcolor
     let status .= fstat
-    let status .= '%#StatusLine# → '
+    let status .= defcolor
+    let status .= ' → '
   else
     let status .= fstat
   endif
+
+  " TODO: add support for netrw windows.
 
   if ! ishelp
     if isactive
@@ -593,7 +600,7 @@ function! StatusLine(winnr) " {{{
     endif
   endif
   if !empty(head) && isactive
-    let status .= '%#Folded#'
+    let status .= infcolor
     let status .= '('.head.')'
   endif
 
@@ -615,7 +622,7 @@ function! StatusLine(winnr) " {{{
       let status .= ' %#DiffChange#'
       let status .= ' P '
     endif
-    let status .= '%#StatusLine# '
+    let status .= defcolor . ' '
   else
     " let status .= '%#CursorLine# '
     if ! isreadonly
@@ -632,9 +639,9 @@ function! StatusLine(winnr) " {{{
   endif
   " }}} ----------------------------------------------------------------------
   let status .=  '%=%< ' " Gutter --------------------------------------------
-  " Left side {{{ ------------------------------------------------------------
+  " Right side {{{ ------------------------------------------------------------
   if isactive
-    let status .= '%#Folded#'
+    let status .= infcolor
     let status .= '%2p%% '
     if exists("b:texty") && ! ishelp " set by FT_text augroup
       let status .= '| %{WordCount()} '
@@ -643,7 +650,7 @@ function! StatusLine(winnr) " {{{
   endif
 
   if isactive
-    let status .= '%#CursorLineNr#'
+    let status .= actcolor
       let status .= '%l:%02v'
   else
     let status .= ' [%n] '
