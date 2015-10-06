@@ -337,11 +337,23 @@ inoremap kk <Esc>
 " Basic movement
 nnoremap <expr> j v:count > 0 ? 'j' : 'gj'
 nnoremap <expr> k v:count > 0 ? 'k' : 'gk'
-nnoremap H ^
-nnoremap L $
+noremap H ^
+noremap L g_
 nnoremap gH :call RealScrollTo('top')<CR>
 nnoremap gM M
 nnoremap gL :call RealScrollTo('bot')<CR>
+
+" Textobjects
+" " Next - Last (Previous)
+onoremap an :<C-u>call <SID>NextTextObject('a', 'f')<CR>
+xnoremap an :<C-u>call <SID>NextTextObject('a', 'f')<CR>
+onoremap in :<C-u>call <SID>NextTextObject('i', 'f')<CR>
+xnoremap in :<C-u>call <SID>NextTextObject('i', 'f')<CR>
+
+onoremap al :<C-u>call <SID>NextTextObject('a', 'F')<CR>
+xnoremap al :<C-u>call <SID>NextTextObject('a', 'F')<CR>
+onoremap il :<C-u>call <SID>NextTextObject('i', 'F')<CR>
+xnoremap il :<C-u>call <SID>NextTextObject('i', 'F')<CR>
 
 " Operators
 nnoremap Y y$
@@ -388,7 +400,9 @@ nnoremap <silent> <leader>rs mz:%s/\s\+$//<CR>:let @/=''<CR>`z
 nnoremap <silent> <leader>rb mz:g/^$/d<CR>:let @/=''<CR>`z
 
 " File formatting
-nnoremap <Leader>gq mzgggqG`z
+nnoremap Q gqip
+vnoremap Q gq
+nnoremap <Leader>Q mzgggqG`z
 nnoremap <Leader>gu :update<CR>:e ++ff=dos<CR>:setlocal ff=unix<CR>:w<CR>
 
 nnoremap <Leader>= :call CharToEnd("=")<CR>
@@ -559,7 +573,7 @@ function! StatusLine(winnr) " {{{
   let fsep = ' ∷ '
 
   if fname == ''
-    let fstat .= '__'
+    let fstat .= '_'
     if len(ftype) > 0
       let fstat .= defcolor
       let fstat .= fsep . ftype
@@ -729,6 +743,19 @@ function! RealScrollTo(direction) " {{{
     let &scrolloff = s:scroff
     unlet s:scroff
 endfunction " }}}
+function! s:NextTextObject(motion, dir) "{{{
+  let c = nr2char(getchar())
+
+  if c ==# "b"
+    let c = "("
+  elseif c ==# "B"
+    let c = "{"
+  elseif c ==# "r"
+    let c = "["
+  endif
+
+  exe "normal! " . a:dir . c . "v" . a:motion . c
+endfunction "}}}
 " }}} ========================================================================
 " __AUTOCOMMANDS__ {{{ =======================================================
 augroup MakesSense " {{{
@@ -913,7 +940,7 @@ Plug 'junegunn/vim-easy-align'
 " Extended operators
 Plug 'AndrewRadev/splitjoin.vim'
   let g:splitjoin_split_mapping = 'gK'
-  nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin', 'J')<CR>
+  nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin', 'mzJ`z')<CR>
   nnoremap <silent> K :<C-u>call <SID>try('SplitjoinSplit',
                                          \ "i\r\ed^kg_lD")<CR>
 Plug 'tommcdo/vim-exchange'
