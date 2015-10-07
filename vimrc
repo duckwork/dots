@@ -1085,7 +1085,7 @@ if executable('ghc-mod') && has('unix') " {{{
   Plug 'eagletmt/neco-ghc'
 endif " }}}
 if has('unix') " {{{
-  Plug 'tpope/vim-eunich'
+  Plug 'tpope/vim-eunuch'
 endif " }}}
 " Xolox {{{
 Plug 'xolox/vim-misc'
