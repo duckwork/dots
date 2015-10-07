@@ -93,12 +93,12 @@ let &winwidth = g:tw + 1  " minimal columns for current window
 "  }}} -----------------------------------------------------------------------
 "  8 terminal {{{ ------------------------------------------------------------
 "set esckeys
-set guicursor=n:block-Cursor/lCursor
-set gcr     +=v:ver20-Cursor/lCursor-blinkon0
-set gcr     +=o:hor50-Cursor/lCursor
-set gcr     +=i-ci:ver20-Cursor/lCursor
-set gcr     +=r-cr:hor10-Cursor/lCursor
-set gcr     +=c:block-Cursor/lCursor
+set guicursor=n:block-nCursor
+set gcr     +=v:ver25-vCursor-blinkon0
+set gcr     +=o:hor50-oCursor
+set gcr     +=i-ci:ver20-iCursor
+set gcr     +=r-cr:hor10-rCursor
+set gcr     +=c:hor10-cCursor
 "set icon
 "set iconstring=
 "set nottyfast
