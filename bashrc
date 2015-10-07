@@ -7,6 +7,11 @@ export HISTFILESIZE=50000
 export HISTSIZE=5000
 export PROMPT_COMMAND='history -a'
 
+if ! echo $PATH | tr ':' '\n' | grep -q "$HOME/bin" -; then
+  export PATH="$HOME/bin:$PATH"
+fi
+alias rbash="source $HOME/.bashrc"
+
 function cleanhist # Remove duplicates from history file
 {
   nl $HOME/.bash_history | sort -k 2 | uniq -f 1 | sort -n | cut -f 2 > $HOME/.bash_history;
