@@ -166,7 +166,7 @@ insertAt x n (x':xs) = x':insertAt x (n - 1) xs
 -- 22. Create a list containing all integers in a given range ----------------
 range :: Int -> Int -> [Int]
 range n m
-  | n > m    = []
+  | n > m     = []
   | otherwise = n : range (n + 1) m
 
 -- 23. Extract a given number of randomly selected elements from a list ------

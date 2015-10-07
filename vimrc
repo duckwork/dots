@@ -8,7 +8,7 @@ else
 endif
 let g:tw      = 78 " fake textwidth
 let g:is_bash = 1
-let g:spelldir = "$HOME/.vim/spell/"
+let g:spelldir = "~/.vim/spell/"
 " }}} ========================================================================
 " __SETTINGS__ {{{ ===========================================================
 "  1 important {{{ -----------------------------------------------------------
@@ -158,7 +158,7 @@ set confirm " ask to save before quitting
 set noerrorbells " ring the bell for error messages
 set ruler " show ruler position in statusline
 set showcmd " show partial commands as they're typed
-set showmode " show current mode in statusline
+set noshowmode " show current mode in statusline
 set visualbell " use a visual bell instead of sound
 set helplang=en
 set report=5 " threshold for reporting number of changed lines
@@ -331,12 +331,12 @@ let maplocalleader = ","
 
 " Changing modes
 noremap ; :
-inoremap jj <Esc>
-inoremap kk <Esc>
+" inoremap jj <Esc>
+" inoremap kk <Esc>
 
 " Basic movement
-nnoremap <expr> j v:count > 0 ? 'j' : 'gj'
-nnoremap <expr> k v:count > 0 ? 'k' : 'gk'
+nnoremap <silent> j :<C-u>call LineMotion("j")<CR>
+nnoremap <silent> k :<C-u>call LineMotion("k")<CR>
 noremap H ^
 noremap L g_
 nnoremap gH :call RealScrollTo('top')<CR>
@@ -432,10 +432,187 @@ nnoremap <F1> K
 "nnoremap <F8>
 "nnoremap <F9>
 "nnoremap <F10>
-"nnoremap <F11>
+"nnoremap <F11> :Goyo<CR>
 nnoremap <F12> :call CloseBufWin()<CR>
 " }}} ========================================================================
 " __FUNCTIONS__ {{{ ==========================================================
+function! StatusLine(winnr) " {{{
+  let status = ''
+  " Variables {{{
+  let buffer = winbufnr(a:winnr)
+  let buf    = {
+        \ 'name': bufname(buffer),
+        \ 'dir':  expand('#'.buffer.':p:h'),
+        \ 'type': getbufvar(buffer, '&filetype'),
+        \ 'foc':  winnr() == a:winnr,
+        \ }
+  if buf.type == 'help'
+    let buf.status = 'help'
+  elseif getbufvar(buffer, '&readonly')
+    let buf.status = 'readonly'
+  elseif getbufvar(buffer, '&modified')
+    let buf.status = 'modified'
+  else
+    let buf.status = 'normal'
+  endif
+
+  let clr = {
+        \ 'def': '%#StatusLine#',
+        \ 'foc': '%#CursorLineNr#',
+        \ 'mut': '%#Folded#',
+        \ }
+  let clr.good = get(g:, 'gitgutter_enabled', 0)
+                        \ ? '%#GitGutterAdd#'
+                        \ : '%#DiffAdd# '
+  let clr.warn = get(g:, 'gitgutter_enabled', 0)
+                        \ ? '%#GitGutterDelete#'
+                        \ : '%#DiffDelete# '
+  let clr.info = get(g:, 'gitgutter_enabled', 0)
+                        \ ? '%#GitGutterChange#'
+                        \ : '%#DiffChange# '
+  let spacer = clr.def . ' '
+  " /vars }}}
+  " Mode {{{
+  let modedict = {
+        \ 'n':  { 'symbol': 'λ', 'color': clr.foc },
+        \ 'v':  { 'symbol': '†', 'color': clr.warn },
+        \ 'V':  { 'symbol': '†', 'color': clr.warn },
+        \ '': { 'symbol': '‡', 'color': clr.warn },
+        \ 's':  { 'symbol': '§', 'color': clr.warn },
+        \ 'S':  { 'symbol': '§', 'color': clr.warn },
+        \ '': { 'symbol': '§', 'color': clr.warn },
+        \ 'i':  { 'symbol': 'ι', 'color': clr.info },
+        \ 'R':  { 'symbol': '∂', 'color': clr.foc },
+        \ 'c':  { 'symbol': 'λ', 'color': clr.good },
+        \ 'r':  { 'symbol': 'λ', 'color': clr.foc },
+        \ '!':  { 'symbol': 'λ', 'color': clr.warn },
+        \ }
+  if buf.foc
+    let status .= modedict[mode()].color . modedict[mode()].symbol
+  else
+    let status .= 'λ'
+  endif
+  let status .= spacer
+  " /mode }}}
+  " File information {{{
+  let f = {}
+  let f.name = empty(buf.name) ? '_' : buf.name
+  let f.type = empty(buf.type) ? ''  : spacer . '∷ ' . buf.type
+
+  if buf.foc
+    let status .= clr.foc
+    if buf.type == 'netrw'
+      let status .= buf.dir
+    else
+      let status .= f.name . f.type
+    endif
+  else
+    let status .= f.name
+  endif
+  let status .= spacer
+  " /file info }}}
+  " File modification status {{{
+  let modifydict = {
+        \ 'help': { 'symbol': '?', 'color': clr.info },
+        \ 'readonly': { 'symbol': '!', 'color': clr.warn },
+        \ 'modified': { 'symbol': '+', 'color': clr.good },
+        \ 'normal': { 'symbol': '-', 'color': clr.foc },
+        \ }
+  if buf.foc
+    let status .= modifydict[buf.status].color
+    let status .= modifydict[buf.status].symbol . '>'
+  else
+    let status .= '[' . modifydict[buf.status].symbol . ']'
+  endif
+  let status .= spacer
+  " /modifications }}}
+  " Directory information {{{
+  if (buf.type != 'help') && (buf.type != 'netrw') && buf.foc
+    if (winwidth(a:winnr)*100) / len(buf.dir) > 500
+      let status .= buf.dir
+      let status .= spacer
+    endif
+  endif
+  " /directory }}}
+  " Git status {{{
+  if exists('*fugitive#head')
+    let head = fugitive#head()
+    if empty(head) && exists('*fugitive#detect') && !exists('b:git_dir')
+      call fugitive#detect(buf.dir)
+      let head = fugitive#head()
+    endif
+  endif
+
+  if !empty(head) && buf.foc
+    let status .= clr.info
+    let status .= '± ' . head
+    let status .= spacer
+  endif
+  " /git }}}
+  let status .= '%=' " Gutter
+  " Toggle switches {{{
+  if buf.foc
+    let status .= clr.info
+    if &paste
+      let status .= '¶'
+    endif
+    if get(b:, 'capslock', 0)
+      let status .= '⇑'
+    endif
+  endif
+  " /toggles }}}
+  let status .= spacer
+  " Auxiliary rulers {{{
+  if buf.foc
+    let status .= clr.mut . '| '
+    if exists('b:texty') && !(buf.type == 'help')
+      let status .= '%{WordCount()} | '
+    endif
+    let status .= '%2p%% |'
+  endif
+  " /aux rulers }}}
+  let status .= spacer
+  " Ruler {{{
+  if buf.foc
+    let status .= clr.foc
+    let status .= '%3l' . ':' . '%02v'
+  else
+    let status .= '[#%n]'
+  endif
+  " /ruler }}}
+  let status .= ' '
+  return status
+endfunction " }}}
+function! s:RefreshStatus(...) " {{{
+  if !a:0
+    for nr in range(1, winnr('$'))
+      call setwinvar(nr, '&statusline', '%!StatusLine('.nr.')')
+    endfor
+  else
+    for nr in range(1, winnr('$'))
+      call setwinvar(nr, '&statusline', '')
+    endfor
+  endif
+endfunction " }}}
+function! FoldLine() " {{{
+    let line = getline(v:foldstart)
+    let foldedlinecount = printf('%d', v:foldend - v:foldstart)
+    if &foldmethod == 'marker'
+        let foldmarks = substitute(&fmr, ',.*', '', '')
+        let line = substitute(line, foldmarks . '\d*', '', '')
+    endif
+    " Get rid of commentstring
+    let commentstr = substitute(&cms, '^\(.*\)%s\(.*\)', '\1\|\2', '')
+    let commentstr = substitute(commentstr, '|$', '', '')
+    let commentstr = substitute(commentstr, '\([\[\]\$\^\.\*|\\]\)',
+                                \ '\\\1', 'g')
+    let line = substitute(line, commentstr, '', 'g')
+    let line = substitute(line, '===\+$', '', '')
+    let line = substitute(line, '---\+$', '', '')
+    " Replace initial whitespace with dashes indicating foldlevel
+    " let line = substitute(line, '^\s*', v:folddashes . ' ', '')
+    return '|' . v:folddashes .' '. line . '[ ' . foldedlinecount . ' ] '
+endfunction " }}}
 function! WordCount() " {{{
   let s:oldstat = v:statusmsg
   let position = getpos('.')
@@ -493,7 +670,6 @@ function! CharToEnd(char) " {{{
   exe "normal! :s/\s*$/ /e"
   exe "normal! " . (s:e - s:l) . "A" . a:char
 endfunction " }}}
-
 function! ChTabBuf(motion) " {{{
     if tabpagenr('$') == 1
         " there is only 1 tab; switch buffers
@@ -527,165 +703,6 @@ function! PopOpen(file) " {{{
         execute "tabe" s:fpath
     endif
 endfunction " }}}
-
-function! FoldLine() " {{{
-    let line = getline(v:foldstart)
-    let foldedlinecount = printf('%d', v:foldend - v:foldstart)
-    if &foldmethod == 'marker'
-        let foldmarks = substitute(&fmr, ',.*', '', '')
-        let line = substitute(line, foldmarks . '\d*', '', '')
-    endif
-    " Get rid of commentstring
-    let commentstr = substitute(&cms, '^\(.*\)%s\(.*\)', '\1\|\2', '')
-    let commentstr = substitute(commentstr, '|$', '', '')
-    let commentstr = substitute(commentstr, '\([\[\]\$\^\.\*|\\]\)',
-                                \ '\\\1', 'g')
-    let line = substitute(line, commentstr, '', 'g')
-    let line = substitute(line, '===\+$', '', '')
-    let line = substitute(line, '---\+$', '', '')
-    " Replace initial whitespace with dashes indicating foldlevel
-    " let line = substitute(line, '^\s*', v:folddashes . ' ', '')
-    return '|' . v:folddashes .' '. line . '[ ' . foldedlinecount . ' ] '
-endfunction " }}}
-function! StatusLine(winnr) " {{{
-  let status = ''
-
-  let buffer = winbufnr(a:winnr)
-  let fname = bufname(buffer)
-  let ftype = getbufvar(buffer, '&filetype')
-
-  let isactive = winnr() == a:winnr
-  let ismodified = getbufvar(buffer, '&modified')
-  let isreadonly = getbufvar(buffer, '&readonly')
-  let ishelp = ftype == 'help'
-
-  let defcolor = '%#StatusLine#'
-  let actcolor = '%#CursorLineNr#'
-  let infcolor = '%#Folded#'
-
-  " Left side {{{ -----------------------------------------------------------
-  if isactive
-    let status .= actcolor
-  endif
-  let status .= 'λ '
-
-  let fstat = ''
-  let fsep = ' ∷ '
-
-  if fname == ''
-    let fstat .= '_'
-    if len(ftype) > 0
-      let fstat .= defcolor
-      let fstat .= fsep . ftype
-    endif
-  else
-    let fstat .= '%f'
-    if len(ftype) > 0 && isactive
-      let fstat .= defcolor
-      let fstat .= fsep . ftype
-    endif
-  endif
-
-  if isactive
-    let status .= actcolor
-    let status .= fstat
-    let status .= defcolor
-    let status .= ' → '
-  else
-    let status .= fstat
-  endif
-
-  " TODO: add support for netrw windows.
-
-  if ! ishelp
-    if isactive
-      let cdir = getcwd()
-      if (&columns*100) / len(cdir) > 500
-        " if the cwd is shorter than 20% of the window's width
-        let status .= cdir . ' '
-      endif
-    endif
-  endif
-
-  if exists('*fugitive#head')
-    let head = fugitive#head()
-    if empty(head) && exists('*fugitive#detect') && !exists('b:git_dir')
-      call fugitive#detect(getcwd())
-      let head = fugitive#head()
-    endif
-  endif
-  if !empty(head) && isactive
-    let status .= infcolor
-    let status .= '('.head.')'
-  endif
-
-  if isactive
-    if ! isreadonly
-      if ismodified
-        let status .= ' %#DiffAdd#' " toggle comments if no gruvbox
-        let status .= ' + '
-      endif
-    else
-      if ishelp
-        let status .= ' ? '
-      else
-        let status .= ' %#DiffDelete#'
-        let status .= ' ! '
-      endif
-    endif
-    if &paste
-      let status .= ' %#DiffChange#'
-      let status .= ' P '
-    endif
-    let status .= defcolor . ' '
-  else
-    " let status .= '%#CursorLine# '
-    if ! isreadonly
-      if ismodified
-        let status .= ' [+] '
-      endif
-    else
-      if ishelp
-        let status .= ' [?] '
-      else
-        let status .= ' [!] '
-      endif
-    endif
-  endif
-  " }}} ----------------------------------------------------------------------
-  let status .=  '%=%< ' " Gutter --------------------------------------------
-  " Right side {{{ ------------------------------------------------------------
-  if isactive
-    let status .= infcolor
-    let status .= '%2p%% '
-    if exists("b:texty") && ! ishelp " set by FT_text augroup
-      let status .= '| %{WordCount()} '
-    endif
-    let status .= '| '
-  endif
-
-  if isactive
-    let status .= actcolor
-      let status .= '%l:%02v'
-  else
-    let status .= ' [%n] '
-  endif
-  " }}} ----------------------------------------------------------------------
-  let status .= ' '
-  return status
-endfunction " }}}
-function! s:RefreshStatus(...) " {{{
-  if !a:0
-    for nr in range(1, winnr('$'))
-      call setwinvar(nr, '&statusline', '%!StatusLine('.nr.')')
-    endfor
-  else
-    for nr in range(1, winnr('$'))
-      call setwinvar(nr, '&statusline', '')
-    endfor
-  endif
-endfunction " }}}
-
 function! ToggleBG() "{{{
     if &bg == 'light'
         set background=dark
@@ -729,7 +746,6 @@ function! ListPlus(switch) "{{{
                     \ : <SID>listplus_on()
     endif
 endfunction "}}}
-
 function! RealScrollTo(direction) " {{{
     let s:scroff = &scrolloff
     set scrolloff=0
@@ -756,6 +772,9 @@ function! s:NextTextObject(motion, dir) "{{{
 
   exe "normal! " . a:dir . c . "v" . a:motion . c
 endfunction "}}}
+function! LineMotion(dir) " {{{
+  execute "normal! " . (v:count1 > 1 ? "m'" . v:count1 : "g") . a:dir
+endfunction " }}}
 " }}} ========================================================================
 " __AUTOCOMMANDS__ {{{ =======================================================
 augroup MakesSense " {{{
@@ -816,8 +835,8 @@ augroup FT_text " {{{
   au FileType *wiki,markdown,pandoc let b:texty = 1
 
   au CursorHold *.{txt,m*d*}
-        \ if &modifiable && &modified
-        \ |  write
+        \ if &modifiable
+        \ |  update
         \ | endif
 augroup END " }}}
 augroup FT_netrw " {{{
@@ -876,9 +895,12 @@ Plug 'junegunn/goyo.vim',
   let g:goyo_width = g:tw + 1
   let g:goyo_margin_top = 2
   let g:goyo_margin_bottom = g:goyo_margin_top
-  nnoremap <S-F11> :Goyo<CR>
+  nnoremap <F11> :Goyo<CR>
 Plug 'junegunn/limelight.vim',
       \ { 'on': 'Limelight' }
+Plug 'tpope/vim-capslock'
+Plug 'kana/vim-textobj-user'
+Plug 'reedes/vim-textobj-sentence'
 " }}} ------------------------------------------------------------------------
 " Coding {{{ -----------------------------------------------------------------
 Plug 'tpope/vim-commentary'
@@ -908,6 +930,25 @@ Plug 'ctrlpvim/ctrlp.vim'
   nnoremap gf :CtrlP<CR>
   nnoremap go :CtrlPMRU<CR>
   nnoremap gb :CtrlPBuffer<CR>
+" if has('win64')
+"   Plug 'Shougo/vimproc.vim'
+"   let g:vimproc#dll_path = '~/.vim/vimproc_win64.dll'
+" endif
+" Plug 'Shougo/Unite.vim'
+"   if executable('ag')
+"     let g:unite_source_rec_async_command =
+"           \ ['ag', '--follow', '--nocolor', '--nogroup',
+"           \  '--hidden', '-g', '']
+"     let g:unite_source_rec_find_args = []
+"   endif
+"   nnoremap <Leader>f :<C-u>Unite -start-insert file_rec<CR>
+"   nnoremap <Leader>o :<C-u>Unite -start-insert file_mru<CR>
+"   let g:unite_source_history_yank_enable = 1
+"   nnoremap <Leader>y :<C-u>Unite history/yank<CR>
+"   nnoremap go :<C-u>Unite -start-insert buffer file_mru file_rec/async<CR>
+" Plug 'Shougo/neomru.vim'
+" Plug 'kopischke/unite-spell-suggest'
+" Plug 'sanford1/unite-unicode'
 if has('python') && v:version >= 704
   Plug 'FelikZ/ctrlp-py-matcher'
 endif
@@ -937,6 +978,13 @@ Plug 'junegunn/vim-easy-align'
   xnoremap \| :EasyAlign //<Left>
   vmap <Enter> <Plug>(EasyAlign)
   nmap ga <Plug>(EasyAlign)
+Plug 'shinokada/dragvisuals.vim'
+  vmap <expr> <LEFT>  DVB_Drag('left')
+  vmap <expr> <RIGHT> DVB_Drag('right')
+  vmap <expr> <DOWN>  DVB_Drag('down')
+  vmap <expr> <UP>    DVB_Drag('up')
+  vmap <expr> D       DVB_Duplicate()
+  let g:DVB_TrimeWS = 1
 " Extended operators
 Plug 'AndrewRadev/splitjoin.vim'
   let g:splitjoin_split_mapping = 'gK'
@@ -954,6 +1002,9 @@ Plug 'tpope/vim-surround'
 " Miscellaneous
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-speeddating'
+Plug 'nixon/vim-vmath'
+  vmap <expr> ++ VMATH_YankAndAnalyse()
+  nmap        ++ vip++
 " }}} ------------------------------------------------------------------------
 " Filetypes {{{ --------------------------------------------------------------
 "Plug 'scrooloose/syntastic'
@@ -1036,12 +1087,17 @@ endif " }}}
 if has('unix') " {{{
   Plug 'tpope/vim-eunich'
 endif " }}}
+" Xolox {{{
 Plug 'xolox/vim-misc'
 Plug 'xolox/vim-shell'
   let g:shell_fullscreen_message = 0
   let g:shell_mappings_enabled   = 0
 Plug 'xolox/vim-session'
   let g:session_autosave = 'no'
+" }}}
+if executable('wmctrl') " {{{
+  Plug 'gioele/vim-autoswap'
+endif " }}}
 " }}} ------------------------------------------------------------------------
 call plug#end()
 " Functions for plugins {{{ --------------------------------------------------
