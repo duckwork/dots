@@ -32,21 +32,27 @@ set passkeys+=facebook.com:jkc
 nmap -builtin ; :
 nmap -builtin : ;
 map , <Leader>
-nmap -b <Leader>re :source $MY_PENTADACTYLRC<CR>
+nmap -b <Leader>re :source ~/_pentadactylrc<CR>
 map -b <F2> :set guioptions!=T<CR>
 map -b -s <F3> y:open about:reader?url=<C-v><C-v><CR>
 map -b <F4> <C-S-e>
-map -b j 6j
-map -b k 6k
-map -b h 6h
-map -b l 6l
+nmap -b j 6j
+nmap -b k 6k
+nmap -b h 6h
+nmap -b l 6l
 map -m hints j -ex normal! 6j
 map -m hints k -ex normal! 6k
 map -m hints f <CR>
-nmap -b > gt
-nmap -b <lt> gT
+nmap -b J H
+nmap -b K L
+nmap -b H gT
+nmap -b L gt
+nmap -b ! :open duckduckgo-html !
+nmap -b <C-1> :tabopen duckduckgo-html !
 map -b gb :ls<CR>:b<Space>
 " }}}
+" Commands"{{{
+""}}}
 " Hilight groups {{{
 hi Bell background-color: white !important;
 
@@ -64,5 +70,33 @@ hi Hint font: 12px "Source Code Pro",monospace !important;
 
 hi TabNumber::after content: ">" !important;
 hi TabNumber::before content: "|" !imporant;
+
+hi -a TabText font-family: "Source Code Pro",monospace !important;
+hi -a StatusLine font-maily: "Source Code Pro",monospace !important;
 " }}}
+" Userstyles"{{{
+style -name=FBNoLiker facebook.com
+    \ a.UFILikeLink, .PageLikeButton, .like_link {
+        \ display: none !important;
+        \ }
+    \ #fbNotificationsFlyout [data-gt*="like"] * {
+        \ display: block;
+        \ height: 12px;
+        \ padding: 0;
+        \ font-size: 10px;
+        \ background-color: #3a5795;
+        \ color: white;
+        \ }
+    \ #fbNotificationsFlyout [data-gt*="like"] .lfloat,
+    \ #fbNotificationsFlyout [data-gt*="like"] .img,
+    \ #fbNotificationsFlyout [data-gt*="like"] ._55m9 {
+        \ display: none !important;
+        \ }
+style -name=FBCruftRemove facebook.com
+    \ #leftCol, #rightCol {
+        \ display: none !important;
+        \ width: 0 !important;
+        \ }
+    \ #contentCol { margin: 0 !important; }
+"}}}
 " vim:ft=pentadactyl:fdm=marker

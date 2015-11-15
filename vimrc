@@ -1,16 +1,17 @@
 " ViMrc v0.8.0
 " by Case Duckworth
-" __VARIABLES__ {{{ ==========================================================
+" VARIABLES {{{ ==========================================================
 if filereadable(glob("~/dots/vimrc"))
-  let g:myvimrc = "~/dots/vimrc"
+  let g:myvimrc = glob("~/dots/vimrc")
 else
   let g:myvimrc = $MYVIMRC
 endif
-let g:tw      = 78 " fake textwidth
-let g:is_bash = 1
-let g:spelldir = "~/.vim/spell/"
+let g:tw       = 78 " fake textwidth
+let g:tabwidth = 4 " how wide are <TAB>s
+let g:is_bash  = 1
+let g:spelldir = $HOME . ".vim/spell/"
 " }}} ========================================================================
-" __SETTINGS__ {{{ ===========================================================
+" SETTINGS {{{ ===========================================================
 "  1 important {{{ -----------------------------------------------------------
 set nocompatible " be iMproved
 set cpoptions+=J " sentences are delimeted by 2 spaces
@@ -64,8 +65,8 @@ let &lcs      .= ',nbsp:~'      " Non-breaking spaces
 set cursorline                              " hilite the screen line of crsor
 set hlsearch                                " highlight matches for last srch
 set nocursorcolumn                          " hilite screen column of crsr
-set background=dark                         " background color brightness
-let &spellfile = g:spelldir . "en_us.utf-8.add"  " file to store custom words
+"set background=dark                         " background color brightness
+let &spellfile = g:spelldir . "en.utf-8.add"  " file to store custom words
 set spelllang=en_us                         " list of accepted languages
 let &synmaxcol = g:tw + 3                   " maximum col to hilite to
 let &colorcolumn = g:tw + 1                 " columns to hilite
@@ -139,7 +140,7 @@ if has('gui_running')
   set go       +=i      " use Vim icon
   set go       +=t      " include tearoff menus
   set browsedir=buffer  " where to open the file browser
-  set linespace=1
+  set linespace=0
   set winaltkeys=no     " how to map the <ALT> keys to the menu
 endif
 " }}} ------------------------------------------------------------------------
@@ -192,13 +193,13 @@ set undolevels=10000   " max number of undoable changes
 set undoreload=10000   " max lines to save for undo on reload
 " }}} ------------------------------------------------------------------------
 " 15 tabs and indenting {{{ --------------------------------------------------
-set autoindent     " automatically set the indent of a new line
-set expandtab      " expand <Tab> to spaces in {I}
-set shiftround     " round to 'shiftwidth' for <<,>>
-set smartindent    " clever autoindenting
-set smarttab       " a <Tab> in an indent inserts 'shiftwidth' spaces
-set shiftwidth=2   " number of spaces to autoindent
-set softtabstop=2  " number of spaces to a <Tab>
+set autoindent                 " automatically set the indent of a new line
+set expandtab                  " expand <Tab> to spaces in {I}
+set shiftround                 " round to 'shiftwidth' for <<,>>
+set nosmartindent              " clever autoindenting [NOT ACTUALLY CLEVER]
+set smarttab                   " a <Tab> in an indent inserts 'shiftwidth' spaces
+let &shiftwidth = g:tabwidth   " number of spaces to autoindent
+let &softtabstop = g:tabwidth  " number of spaces to a <Tab>
 " }}} ------------------------------------------------------------------------
 " 16 folding {{{ -------------------------------------------------------------
 set foldenable
@@ -243,6 +244,7 @@ set directory=$HOME/.vim/swap/ " list of dirs for swap files
 " 21 command line editing {{{ ------------------------------------------------
 "set nofileignorecase
 set undofile
+set wildcharm=<C-z>
 set wildignorecase        " ignore case when completing filenames
 set wildmenu              " show a list of matches w/ cmd completion
 set history=1000          " how many command lines are remembered
@@ -324,15 +326,17 @@ set vi    +=h           " Disable 'hlsearch' on saved files
 set virtualedit=block   " allow positioning cursor anywhere in {^V}
 " }}} ------------------------------------------------------------------------
 " }}} ========================================================================
-" __KEYMAPS__ {{{ ============================================================
+" KEYMAPS {{{ ============================================================
 " Leaders
 let mapleader = ","
 let maplocalleader = ","
 
 " Changing modes
 noremap ; :
-" inoremap jj <Esc>
-" inoremap kk <Esc>
+let g:jkesc = 1
+if get(g:, "jkesc", 0)
+  inoremap jk <Esc>
+endif
 
 " Basic movement
 nnoremap <silent> j :<C-u>call LineMotion("j")<CR>
@@ -342,6 +346,9 @@ noremap L g_
 nnoremap gH :call RealScrollTo('top')<CR>
 nnoremap gM M
 nnoremap gL :call RealScrollTo('bot')<CR>
+
+nnoremap ' `
+nnoremap ` '
 
 " Textobjects
 " " Next - Last (Previous)
@@ -382,6 +389,8 @@ nnoremap <silent> <BS> :b#<CR>
 " Folds
 nnoremap <Space> za
 nnoremap <S-Space> zA
+" TODO: toggle foldopen & close b/w setting and 'all'
+" -- will need a Toggle function. -- GENERALIZE?!?!?!?
 
 " File & filesystem shortcuts
 nnoremap <Leader>er :call PopOpen(g:myvimrc)<CR>
@@ -421,6 +430,14 @@ else
   nnoremap <silent> <Leader>P :set paste<CR>"*P:set nopaste<CR>
 endif
 
+" Smarter commandline
+" cnoremap <expr> <Tab> getcmdtype() == "/" \|\| getcmdtype() == "?"
+"       \ ? "<CR>/<C-r>/"
+"       \ : "<C-z>"
+" cnoremap <expr> <S-Tab> getcmdtype() == "/" \|\| getcmdtype() == "?"
+"       \ ? "<CR>?<C-r>/"
+"       \ : "<S-Tab>"
+
 " Function keys
 nnoremap <F1> K
 "nnoremap <F2>
@@ -435,7 +452,7 @@ nnoremap <F1> K
 "nnoremap <F11> :Goyo<CR>
 nnoremap <F12> :call CloseBufWin()<CR>
 " }}} ========================================================================
-" __FUNCTIONS__ {{{ ==========================================================
+" FUNCTIONS {{{ ==========================================================
 function! StatusLine(winnr) " {{{
   let status = ''
   " Variables {{{
@@ -554,14 +571,14 @@ function! StatusLine(winnr) " {{{
   if buf.foc
     let status .= clr.info
     if &paste
-      let status .= '¶'
+      let status .= ' ¶'
     endif
     if get(b:, 'capslock', 0)
-      let status .= '⇑'
+      let status .= ' ⇑'
     endif
   endif
-  " /toggles }}}
   let status .= spacer
+  " /toggles }}}
   " Auxiliary rulers {{{
   if buf.foc
     let status .= clr.mut . '| '
@@ -570,8 +587,8 @@ function! StatusLine(winnr) " {{{
     endif
     let status .= '%2p%% |'
   endif
-  " /aux rulers }}}
   let status .= spacer
+  " /aux rulers }}}
   " Ruler {{{
   if buf.foc
     let status .= clr.foc
@@ -580,8 +597,7 @@ function! StatusLine(winnr) " {{{
     let status .= '[#%n]'
   endif
   " /ruler }}}
-  let status .= ' '
-  return status
+  return status . ' '
 endfunction " }}}
 function! s:RefreshStatus(...) " {{{
   if !a:0
@@ -703,13 +719,53 @@ function! PopOpen(file) " {{{
         execute "tabe" s:fpath
     endif
 endfunction " }}}
-function! ToggleBG() "{{{
-    if &bg == 'light'
-        set background=dark
-    else
-        set background=light
+function! ToggleBG(...) "{{{
+  if a:0
+    if a:1 ==? 'light'
+      set bg=light
+    elseif a:1 ==? 'dark'
+      set bg=dark
+    elseif a:1 =~? 'tog.*'
+      if &bg == 'light'
+          set background=dark
+      else
+          set background=light
+      endif
+    elseif a:1 =~? 'time' && exists("*strftime")
+      if strftime("%H") > 6 && strftime("%H") < 18 " good enough sunrise & set
+        set bg=light
+      else
+        set bg=dark
+      endif
     endif
+  else
+    call ToggleBG('tog')
+  endif
 endfunction "}}}
+function! FoldZipper(switch) " {{{
+  function! s:foldzip_on()
+    let s:foldc = &foldclose
+    let s:foldo = &foldopen
+    set foldclose=all
+    set foldopen=all
+    return 0
+  endfunction
+  function! s:foldzip_off()
+    let &foldclose = get(s:, 'foldc', &foldclose)
+    let &foldopen  = get(s:, 'foldo', &foldopen)
+    return 1
+  endfunction
+
+  if a:switch ==? 'on'
+    let b:foldzip_enabled = <SID>foldzip_on()
+  elseif a:switch ==? 'off'
+    let b:foldzip_enabled = <SID>foldzip_off()
+  else
+    let b:foldzip_enabled = get(b:, 'foldzip_enabled', 0)
+                          \ ? <SID>foldzip_off()
+                          \ : <SID>foldzip_on()
+  endif
+endfunction " }}}
 function! ListPlus(switch) "{{{
     function! s:listplus_off()
         let s:cul  = &l:cursorline
@@ -775,8 +831,25 @@ endfunction "}}}
 function! LineMotion(dir) " {{{
   execute "normal! " . (v:count1 > 1 ? "m'" . v:count1 : "g") . a:dir
 endfunction " }}}
+function! UnIntelligent() "{{{
+  " remove smartquotes, em-dashes, en-dashes, and other
+  " 'fancy' typographical shit and replace them with pandoc-okay
+  " stuff.  Because this is VIM goddammit, and I have
+  " post-processors for that.
+  let s:gdef_save  = &gdefault
+  set nogdefault
+
+  normal!  mz
+  %sm/[‘’]/'/ge
+  %sm/[“”]/"/ge
+  %sm/—/---/ge
+  %sm/–/--/ge
+  normal! `z
+
+  let &gdefault = s:gdef_save
+endfunction "}}}
 " }}} ========================================================================
-" __AUTOCOMMANDS__ {{{ =======================================================
+" AUTOCOMMANDS {{{ =======================================================
 augroup MakesSense " {{{
   au!
   au FocusLost   * silent! wall
@@ -788,6 +861,7 @@ augroup END " }}}
 augroup WindowCmds " {{{
   au!
   au VimEnter,WinEnter,BufWinEnter * call <SID>RefreshStatus()
+  au VimEnter * call ToggleBG('time')
 
   au InsertEnter * call ListPlus('off')
   au InsertLeave * call ListPlus('on')
@@ -812,7 +886,7 @@ augroup END
 "   endif
 " endfunction " }}}
 " }}}
-" __FILETYPE__ {{{ -----------------------------------------------------------
+" FILETYPE {{{ -----------------------------------------------------------
 " TODO: add :set define,include
 augroup FT_help " {{{
   au!
@@ -821,9 +895,16 @@ augroup FT_help " {{{
         \ if &ft == 'help' && winwidth(0) >= 2 * g:tw
         \ |  wincmd L
         \ | endif
+  au FileType help call ListPlus('off')
   au FileType help nnoremap <buffer> <CR> <C-]>
   au FileType help nnoremap <buffer> <BS> <C-t>
-  au FileType help call ListPlus('off')
+  " au FileType help nnoremap <buffer> o /'\S\{2,\}'<CR>
+  " au FileType help nnoremap <buffer> O ?'\S\{2,\}'<CR>
+  " au FileType help nnoremap <buffer> s /|\S\+\|<CR>l
+  " au FileType help nnoremap <buffer> S ?|\S\+\|<CR>l
+  " au FileType help nnoremap <buffer> t /\*\S\+\*<CR>l
+  " au FileType help nnoremap <buffer> T ?\*\S\+\*<CR>l
+  au FileType help nnoremap <buffer> q :q<CR>
 augroup END " }}}
 augroup FT_text " {{{
   au!
@@ -853,9 +934,9 @@ augroup FT_vim " {{{
 augroup END " }}}
 " }}} ------------------------------------------------------------------------
 " }}} ========================================================================
-" __PLATFORM__ {{{ ===========================================================
-if has('win32') " {{{
-  set runtimepath+=$HOME\\.vim
+" PLATFORM {{{ ===========================================================
+if has('win32') || has('win64') " {{{
+  set runtimepath+=$HOME/.vim,$HOME/.vim/after
   set viminfo+=rA:,rB:
   augroup VimEnterWin
     au VimEnter * let &columns = 8 + g:tw + &fdc + &nu * &nuw
@@ -877,7 +958,7 @@ if exists("*mkdir")
   endfor
 endif " }}} ------------------------------------------------------------------
 " }}} ========================================================================
-" __PLUGINS__ {{{ ============================================================
+" PLUGINS {{{ ============================================================
 " Automatic vim-plug installation {{{
 if empty(glob('~/.vim/autoload/plug.vim'))
     silent !mkdir -p ~/.vim/autoload
@@ -885,9 +966,8 @@ if empty(glob('~/.vim/autoload/plug.vim'))
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     au VimEnter * PlugInstall
 endif " }}}
-call plug#begin('~/.vim/plugged')
+call plug#begin('~/.vim/plugged') " Vim-plug {{{
 " Colorschemes {{{ -----------------------------------------------------------
-Plug 'duckwork/gruvbox'
 " }}} ------------------------------------------------------------------------
 " Writing {{{ ----------------------------------------------------------------
 Plug 'junegunn/goyo.vim',
@@ -901,6 +981,17 @@ Plug 'junegunn/limelight.vim',
 Plug 'tpope/vim-capslock'
 Plug 'kana/vim-textobj-user'
 Plug 'reedes/vim-textobj-sentence'
+  augroup text_sentence
+    au!
+    au FileType pandoc,markdown call textobj#sentence#init()
+  augroup END
+Plug 'reedes/vim-textobj-quote'
+  augroup text_quote
+    au!
+    au FileType pandoc,markdown call textobj#quote#init({'educate': 0})
+  augroup END
+  map <silent> <leader>'c <Plug>ReplaceWithCurly
+  map <silent> <leader>'s <Plug>ReplaceWithStraight
 " }}} ------------------------------------------------------------------------
 " Coding {{{ -----------------------------------------------------------------
 Plug 'tpope/vim-commentary'
@@ -927,6 +1018,7 @@ Plug 'ctrlpvim/ctrlp.vim'
               \ 'dir': '\v[\/]\.(tmp|git|hg|svn)$',
               \ 'file': '\v\.(exe|so|dll|hi)$',
               \ }
+  let g:ctrlp_reuse_window = 'startify'
   nnoremap gf :CtrlP<CR>
   nnoremap go :CtrlPMRU<CR>
   nnoremap gb :CtrlPBuffer<CR>
@@ -956,15 +1048,33 @@ Plug 'dockyard/vim-easydir'
 Plug 'tpope/vim-vinegar'
 Plug 'vim-scripts/gitignore'
 Plug 'mhinz/vim-startify'
-  let g:startify_session_dir = '~/.vim/session'
-  let g:startify_bookmarks = [ g:myvimrc ]
-  let g:pad = repeat(' ', (&columns / 2) - 8)
+  let g:startify_session_dir = $HOME . '.vim/sessions'
+  let g:startify_bookmarks = [ g:myvimrc,
+                             \ ]
+  let g:startify_custom_indices = [ 'r',
+                                  \ '1', '2', '3', '4', '5',
+                                  \ '6', '7', '8', '9', '0',
+                                  \ 'f', 'g', 'h', 'd', 'a',
+                                  \ 'l', 'w', 'y', 'u', 'z',
+                                  \ 'x', 'c', 'n', 'm',    ]
+  let g:pad = repeat(' ', (&columns / 2) - 6)
   let g:startify_custom_header = [
-        \ g:pad . '    ________' .          '_',
-        \ g:pad . '   /        ' .          ' \  ',
-        \ g:pad . '-<(  ViM ' . v:version . '  )>-',
-        \ g:pad . '   \________' .          '_/',
-        \ ]
+                         \ g:pad . '┌─────────┐',
+                         \ g:pad . '│  BEGIN. │',
+                         \ g:pad . '└─────────┘',
+                         \ ]
+  let g:startify_list_order = [
+              \ ['█▒░ ❤ '], 'bookmarks',
+              \ ['█▒░ … '], 'files',
+              \ ['█▒░ ⌂ '], 'dir',
+              \ ['█▒░ ☼ '], 'sessions',
+              \ ]
+  let g:startify_skiplist = [
+              \ 'COMMIT_EDITMSG',
+              \ '.git',
+              \ 'plugged[\\/].*[\\/]doc',
+              \ substitute($VIM, '\\', '[\\\\/]', 'g') . '.*'
+              \ ]
 " }}} ------------------------------------------------------------------------
 " Extending Vim's behavior {{{ -----------------------------------------------
 " Search & Replace
@@ -972,6 +1082,21 @@ Plug 'nelstrom/vim-visual-star-search'
 Plug 'tpope/vim-abolish'
   nnoremap gS :%S/
   xnoremap gS :S/
+Plug 'haya14busa/incsearch.vim'
+  let g:incsearch#auto_nohlsearch = 1
+  let g:incsearch#consistent_n_direction = 1
+  let g:incsearch#do_not_save_error_message_history = 1
+  "let g:incsearch#magic = '\v'
+  let g:incsearch#separate_highlight = 1
+  map /  <Plug>(incsearch-forward)
+  map ?  <Plug>(incsearch-backward)
+  map g/ <Plug>(incsearch-stay)
+  map n  <Plug>(incsearch-nohl-n)
+  map N  <Plug>(incsearch-nohl-N)
+  map *  <Plug>(incsearch-nohl-*)
+  map #  <Plug>(incsearch-nohl-#)
+  map g* <Plug>(incsearch-nohl-g*)
+  map g# <Plug>(incsearch-nohl-g#)
 " Aligning text
 "Plug 'godlygeek/tabular'
 Plug 'junegunn/vim-easy-align'
@@ -995,6 +1120,7 @@ Plug 'tommcdo/vim-exchange'
 Plug 'rhysd/clever-f.vim'
   let g:clever_f_smart_case = 1
   let g:clever_f_chars_match_any_signs = ';'
+"Plug justinmk/vim-sneak'
 " Text objects
 Plug 'wellle/targets.vim'
 Plug 'michaeljsmith/vim-indent-object'
@@ -1005,8 +1131,15 @@ Plug 'tpope/vim-speeddating'
 Plug 'nixon/vim-vmath'
   vmap <expr> ++ VMATH_YankAndAnalyse()
   nmap        ++ vip++
+Plug 'ajh17/VimCompletesMe'
+  " augroup VimCompletesWriting
+  "   au!
+  "   au FileType pandoc,markdown,text,*wiki
+  "         \ let b:vcm_tab_complete = 'dict'
+  " augroup END
 " }}} ------------------------------------------------------------------------
 " Filetypes {{{ --------------------------------------------------------------
+" ------------- General
 "Plug 'scrooloose/syntastic'
 "  let g:syntastic_always_populate_loc_list = 1
 "  let g:syntastic_auto_loc_list = 1
@@ -1014,10 +1147,13 @@ Plug 'nixon/vim-vmath'
 "  let g:syntastic_check_on_wq = 0
 Plug 'vim-scripts/matchit.zip'
 Plug 'vim-scripts/SyntaxAttr.vim'
-
-Plug 'gregsexton/MatchTag',
-      \ { 'for': [ 'html', 'xml', ] }
-
+" ------------- HTML, CSS
+Plug 'othree/html5.vim'
+Plug 'gregsexton/MatchTag'
+Plug 'amirh/HTML-AutoCloseTag'
+Plug 'hail2u/vim-css3-syntax'
+Plug 'gorodinskiy/vim-coloresque'
+" ------------- Pandoc
 Plug 'vim-pandoc/vim-pandoc',
       \ { 'for': [ 'pandoc', 'markdown' ] }
   let g:pandoc#modules#disabled = [
@@ -1046,20 +1182,16 @@ Plug 'vim-pandoc/vim-pandoc-syntax'
 "       \ { 'for': [ 'pandoc', 'markdown' ] }
 Plug 'reedes/vim-litecorrect',
       \ { 'for': [ 'pandoc', 'markdown', 'text' ] }
-
-Plug 'duckwork/vim2hs'
-  let g:hpaste_author = 'duckwork'
-  let g:haskell_conceal_wide = 0
-  let g:haskell_conceal = 0
+" ------------- Haskell
 Plug 'Twinside/vim-hoogle'
 "Plug 'neovimhaskell/haskell-vim'
-
-Plug 'hail2u/vim-css3-syntax'
-Plug 'othree/html5.vim'
-Plug 'dogrover/vim-pentadactyl'
-
+if has('python')
+    Plug 'gilligan/vim-textobj-haskell'
+endif
+" ------------- Other
 "Plug 'freitass/todo.txt-vim'
 Plug 'LnL7/vim-nix'
+Plug 'dogrover/vim-pentadactyl'
 " }}} ------------------------------------------------------------------------
 " System integration {{{ -----------------------------------------------------
 if executable('git') " {{{
@@ -1099,7 +1231,14 @@ if executable('wmctrl') " {{{
   Plug 'gioele/vim-autoswap'
 endif " }}}
 " }}} ------------------------------------------------------------------------
-call plug#end()
+let g:plug_url_format = 'https://github.com/%s.git' " Plugins I've forked {{{
+  Plug 'duckwork/gruvbox'
+  Plug 'duckwork/vim2hs'
+    let g:hpaste_author = 'duckwork'
+    let g:haskell_conceal_wide = 0
+    let g:haskell_conceal = 0
+unlet g:plug_url_format " }}}
+call plug#end() " }}}
 " Functions for plugins {{{ --------------------------------------------------
 function! CtrlPStatusLine(...) " {{{
     " arguments: focus, byfname, s:regexp, prv, item, nxt, marked
