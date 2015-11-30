@@ -26,12 +26,13 @@ set lazyredraw
 set linebreak
 set list
 set listchars=tab:..,trail:_,extends:>,precedes:<,nbsp:~
-"set wrap
-set display=lastline
-set scrolloff=8
+set wrap
 set sidescroll=1
 set sidescrolloff=1
-let &synmaxcol = g:tw + 1
+set display=lastline
+set scrolloff=8
+let &synmaxcol = g:tw + 3
+let &colorcolumn = g:tw + 1
 " ----------------------- Spelling options
 set spelllang=en_us
 let &spellfile = g:spelldir . "en.utf-8.add"
@@ -132,6 +133,7 @@ function! s:fixLineEndings()
 endfunction
 
 " Toggle settings
+nnoremap <silent> <Leader>bg :let &bg = &bg == 'dark' ? 'light' : 'dark'<CR>
 nnoremap <silent> <Leader>nr :set number!<CR>
 nnoremap <silent> <Leader>/ :nohlsearch<CR>
 nnoremap <silent> <Leader>rs :call <SID>removeEOLSpaces()<CR>
