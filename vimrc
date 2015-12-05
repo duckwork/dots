@@ -172,28 +172,14 @@ nnoremap <C-l> <C-w>l
 " Formatting
 nnoremap Q gqip
 vnoremap Q gq
-nnoremap <silent> <Leader>Q :call LeBron("gggqG")<CR>
-nnoremap <silent> <Leader>gu :call <SID>fixLineEndings()<CR>
-function! s:fixLineEndings()
-  update
-  edit ++ff=dos
-  setlocal ff=unix
-  write
-endfunction
+nnoremap <silent> <Leader>Q :call util#keepjumps("gggqG")<CR>
+nnoremap <silent> <Leader>gu :call util#fixLineEndings()<CR>
 
 " Toggle settings
 nnoremap <silent> <Leader>bg :let &bg = &bg == 'dark' ? 'light' : 'dark'<CR>
 nnoremap <silent> <Leader>nr :set number!<CR>
 nnoremap <silent> <Leader>/ :nohlsearch<CR>
-nnoremap <silent> <Leader>rs :call <SID>removeEOLSpaces()<CR>
-function! s:removeEOLSpaces()
-  let winview = winsaveview()
-  let prevsearch = @/
-  keepjumps silent! %s/\v\s+$//
-  let @/ = prevsearch
-  unlet prevsearch
-  call winrestview(winview)
-endfunction
+nnoremap <silent> <Leader>rs :call util#removeEOLSpaces()<CR>
 
 " Commands
 nnoremap <F1> K
@@ -214,24 +200,9 @@ augroup WindowCmds
   au BufReadPost * normal! `"
   au BufWinLeave * silent! mkview
   au BufWinEnter * silent! loadview
-  au BufReadPost * call <SID>updateModifiable()
+  au BufReadPost * call util#updateModifiable()
   au VimEnter,WinEnter,BufWinEnter * call <SID>updateStatus()
 augroup END
-function! s:updateModifiable()
-  if !exists("b:setmodifiable")
-    let b:setmodifiable = 0
-  endif
-  if &readonly
-    if &modifiable
-      setlocal nomodifiable
-      let b:setmodifiable = 1
-    endif
-  else
-    if b:setmodifiable
-      setlocal modifiable
-    endif
-  endif
-endfunction
 function! s:updateStatus()
   let &l:statusline = substitute(join(g:stl.left) .
                     \ ' %= ' . join(g:stl.plug) .
@@ -251,7 +222,7 @@ augroup ft_Text
   au BufNewFile,BufRead *.m.*d.*    setf markdown
   au FileType markdown,pandoc call TextMode()
   au FileType markdown,pandoc
-        \nnoremap <buffer> <Leader>" :call <SID>unintelligent()<CR>
+        \nnoremap <buffer> <Leader>" :call util#unintelligent()<CR>
 augroup END
 function! TextMode()
   setlocal spell spelllang=en_us
@@ -265,20 +236,6 @@ function! TextMode()
     set formatprg=par
   endif
   let b:istext = 1
-endfunction
-function! s:unintelligent()
-  let gdef_save  = &gdefault
-  set nogdefault
-  let oldsearch = @/
-  let winview = winsaveview()
-  keepjumps %sm/[‘’]/'/ge
-  keepjumps %sm/[“”]/"/ge
-  keepjumps %sm/—/---/ge
-  keepjumps %sm/–/--/ge
-  call winrestview(winview)
-  let &gdefault = gdef_save
-  let @/ = oldsearch
-  unlet gdef_save oldsearch
 endfunction
 
 augroup ft_Help
@@ -315,11 +272,6 @@ if exists("*mkdir")
 endif
 
 " ----------------------- Functions
-function! LeBron(command) " keep jumps! LOLOLOL
-  let winview = winsaveview()
-  exe "keepjumps normal!" a:command
-  call winrestview(winview)
-endfunction
 function! WordCount()
   if !exists('b:istext')
     return ''
@@ -436,7 +388,7 @@ nnoremap <silent> <F3> :call SyntaxAttr()<CR>
 "Unite
 let g:unite_source_history_yank_enable = 1
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
-call unite#custom#profile('default', 'context', { 
+call unite#custom#profile('default', 'context', {
       \ 'start_insert': 1,
       \ 'winheight': 10,
       \ 'direction': 'dynamictop',
