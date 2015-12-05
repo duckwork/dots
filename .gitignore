@@ -1,8 +1,9 @@
+# GITIGNORE -- dots
+
 tmp/
 *.tmp
 *.bak
 *.swp
-
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
@@ -14,6 +15,14 @@ $RECYCLE.BIN/
 Session.vim
 .netrwhist
 *~
+# Unneeded .vim dirs (TODO: find a better f*ing rule)
+.vim/backup
+.vim/cache
+.vim/plugged
+.vim/swap
+.vim/undo
+.vim/view
+.vim/autoload/plug.*
 
 # Haskell
 *.errors
