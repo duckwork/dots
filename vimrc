@@ -34,10 +34,9 @@ set sidescroll=1
 set sidescrolloff=1
 set display=lastline
 set scrolloff=8
-let &synmaxcol = g:tw + 3
+let &synmaxcol = g:tw + 2
 let &colorcolumn = g:tw + 1
-set laststatus=2
-set showtabline=2
+set laststatus=2 showtabline=2
 set tabline=%!Tabline()
 function! Tabline()
   let t = ''
@@ -142,7 +141,7 @@ if has('gui_running')
   set winaltkeys=no
   augroup VimEnterGUI
     au!
-    au VimEnter * let &columns = g:tw + &fdc + &nu * &nuw
+    au VimEnter * let &columns = g:tw + &fdc + &nu * &nuw + 1
   augroup END
 endif
 
@@ -300,7 +299,7 @@ function! UniqueFT()
   if &ft =~? expand('%:e')
     return ''
   else
-    return '['.&ft.']'
+    return ': '.&ft
   endif
 endfunction
 
@@ -314,13 +313,15 @@ Plug 'dockyard/vim-easydir'
 Plug 'habamax/vim-skipit'
 Plug 'haya14busa/incsearch.vim'      " IncSearch
 Plug 'junegunn/goyo.vim'             " Goyo
-Plug 'junegunn/vim-easy-align'       " EasyAlign
+" Plug 'junegunn/vim-easy-align'       " EasyAlign
+Plug 'tommcdo/vim-lion'
 Plug 'kopischke/unite-spell-suggest'
-Plug 'reedes/vim-litecorect', { 'for': [ 'pandoc', 'markdown', 'text' ] }
+Plug 'reedes/vim-litecorrect', { 'for': [ 'pandoc', 'markdown', 'text' ] }
 Plug 'shinokada/dragvisuals.vim'     " DragVisuals
 Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-capslock'
+Plug 'bronson/vim-visual-star-search'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-repeat'
@@ -348,7 +349,8 @@ endif
 
 let g:plug_url_format = 'https://github.com/%s.git' " My plugins go here
 Plug 'duckwork/minimal'
-Plug '~/thatoldlook'
+Plug 'duckwork/quick-scope', {'branch': 'patch-1'}
+Plug 'duckwork/vim-thatoldlook'
 call plug#end()
 
 " ----------------------- Plugin options
@@ -371,9 +373,9 @@ map #  <Plug>(incsearch-nohl-#)
 map g* <Plug>(incsearch-nohl-g*)
 map g# <Plug>(incsearch-nohl-g#)
 "EasyAlign
-xnoremap \| :EasyAlign //<Left>
-vmap <Enter> <Plug>(EasyAlign)
-nmap <Leader>a <Plug>(EasyAlign)
+" xnoremap \| :EasyAlign //<Left>
+" vmap <Enter> <Plug>(EasyAlign)
+" nmap <Leader>a <Plug>(EasyAlign)
 "DragVisuals
 vmap <expr> <LEFT>  DVB_Drag('left')
 vmap <expr> <RIGHT> DVB_Drag('right')
@@ -383,6 +385,8 @@ vmap <expr> D       DVB_Duplicate()
 let g:DVB_TrimeWS = 1
 "PandocSyntax
 let g:pandoc#syntax#conceal#use = 0
+"QuickScope
+let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
 "SyntaxAttr
 nnoremap <silent> <F3> :call SyntaxAttr()<CR>
 "Unite
@@ -390,8 +394,8 @@ let g:unite_source_history_yank_enable = 1
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
 call unite#custom#profile('default', 'context', {
       \ 'start_insert': 1,
-      \ 'winheight': 10,
-      \ 'direction': 'dynamictop',
+      \ 'winheight'   : 10,
+      \ 'direction'   : 'dynamictop',
       \ })
 nnoremap <silent> - :<C-u>call <SID>uniteExplore()<CR>
 function! s:uniteExplore()
@@ -406,6 +410,16 @@ nnoremap <C-p> :<C-u>Unite history/yank<CR>
 nnoremap <C-Space> :<C-u>Unite buffer neomru/file file<CR>
 nnoremap z= :<C-u>Unite spell_suggest<CR>
 hi! link uniteCandidateSourceName Comment
+
+augroup PluginAutocmds
+  au!
+  au VimEnter * call <SID>exploreEmptyVim()
+augroup END
+function! s:exploreEmptyVim()
+  if bufname("") == "" && bufnr("$") == 1
+    Unite neomru/file file
+  endif
+endfunction
 
 " ----------------------- Theming
 colorscheme thatoldlook
