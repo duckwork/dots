@@ -35,7 +35,6 @@ set sidescrolloff=1
 set display=lastline
 set scrolloff=8
 let &synmaxcol = g:tw + 2
-let &colorcolumn = g:tw + 1
 set laststatus=2 showtabline=2
 set tabline=%!Tabline()
 function! Tabline()
@@ -201,6 +200,8 @@ augroup WindowCmds
   au BufWinEnter * silent! loadview
   au BufReadPost * call util#updateModifiable()
   au VimEnter,WinEnter,BufWinEnter * call <SID>updateStatus()
+  au WinEnter * setlocal rnu cul
+  au WinLeave * setlocal nornu nocul
 augroup END
 function! s:updateStatus()
   let &l:statusline = substitute(join(g:stl.left) .
@@ -210,8 +211,8 @@ endfunction
 
 augroup ModeCmds
   au!
-  au InsertEnter * set nornu
-  au InsertLeave * set rnu
+  au InsertEnter * set nornu | let &cc = g:tw + 1
+  au InsertLeave * set rnu cc=
 augroup END
 
 augroup ft_Text
@@ -417,7 +418,7 @@ augroup PluginAutocmds
 augroup END
 function! s:exploreEmptyVim()
   if bufname("") == "" && bufnr("$") == 1
-    Unite neomru/file file
+    Unite -no-split neomru/file file
   endif
 endfunction
 
