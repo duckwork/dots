@@ -6,9 +6,11 @@ if filereadable(glob("~/dots/vimrc"))
 else
   let g:myvimrc = $MYVIMRC
 endif
-let g:tw       = 78
-let g:is_bash  = 1
-let g:spelldir = glob("~/.vim/spell")
+let g:tw        = 78
+let g:stl       = {}
+let g:stl.plug  = []
+let g:is_bash   = 1
+let g:spelldir  = glob("~/.vim/spell")
 
 " ----------------------- Important options
 set nocompatible
@@ -23,7 +25,8 @@ set wrapscan
 set ruler
 set breakindent
 set lazyredraw
-set linebreak
+set linebreak showbreak=\\
+set linespace=2
 set list
 set listchars=tab:..,trail:_,extends:>,precedes:<,nbsp:~
 set wrap
@@ -33,6 +36,46 @@ set display=lastline
 set scrolloff=8
 let &synmaxcol = g:tw + 3
 let &colorcolumn = g:tw + 1
+set laststatus=2
+set showtabline=2
+set tabline=%!Tabline()
+function! Tabline()
+  let t = ''
+  let nt = tabpagenr('$')
+  if nt == 1
+    return ''
+  endif
+  for i in range(nt)
+    if i + 1 == tabpagenr()
+      let t .= '%#TabLineSel#'
+    else
+      let t .= '%#TabLine#'
+    endif
+    let t .= ' %' . (i + 1) . 'T'
+    let t .= '%{Tablabel(' . (i + 1) . ')}'
+  endfor
+  if nt <= 1
+    let t .= '%#TabLineFill#%T'
+  else
+    let t .= '%#TabLine#%T'
+    let t .= '%=%999X-'
+  endif
+  return t
+endfunction
+function! Tablabel(n)
+  let buflist = tabpagebuflist(a:n)
+  let winnr = tabpagewinnr(a:n)
+  let tabwins = tabpagewinnr(a:n, '$')
+  let fname = fnamemodify(bufname(buflist[winnr - 1]), ':t')
+  if fname == ''
+    let fname = '--'
+  endif
+  if tabwins > 1
+    return '[ ' . fname . ' (' . winnr . '/' . tabwins . ')' . ' ] '
+  else
+    return '[ ' . fname . ' ] '
+  endif
+endfunction
 " ----------------------- Spelling options
 set spelllang=en_us
 let &spellfile = g:spelldir . "en.utf-8.add"
@@ -42,7 +85,7 @@ set noerrorbells visualbell
 set showcmd
 set helplang=en
 set report=5
-set shortmess=aIoOtT
+set shortmess=aoOstTWI
 "set verbose=0 verbosefile=~/.vim/log.txt
 " ----------------------- Command line options
 set wildmenu wildignorecase wildmode=full
@@ -53,8 +96,6 @@ set switchbuf=useopen
 set splitbelow splitright
 set equalalways eadirection=both
 set winheight=20 winminheight=2 winminwidth=2
-set laststatus=1
-set statusline=\ %f\ %y\ %m%=%3l:%02v\ %2p%%
 " ----------------------- Editing options
 set backspace=indent,eol,start
 set whichwrap=b,s,<,>,[,]
@@ -79,14 +120,21 @@ set viminfo=!,'100,<50,s10,h
 " ----------------------- OS options
 if has('win32') || has('win64')
   set runtimepath+=$HOME\\.vim
+  set shellslash
   set viminfo+=rA:,rB:
+  augroup WinOpts
+    au! VimEnter *
+          \ if getcwd() =~? "C:[\\/]WINDOWS[\\/]System32" && bufname("") == ""
+          \ |  cd ~
+          \ | endif
+  augroup END
 endif
 " ----------------------- GUI options
 if has('gui_running')
   if has('gui_gtk2')
     set guifont=Source\ Code\ Pro\ 9
   elseif has('gui_win32')
-    set guifont=InputMonoCondensed:h9:cANSI
+    set guifont=Courier_Prime_Source:h9:cANSI
   elseif has('x11')
     set guifont=*-terminus-*-*-*-*-12-*-*-*-*-*-*-*
   endif
@@ -103,8 +151,11 @@ set timeoutlen=1000
 let mapleader = ','
 let maplocalleader = ','
 noremap ; :
+noremap : ;
 
 " Basic movement
+nnoremap <expr> j v:count ? 'j' : 'gj'
+nnoremap <expr> k v:count ? 'k' : 'gk'
 nnoremap H ^
 nnoremap L g_
 
@@ -118,12 +169,10 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
-nnoremap <silent> - :Explore<CR>
-
 " Formatting
 nnoremap Q gqip
 vnoremap Q gq
-nnoremap <Leader>Q m]gggqG`]
+nnoremap <silent> <Leader>Q :call LeBron("gggqG")<CR>
 nnoremap <silent> <Leader>gu :call <SID>fixLineEndings()<CR>
 function! s:fixLineEndings()
   update
@@ -138,13 +187,16 @@ nnoremap <silent> <Leader>nr :set number!<CR>
 nnoremap <silent> <Leader>/ :nohlsearch<CR>
 nnoremap <silent> <Leader>rs :call <SID>removeEOLSpaces()<CR>
 function! s:removeEOLSpaces()
-  normal! m]
+  let winview = winsaveview()
   let prevsearch = @/
-  silent! %s/\v\s+$//
+  keepjumps silent! %s/\v\s+$//
   let @/ = prevsearch
   unlet prevsearch
-  normal! `]
+  call winrestview(winview)
 endfunction
+
+" Commands
+nnoremap <F1> K
 
 " ----------------------- Mouse
 if has('mouse')
@@ -152,7 +204,7 @@ if has('mouse')
   set mousemodel=popup
 endif
 
-" ----------------------- Autocommands
+" ----------------------- Autocmds
 augroup WindowCmds
   au!
   au FocusLost   * silent! wall
@@ -162,6 +214,34 @@ augroup WindowCmds
   au BufReadPost * normal! `"
   au BufWinLeave * silent! mkview
   au BufWinEnter * silent! loadview
+  au BufReadPost * call <SID>updateModifiable()
+  au VimEnter,WinEnter,BufWinEnter * call <SID>updateStatus()
+augroup END
+function! s:updateModifiable()
+  if !exists("b:setmodifiable")
+    let b:setmodifiable = 0
+  endif
+  if &readonly
+    if &modifiable
+      setlocal nomodifiable
+      let b:setmodifiable = 1
+    endif
+  else
+    if b:setmodifiable
+      setlocal modifiable
+    endif
+  endif
+endfunction
+function! s:updateStatus()
+  let &l:statusline = substitute(join(g:stl.left) .
+                    \ ' %= ' . join(g:stl.plug) .
+                    \ ' ' . join(g:stl.right) . ' ', '\s\+', ' ', 'g')
+endfunction
+
+augroup ModeCmds
+  au!
+  au InsertEnter * set nornu
+  au InsertLeave * set rnu
 augroup END
 
 augroup ft_Text
@@ -169,37 +249,33 @@ augroup ft_Text
   au BufNewFile,BufRead *.txt
         \ if &ft != 'help' | setf pandoc | endif
   au BufNewFile,BufRead *.m.*d.*    setf markdown
-  au FileType *wiki,markdown,pandoc setlocal spell
-  au FileType *wiki,markdown,pandoc setlocal shiftwidth=4 softtabstop=4
-  au FileType *wiki,markdown,pandoc setlocal cpoptions+=J
-  au FileType *wiki,markdown,pandoc setlocal stl+=\ (%{WordCount()}w)
-  au FileType *wiki,markdown,pandoc
+  au FileType markdown,pandoc call TextMode()
+  au FileType markdown,pandoc
         \nnoremap <buffer> <Leader>" :call <SID>unintelligent()<CR>
 augroup END
-function! WordCount()
-  let oldstat = v:statusmsg
-  let position = getpos('.')
-  exe ":silent normal g\<c-g>"
-  let status = v:statusmsg
-  let wordcount = ''
-  if status != '--No lines in buffer--' && mode() !~? '[v]'
-    let wordcount = str2nr(split(status)[11])
+function! TextMode()
+  setlocal spell spelllang=en_us
+  setlocal shiftwidth=4 softtabstop=4
+  setlocal cpoptions+=J
+  setlocal formatoptions=tnroqaw
+  setlocal formatlistpat =^\\s*\\([*+-]\\\|\\((*\\d\\+[.)]\\+\\)
+  setlocal formatlistpat+=\\\|\\((*\\l[.)]\\+\\)\\)\\s\\+
+  exec "setlocal textwidth=".g:tw
+  if executable("par")
+    set formatprg=par
   endif
-  let statusmsg = oldstat
-  call setpos('.', position)
-  unlet oldstat position status
-  return wordcount
+  let b:istext = 1
 endfunction
 function! s:unintelligent()
   let gdef_save  = &gdefault
   set nogdefault
   let oldsearch = @/
-  normal!  m]
-  %sm/[‘’]/'/ge
-  %sm/[“”]/"/ge
-  %sm/—/---/ge
-  %sm/–/--/ge
-  normal! `]
+  let winview = winsaveview()
+  keepjumps %sm/[‘’]/'/ge
+  keepjumps %sm/[“”]/"/ge
+  keepjumps %sm/—/---/ge
+  keepjumps %sm/–/--/ge
+  call winrestview(winview)
   let &gdefault = gdef_save
   let @/ = oldsearch
   unlet gdef_save oldsearch
@@ -211,11 +287,16 @@ augroup ft_Help
   au FileType help nnoremap <buffer> <CR> <C-]>
   au FileType help nnoremap <buffer> <BS> <C-t>
   au FileType help nnoremap <buffer> q    :q<CR>
+  au BufWinEnter *.txt
+        \ if &ft == 'help' && winwidth(0) >= 2 * g:tw
+        \|  wincmd L
+        \| endif
 augroup END
 
-augroup MinimalScheme
+augroup MyColorSchcmes
   au!
   au BufWritePost minimal.vim colorscheme minimal
+  au BufWritePost thatoldlook.vim colorscheme thatoldlook
 augroup END
 
 " ----------------------- Cleaning up
@@ -233,18 +314,60 @@ if exists("*mkdir")
   endfor
 endif
 
+" ----------------------- Functions
+function! LeBron(command) " keep jumps! LOLOLOL
+  let winview = winsaveview()
+  exe "keepjumps normal!" a:command
+  call winrestview(winview)
+endfunction
+function! WordCount()
+  if !exists('b:istext')
+    return ''
+  endif
+  let oldstat = v:statusmsg
+  let position = getpos('.')
+  exe ":silent normal g\<c-g>"
+  let status = v:statusmsg
+  let wordcount = ''
+  if status != '--No lines in buffer--'
+    let st = split(substitute(status, ';', '', 'g'))
+    if mode() !~? '[v]'
+      let wordcount = st[11]
+    else
+      let wordcount = st[7] . '(' . st[5] . ')'
+    endif
+  endif
+  let statusmsg = oldstat
+  call setpos('.', position)
+  unlet oldstat position status
+  return '[' . wordcount . 'w]'
+endfunction
+call add(g:stl.plug, '%{WordCount()}')
+
+function! UniqueFT()
+  if &ft =~? expand('%:e')
+    return ''
+  else
+    return '['.&ft.']'
+  endif
+endfunction
+
 " ----------------------- Plugins
 call plug#begin('~/.vim/plugged') " Third-party plugins go here
-Plug 'dockyard/vim-easydir'
-Plug 'habamax/vim-skipit'
-Plug 'haya14busa/incsearch.vim' "IncSearch
-Plug 'junegunn/vim-easy-align' "EasyAlign
-Plug 'reedes/vim-litecorect', { 'for': [ 'pandoc', 'markdown', 'text' ] }
-Plug 'Shougo/Unite.vim' "Unite
+
+Plug 'Shougo/Unite.vim'              " Unite
 Plug 'Shougo/neomru.vim'
 Plug 'Shougo/neoyank.vim'
-Plug 'shinokada/dragvisuals.vim' "DragVisuals
+Plug 'dockyard/vim-easydir'
+Plug 'habamax/vim-skipit'
+Plug 'haya14busa/incsearch.vim'      " IncSearch
+Plug 'junegunn/goyo.vim'             " Goyo
+Plug 'junegunn/vim-easy-align'       " EasyAlign
+Plug 'kopischke/unite-spell-suggest'
+Plug 'reedes/vim-litecorect', { 'for': [ 'pandoc', 'markdown', 'text' ] }
+Plug 'shinokada/dragvisuals.vim'     " DragVisuals
 Plug 'tommcdo/vim-exchange'
+Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-capslock'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-endwise'
@@ -252,20 +375,35 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-vinegar'
-Plug 'vim-pandoc/vim-pandoc-syntax' "PandocSyntax
-Plug 'vim-scripts/SyntaxAttr.vim' "SyntaxAttr
+Plug 'vim-pandoc/vim-pandoc-syntax'  " PandocSyntax
+Plug 'vim-scripts/SyntaxAttr.vim'    " SyntaxAttr
 Plug 'vim-scripts/gitignore'
 Plug 'vim-scripts/matchit.zip'
+
 if has('win32') || has('win64')
   Plug 'kkoenig/wimproved.vim'
-  autocmd GUIEnter * silent! WToggleClean
-  nnoremap <F11> :WToggleFullscreen<CR>
+  au GUIEnter * silent! WToggleClean
+  nnoremap <F11> :WToggleFullscreen<CR>:Goyo<CR>
 endif
+if executable('git')
+  Plug 'esneider/YUNOcommit.vim'
+    let g:YUNOcommit_after = 15
+  Plug 'tpope/vim-fugitive'
+    nnoremap <Leader>gst :w<CR>:Gstatus<CR>
+    call add(g:stl.plug, '%{fugitive#statusline()}')
+  Plug 'tpope/vim-git'
+endif
+
 let g:plug_url_format = 'https://github.com/%s.git' " My plugins go here
 Plug 'duckwork/minimal'
+Plug '~/thatoldlook'
 call plug#end()
 
 " ----------------------- Plugin options
+"Goyo
+let g:goyo_width = g:tw + 1
+let g:goyo_margin_top = 3
+let g:goyo_margin_bottom = g:goyo_margin_top
 "IncSearch
 let g:incsearch#auto_nohlsearch = 1
 let g:incsearch#consistent_n_direction = 1
@@ -283,7 +421,7 @@ map g# <Plug>(incsearch-nohl-g#)
 "EasyAlign
 xnoremap \| :EasyAlign //<Left>
 vmap <Enter> <Plug>(EasyAlign)
-nmap ga <Plug>(EasyAlign)
+nmap <Leader>a <Plug>(EasyAlign)
 "DragVisuals
 vmap <expr> <LEFT>  DVB_Drag('left')
 vmap <expr> <RIGHT> DVB_Drag('right')
@@ -301,12 +439,31 @@ call unite#filters#matcher_default#use(['matcher_fuzzy'])
 call unite#custom#profile('default', 'context', { 
       \ 'start_insert': 1,
       \ 'winheight': 10,
-      \ 'direction': 'botright',
+      \ 'direction': 'dynamictop',
       \ })
-nnoremap go :<C-u>Unite -start-insert neomru/file<CR>
-nnoremap gy :<C-u>Unite history/yank<CR>
-nnoremap <C-Space> :<C-u>Unite buffer neomru/file file history/yank<CR>
+nnoremap <silent> - :<C-u>call <SID>uniteExplore()<CR>
+function! s:uniteExplore()
+  let oldsearch = @/
+  UniteWithBufferDir -no-split -no-start-insert file
+  silent! exe "normal! /\<C-r>#\r0"
+  nohlsearch
+  let @/ = oldsearch
+  unlet oldsearch
+endfunction
+nnoremap <C-p> :<C-u>Unite history/yank<CR>
+nnoremap <C-Space> :<C-u>Unite buffer neomru/file file<CR>
+nnoremap z= :<C-u>Unite spell_suggest<CR>
+hi! link uniteCandidateSourceName Comment
 
 " ----------------------- Theming
-colorscheme minimal
-set number cursorline
+colorscheme thatoldlook
+set number relativenumber cursorline
+" Statusline
+let g:stl.left = [
+      \ "%2n%{mode()}",
+      \ "%f", "%{UniqueFT()} %M",
+      \ ]
+let g:stl.right = [
+      \ "%l:%c%V",
+      \ "%P",
+      \ ]
