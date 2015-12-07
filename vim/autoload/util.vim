@@ -52,3 +52,21 @@ function! util#keepjumps(command) " keep jumps! LOLOLOL
   exe "keepjumps normal!" a:command
   call winrestview(winview)
 endfunction
+
+function! util#notHelp(cmd)
+  if (&ft !=? 'help' && glob('%') !~? 'doc') && (&ft != 'unite')
+    exe a:cmd
+  endif
+endfunction
+
+function! util#try(cmd, def)
+  if exists(':' . a:cmd) && !v:count
+    let tick = b:changedtick
+    exe a:cmd
+    if tick == b:changedtick
+      exe 'normal! ' . a:default
+    endif
+  else
+    exe 'normal! ' . v:count
+  endif
+endfunction

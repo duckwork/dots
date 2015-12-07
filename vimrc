@@ -62,16 +62,17 @@ function! Tabline()
 endfunction
 function! Tablabel(n)
   let buflist = tabpagebuflist(a:n)
+  let tabnr = a:n
   let winnr = tabpagewinnr(a:n)
   let tabwins = tabpagewinnr(a:n, '$')
   let fname = fnamemodify(bufname(buflist[winnr - 1]), ':t')
   if fname == ''
-    let fname = '--'
+    let fname = '__'
   endif
   if tabwins > 1
-    return '[ ' . fname . ' (' . winnr . '/' . tabwins . ')' . ' ] '
+    return tabnr.': '.fname.' ('.winnr.'/'.tabwins.')'.' '
   else
-    return '[ ' . fname . ' ] '
+    return tabnr.': '.fname.' '
   endif
 endfunction
 " ----------------------- Spelling options
@@ -161,6 +162,9 @@ nnoremap L g_
 nnoremap Y y$
 nnoremap K i<CR><Esc>d^kg_lD
 
+" Buffers
+nnoremap <BS> :b#<CR>
+
 " Windows
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
@@ -192,15 +196,13 @@ endif
 augroup WindowCmds
   au!
   au FocusLost   * silent! wall
-  au BufEnter    * if &ft != 'help'
-                \|   silent! lcd %:p:h
-                \| endif
+  au BufEnter    * call util#notHelp('silent! lcd %:p:h')
   au BufReadPost * normal! `"
   au BufWinLeave * silent! mkview
   au BufWinEnter * silent! loadview
   au BufReadPost * call util#updateModifiable()
   au VimEnter,WinEnter,BufWinEnter * call <SID>updateStatus()
-  au WinEnter * setlocal rnu cul
+  au WinEnter * call util#notHelp('setlocal rnu cul')
   au WinLeave * setlocal nornu nocul
 augroup END
 function! s:updateStatus()
@@ -212,13 +214,12 @@ endfunction
 augroup ModeCmds
   au!
   au InsertEnter * set nornu | let &cc = g:tw + 1
-  au InsertLeave * set rnu cc=
+  au InsertLeave * call util#notHelp('set rnu cc=')
 augroup END
 
 augroup ft_Text
   au!
-  au BufNewFile,BufRead *.txt
-        \ if &ft != 'help' | setf pandoc | endif
+  au BufNewFile,BufRead *.txt call util#notHelp('setf pandoc')
   au BufNewFile,BufRead *.m.*d.*    setf markdown
   au FileType markdown,pandoc call TextMode()
   au FileType markdown,pandoc
@@ -250,7 +251,7 @@ augroup ft_Help
         \| endif
 augroup END
 
-augroup MyColorSchcmes
+augroup MyColorSchemes
   au!
   au BufWritePost minimal.vim colorscheme minimal
   au BufWritePost thatoldlook.vim colorscheme thatoldlook
@@ -297,7 +298,7 @@ endfunction
 call add(g:stl.plug, '%{WordCount()}')
 
 function! UniqueFT()
-  if &ft =~? expand('%:e')
+  if &ft =~? join(split(expand('%:e'), '\zs'), '.*')
     return ''
   else
     return ': '.&ft
@@ -305,24 +306,25 @@ function! UniqueFT()
 endfunction
 
 " ----------------------- Plugins
-call plug#begin('~/.vim/plugged') " Third-party plugins go here
+call plug#begin('~/.vim/plugged')
 
 Plug 'Shougo/Unite.vim'              " Unite
 Plug 'Shougo/neomru.vim'
 Plug 'Shougo/neoyank.vim'
+Plug 'bronson/vim-visual-star-search'
 Plug 'dockyard/vim-easydir'
 Plug 'habamax/vim-skipit'
 Plug 'haya14busa/incsearch.vim'      " IncSearch
 Plug 'junegunn/goyo.vim'             " Goyo
-" Plug 'junegunn/vim-easy-align'       " EasyAlign
-Plug 'tommcdo/vim-lion'
+Plug 'junegunn/limelight.vim'
 Plug 'kopischke/unite-spell-suggest'
+Plug 'mbbill/undotree'               " Undotree
 Plug 'reedes/vim-litecorrect', { 'for': [ 'pandoc', 'markdown', 'text' ] }
 Plug 'shinokada/dragvisuals.vim'     " DragVisuals
 Plug 'tommcdo/vim-exchange'
+Plug 'tommcdo/vim-lion'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-capslock'
-Plug 'bronson/vim-visual-star-search'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-repeat'
@@ -390,6 +392,8 @@ let g:pandoc#syntax#conceal#use = 0
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
 "SyntaxAttr
 nnoremap <silent> <F3> :call SyntaxAttr()<CR>
+"Undotree
+nnoremap <F5> :UndotreeToggle<CR>
 "Unite
 let g:unite_source_history_yank_enable = 1
 call unite#filters#matcher_default#use(['matcher_fuzzy'])
@@ -409,12 +413,14 @@ function! s:uniteExplore()
 endfunction
 nnoremap <C-p> :<C-u>Unite history/yank<CR>
 nnoremap <C-Space> :<C-u>Unite buffer neomru/file file<CR>
-nnoremap z= :<C-u>Unite spell_suggest<CR>
+nnoremap z= :<C-u>Unite -no-start-insert spell_suggest<CR>
 hi! link uniteCandidateSourceName Comment
 
 augroup PluginAutocmds
   au!
   au VimEnter * call <SID>exploreEmptyVim()
+  au User GoyoEnter Limelight | set nonu nornu
+  au User GoyoLeave Limelight! | set nu rnu
 augroup END
 function! s:exploreEmptyVim()
   if bufname("") == "" && bufnr("$") == 1
