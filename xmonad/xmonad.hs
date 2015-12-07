@@ -54,7 +54,7 @@ import qualified XMonad.StackSet as W
 -- {{{ Theming
 -- Apprentice colorscheme: https://github.com/romainl/Apprentice
 myCS   = apprentice
-myFont = "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*"
+myFont = "xft:"
 -- }}}
 -- TODO: use `env <- M.fromList `fmap` getEnvironment` for env vars
 myTerm     = "termite"
