@@ -1,6 +1,6 @@
 -- Imports {{{
 import Colorschemes
-import Colorschemes.Apprentice
+import Colorschemes.ThatOldLook
 import Control.Monad (liftM2)
 import Data.Char
 import Data.List
@@ -53,8 +53,9 @@ import qualified XMonad.StackSet as W
 -- {{{ Defaults
 -- {{{ Theming
 -- Apprentice colorscheme: https://github.com/romainl/Apprentice
-myCS   = apprentice
-myFont = "xft:"
+myCS   = thatOldLook
+-- myFont = "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*"
+myFont = "xft:Source Code Pro-10"
 -- }}}
 -- TODO: use `env <- M.fromList `fmap` getEnvironment` for env vars
 myTerm     = "termite"
@@ -157,12 +158,12 @@ myLogHook h = do -- {{{ ( & dynamicLogWithPP config
         | otherwise     = take n xs
       myTitleLength = 20
    in dynamicLogWithPP defaultPP
-        { ppCurrent         = xmobarColor (red' myCS) ""
+        { ppCurrent         = xmobarColor (yellow myCS) ""
                              . map toUpper
         , ppHidden          = checkCopy
-        , ppHiddenNoWindows = xmobarColor (black' myCS) ""
+        , ppHiddenNoWindows = xmobarColor (bg myCS) ""
         , ppUrgent          = xmobarColor (white myCS) (red' myCS)
-        , ppSep             = xmobarColor (black' myCS) "" " // "
+        , ppSep             = xmobarColor (fg myCS) "" " // "
         , ppWsSep           = " "
         , ppTitle           = xmobarColor (green' myCS) ""
                              . mkLengthL myTitleLength
