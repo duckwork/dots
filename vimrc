@@ -26,14 +26,12 @@ set ruler
 set breakindent
 set lazyredraw
 set linebreak showbreak=\\
-set linespace=2
-set list
-set listchars=tab:..,trail:_,extends:>,precedes:<,nbsp:~
 set wrap
-set sidescroll=1
-set sidescrolloff=1
+set sidescroll=1 sidescrolloff=4
+set linespace=2
+set list listchars=tab:..,trail:_,extends:>,precedes:<,nbsp:~
+set scrolloff=4
 set display=lastline
-set scrolloff=8
 let &synmaxcol = g:tw + 2
 set laststatus=2 showtabline=2
 set tabline=%!Tabline()
@@ -105,6 +103,7 @@ set undolevels=10000 undoreload=10000
 set undofile undodir=$HOME/.vim/undo
 set gdefault
 set virtualedit=block
+set nrformats=hex,alpha
 " ----------------------- Read/write options
 set autoread autowriteall
 set backup backupcopy=yes backupdir=$HOME/.vim/backup
@@ -297,6 +296,15 @@ function! WordCount()
 endfunction
 call add(g:stl.plug, '%{WordCount()}')
 
+function! PasteStl()
+  if &paste
+    return '[Paste]'
+  else
+    return ''
+  endif
+endfunction
+call add(g:stl.plug, '%{PasteStl()}')
+
 function! UniqueFT()
   if &ft =~? join(split(expand('%:e'), '\zs'), '.*')
     return ''
@@ -324,7 +332,8 @@ Plug 'shinokada/dragvisuals.vim'     " DragVisuals
 Plug 'tommcdo/vim-exchange'
 Plug 'tommcdo/vim-lion'
 Plug 'tpope/vim-abolish'
-Plug 'tpope/vim-capslock'
+Plug 'tpope/vim-capslock'            " Capslock
+  call add(g:stl.plug, '%{CapsLockStatusline()}')
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-repeat'
@@ -365,7 +374,6 @@ let g:goyo_margin_bottom = g:goyo_margin_top
 let g:incsearch#auto_nohlsearch = 1
 let g:incsearch#consistent_n_direction = 1
 let g:incsearch#do_not_save_error_message_history = 1
-let g:incsearch#separate_highlight = 1
 map /  <Plug>(incsearch-forward)
 map ?  <Plug>(incsearch-backward)
 map g/ <Plug>(incsearch-stay)
@@ -421,11 +429,16 @@ augroup PluginAutocmds
   au VimEnter * call <SID>exploreEmptyVim()
   au User GoyoEnter Limelight | set nonu nornu
   au User GoyoLeave Limelight! | set nu rnu
+  au FileType unite call <SID>myUniteSettings()
 augroup END
 function! s:exploreEmptyVim()
   if bufname("") == "" && bufnr("$") == 1
     Unite -no-split neomru/file file
   endif
+endfunction
+function! s:myUniteSettings()
+  imap <silent><buffer><expr> <C-s> unite#do_action('split')
+  imap <silent><buffer><expr> <C-v> unite#do_action('vsplit')
 endfunction
 
 " ----------------------- Theming
@@ -437,6 +450,6 @@ let g:stl.left = [
       \ "%f", "%{UniqueFT()} %M",
       \ ]
 let g:stl.right = [
-      \ "%l:%c%V",
+      \ "%-10.(%l:%c%V%)",
       \ "%P",
       \ ]
