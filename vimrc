@@ -127,6 +127,9 @@ if has('win32') || has('win64')
           \ | endif
   augroup END
 endif
+if has('unix') && !has('gui_running')
+  set t_Co=256
+endif
 " ----------------------- GUI options
 if has('gui_running')
   if has('gui_gtk2')
@@ -361,7 +364,7 @@ endif
 
 let g:plug_url_format = 'https://github.com/%s.git' " My plugins go here
 Plug 'duckwork/minimal'
-Plug 'duckwork/quick-scope', {'branch': 'patch-1'}
+" Plug 'duckwork/quick-scope', {'branch': 'patch-1'}
 Plug 'duckwork/vim-thatoldlook'
 call plug#end()
 

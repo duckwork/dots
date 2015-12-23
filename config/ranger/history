@@ -19,7 +19,15 @@ mkdir
 mkdir Colorschemes
 touch Apprentice.hs
 =======
-delete 
-
 rename DwmActions.hs
 >>>>>>> dwm-tags
+
+con
+shell
+shell echo $EDITOR
+search make
+rename 
+rename corpi
+rename autocento
+rename autocento.txt
+delete 
