@@ -322,6 +322,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'Shougo/Unite.vim'              " Unite
 Plug 'Shougo/neomru.vim'
 Plug 'Shougo/neoyank.vim'
+Plug 'Shougo/vimfiler.vim'           " Vimfiler
 Plug 'bronson/vim-visual-star-search'
 Plug 'dockyard/vim-easydir'
 Plug 'habamax/vim-skipit'
@@ -364,72 +365,78 @@ endif
 
 let g:plug_url_format = 'https://github.com/%s.git' " My plugins go here
 Plug 'duckwork/minimal'
-" Plug 'duckwork/quick-scope', {'branch': 'patch-1'}
 Plug 'duckwork/vim-thatoldlook'
 call plug#end()
 
-" ----------------------- Plugin options
-"Goyo
-let g:goyo_width = g:tw + 1
-let g:goyo_margin_top = 3
-let g:goyo_margin_bottom = g:goyo_margin_top
-"IncSearch
-let g:incsearch#auto_nohlsearch = 1
-let g:incsearch#consistent_n_direction = 1
-let g:incsearch#do_not_save_error_message_history = 1
-map /  <Plug>(incsearch-forward)
-map ?  <Plug>(incsearch-backward)
-map g/ <Plug>(incsearch-stay)
-map n  <Plug>(incsearch-nohl-n)
-map N  <Plug>(incsearch-nohl-N)
-map *  <Plug>(incsearch-nohl-*)
-map #  <Plug>(incsearch-nohl-#)
-map g* <Plug>(incsearch-nohl-g*)
-map g# <Plug>(incsearch-nohl-g#)
-"EasyAlign
-" xnoremap \| :EasyAlign //<Left>
-" vmap <Enter> <Plug>(EasyAlign)
-" nmap <Leader>a <Plug>(EasyAlign)
-"DragVisuals
-vmap <expr> <LEFT>  DVB_Drag('left')
-vmap <expr> <RIGHT> DVB_Drag('right')
-vmap <expr> <DOWN>  DVB_Drag('down')
-vmap <expr> <UP>    DVB_Drag('up')
-vmap <expr> D       DVB_Duplicate()
-let g:DVB_TrimeWS = 1
-"PandocSyntax
-let g:pandoc#syntax#conceal#use = 0
-"QuickScope
-let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
-"SyntaxAttr
-nnoremap <silent> <F3> :call SyntaxAttr()<CR>
-"Undotree
-nnoremap <F5> :UndotreeToggle<CR>
-"Unite
-let g:unite_source_history_yank_enable = 1
-call unite#filters#matcher_default#use(['matcher_fuzzy'])
-call unite#custom#profile('default', 'context', {
-      \ 'start_insert': 1,
-      \ 'winheight'   : 10,
-      \ 'direction'   : 'dynamictop',
-      \ })
-nnoremap <silent> - :<C-u>call <SID>uniteExplore()<CR>
-function! s:uniteExplore()
-  let oldsearch = @/
-  UniteWithBufferDir -no-split -no-start-insert file
-  silent! exe "normal! /\<C-r>#\r0"
-  nohlsearch
-  let @/ = oldsearch
-  unlet oldsearch
+" ----------------------- Plugin specific options
+function! SetPluginOptionsNow()
+  if exists(":Goyo") "Goyo
+    let g:goyo_width = g:tw + 1
+    let g:goyo_margin_top = 3
+    let g:goyo_margin_bottom = g:goyo_margin_top
+  endif
+  if exists(":IncSearchNoreMap") "IncSearch
+    let g:incsearch#auto_nohlsearch = 1
+    let g:incsearch#consistent_n_direction = 1
+    let g:incsearch#do_not_save_error_message_history = 1
+    map /  <Plug>(incsearch-forward)
+    map ?  <Plug>(incsearch-backward)
+    map g/ <Plug>(incsearch-stay)
+    map n  <Plug>(incsearch-nohl-n)
+    map N  <Plug>(incsearch-nohl-N)
+    map *  <Plug>(incsearch-nohl-*)
+    map #  <Plug>(incsearch-nohl-#)
+    map g* <Plug>(incsearch-nohl-g*)
+    map g# <Plug>(incsearch-nohl-g#)
+  endif
+  if exists("*DVB_Drag") "DragVisuals
+    vmap <expr> <LEFT>  DVB_Drag('left')
+    vmap <expr> <RIGHT> DVB_Drag('right')
+    vmap <expr> <DOWN>  DVB_Drag('down')
+    vmap <expr> <UP>    DVB_Drag('up')
+    vmap <expr> D       DVB_Duplicate()
+    let g:DVB_TrimeWS = 1
+  endif
+  if exists(":PandocHighlight") "PandocSyntax
+    let g:pandoc#syntax#conceal#use = 0
+  endif
+  if exists("*SyntaxAttr") "SyntaxAttr
+    nnoremap <silent> <F3> :call SyntaxAttr()<CR>
+  endif
+  if exists(":UndotreeToggle") "Undotree
+    nnoremap <F5> :UndotreeToggle<CR>
+  endif
+  if exists(":Unite") "Unite
+    let g:unite_source_history_yank_enable = 1
+    call unite#filters#matcher_default#use(['matcher_fuzzy'])
+    call unite#custom#profile('default', 'context', {
+          \ 'start_insert': 1,
+          \ 'winheight'   : 10,
+          \ 'direction'   : 'dynamictop',
+          \ })
+    nnoremap <silent> - :<C-u>call <SID>uniteExplore()<CR>
+    function! s:uniteExplore()
+      let oldsearch = @/
+      UniteWithBufferDir -no-split -no-start-insert file
+      silent! exe "normal! /\<C-r>#\r0"
+      nohlsearch
+      let @/ = oldsearch
+      unlet oldsearch
+    endfunction
+    nnoremap <C-p> :<C-u>Unite history/yank<CR>
+    nnoremap <Space><Space> :<C-u>Unite buffer neomru/file file<CR>
+    nnoremap z= :<C-u>Unite -no-start-insert spell_suggest<CR>
+    hi! link uniteCandidateSourceName Comment
+  endif
+  if exists(":VimFiler") "Vimfiler
+    let g:vimfiler_as_default_explorer = 1
+  endif
 endfunction
-nnoremap <C-p> :<C-u>Unite history/yank<CR>
-nnoremap <C-Space> :<C-u>Unite buffer neomru/file file<CR>
-nnoremap z= :<C-u>Unite -no-start-insert spell_suggest<CR>
-hi! link uniteCandidateSourceName Comment
 
 augroup PluginAutocmds
   au!
   au VimEnter * call <SID>exploreEmptyVim()
+  au VimEnter * call SetPluginOptionsNow()
   au User GoyoEnter Limelight | set nonu nornu
   au User GoyoLeave Limelight! | set nu rnu
   au FileType unite call <SID>myUniteSettings()
