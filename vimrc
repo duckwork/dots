@@ -187,6 +187,8 @@ nnoremap <silent> <Leader>rs :call util#removeEOLSpaces()<CR>
 
 " Commands
 nnoremap <F1> K
+nnoremap <F5> a<C-r>=strftime("%Y-%m-%d %H:%M")<CR><Esc>
+inoremap <F5> <C-r>=strftime("%Y-%m-%d %H:%M")<CR>
 
 " ----------------------- Mouse
 if has('mouse')
@@ -379,9 +381,9 @@ function! SetPluginOptionsNow()
     let g:incsearch#auto_nohlsearch = 1
     let g:incsearch#consistent_n_direction = 1
     let g:incsearch#do_not_save_error_message_history = 1
-    map /  <Plug>(incsearch-forward)
-    map ?  <Plug>(incsearch-backward)
-    map g/ <Plug>(incsearch-stay)
+    " map /  <Plug>(incsearch-forward)
+    " map ?  <Plug>(incsearch-backward)
+    " map g/ <Plug>(incsearch-stay)
     map n  <Plug>(incsearch-nohl-n)
     map N  <Plug>(incsearch-nohl-N)
     map *  <Plug>(incsearch-nohl-*)
@@ -404,7 +406,7 @@ function! SetPluginOptionsNow()
     nnoremap <silent> <F3> :call SyntaxAttr()<CR>
   endif
   if exists(":UndotreeToggle") "Undotree
-    nnoremap <F5> :UndotreeToggle<CR>
+    nnoremap <Leader>u :UndotreeToggle<CR>
   endif
   if exists(":Unite") "Unite
     let g:unite_source_history_yank_enable = 1
