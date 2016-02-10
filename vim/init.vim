@@ -186,8 +186,7 @@ endif
 set timeoutlen=1000
 let mapleader = '\<Space>'
 let maplocalleader = '\<Space>'
-" noremap ; :
-noremap <CR> :
+noremap ; :
 
 " ------------------- Basic movement
 nnoremap <expr> j v:count ? 'j' : 'gj'
@@ -196,6 +195,8 @@ nnoremap H ^
 nnoremap L g_
 nnoremap ' `
 nnoremap ` '
+nnoremap <expr> { len(getline(line('.')-1)) > 0 ? '{+' : '{-'
+nnoremap <expr> } len(getline(line('.')+1)) > 0 ? '}-' : '}+'
 
 " ------------------- Operators
 nnoremap Y y$
@@ -203,7 +204,7 @@ nnoremap K i<CR><Esc>d^kg_lD
 xnoremap @ :<C-u>call util#visualAt()<CR>
 
 " ------------------- Buffers
-nnoremap <BS> :b#<CR>
+nnoremap <BS> <C-^>
 
 " ------------------- Windows
 nnoremap <C-h> <C-w>h
@@ -239,6 +240,7 @@ endif
 augroup WindowCmds
   au!
   au FocusLost   * silent! wall
+  au CursorHold  * silent! update | noh
   au BufEnter    * call util#notHelp('silent! lcd %:p:h')
   au BufReadPost * normal! `"
   au BufWinLeave * silent! mkview
