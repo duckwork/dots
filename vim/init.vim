@@ -17,12 +17,12 @@
     let g:vimdir = glob("~/.vim")
     set nocompatible
   endif
-  let g:spelldir  = glob(g:vimdir . "/spell")
-  let g:undodir   = glob(g:vimdir . "/undo")
-  let g:backupdir = glob(g:vimdir . "/backup")
-  let g:swapdir   = glob(g:vimdir . "/swap")
-  let g:viewdir   = glob(g:vimdir . "/view")
-  let g:plugdir   = glob(g:vimdir . "/plugged")
+  let g:spelldir  = glob(g:vimdir . "/spell/")
+  let g:undodir   = glob(g:vimdir . "/undo/")
+  let g:backupdir = glob(g:vimdir . "/backup/")
+  let g:swapdir   = glob(g:vimdir . "/swap/")
+  let g:viewdir   = glob(g:vimdir . "/view/")
+  let g:plugdir   = glob(g:vimdir . "/plugged/")
 
   let g:tw        = 78
   let g:stl       = {}
@@ -228,6 +228,7 @@
   " Commands
     nnoremap <F1> K
     nnoremap <F4> :update<CR>:call util#closeBufOrWin()<CR>
+    nnoremap <S-F4> :wqall<CR>
     nnoremap <F5> a<C-r>=strftime("%Y-%m-%d %H:%M")<CR><Esc>
     inoremap <F5> <C-r>=strftime("%Y-%m-%d %H:%M")<CR>
 
@@ -389,6 +390,7 @@
   Plug 'tpope/vim-capslock'            " Capslock
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-endwise'
+  Plug 'tpope/vim-obsession'
   Plug 'tpope/vim-repeat'
   Plug 'tpope/vim-speeddating'
   Plug 'tpope/vim-surround'
@@ -500,7 +502,7 @@
 
 " Theming
   set background=dark
-  colorscheme gruvbox
+  colorscheme thatoldlook
   set number relativenumber cursorline
   " Statusline
   let g:stl.left = [
